@@ -1,5 +1,6 @@
 /**
  * @name QuickMessages
+ * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/QuickMessages/QuickMessages.plugin.js
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages
  */
