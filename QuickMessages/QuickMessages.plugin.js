@@ -17,7 +17,7 @@ const config = {
             }
         ],
         version: "0.0.1",
-        description: "Send messages .",
+        description: "Save messages to quickly send them later, when you need.",
         github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages",
         changelog: [
             {
