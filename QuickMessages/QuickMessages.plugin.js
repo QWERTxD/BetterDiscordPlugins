@@ -7,7 +7,9 @@
 
 /// <reference types="bandagedbd/bdapi" />
 const request = require("request");
-const fs = require("fs")
+const fs = require("fs");
+const path = require("path");
+
 const config = {
     info: {
         name: "QuickMessages",
@@ -17,7 +19,7 @@ const config = {
                 discord_id: "678556376640913408",
             }
         ],
-        version: "0.0.2",
+        version: "0.0.3",
         description: "Save messages to quickly send them later, when you need.",
         github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages",
         github_raw: "https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/QuickMessages/QuickMessages.plugin.js",
