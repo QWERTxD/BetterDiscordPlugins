@@ -1,7 +1,7 @@
 /**
  * @name QuickMessages
- * @updateUrl
- * @website 
+ * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js
+ * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages
  */
 
 /// <reference types="bandagedbd/bdapi" />
@@ -18,7 +18,7 @@ const config = {
         ],
         version: "0.0.1",
         description: "Send messages .",
-        github: "",
+        github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages",
         changelog: [
             {
                 title: "First Commit!",
