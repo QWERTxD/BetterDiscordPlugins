@@ -74,24 +74,24 @@ module.exports = !global.ZeresPluginLibrary ? class {
     window.Patcher = Patcher;
     window.DiscordContextMenu = DiscordContextMenu
     function configArrayPush(name, key, data) {
-        const config = BdApi.getData(name, key);
+        const config = BdApi.getData(name, key) || [];
         if(config.includes(data)) return;
         config.push(data);
         BdApi.setData(name, key, config);
     }
 
     const configArrayRemove = function(name, key, value) { 
-    
-        const config = BdApi.getData(name, key).filter(function(x){ 
+        const data = BdApi.getData(name, key) || [];
+        const config = data.filter(function(x){ 
             return x != value; 
         });
         BdApi.setData(name, key, config)
     }
 
-    var messages = BdApi.getData('QuickMessages', 'messages');
+    var messages = BdApi.getData('QuickMessages', 'messages') || [];
 
     function updateMessages() {
-        messages = BdApi.getData('QuickMessages', 'messages');
+        messages = BdApi.getData('QuickMessages', 'messages') || [];
     }
     class QuickMessages extends Plugin {
         constructor() {
