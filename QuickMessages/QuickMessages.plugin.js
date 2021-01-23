@@ -19,7 +19,7 @@ const config = {
                 discord_id: "678556376640913408",
             }
         ],
-        version: "0.0.3",
+        version: "0.0.4",
         description: "Save messages to quickly send them later, when you need.",
         github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages",
         github_raw: "https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/QuickMessages/QuickMessages.plugin.js",
@@ -40,7 +40,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
     }
 
     getAuthor() {
-        return config.info.authors[0]
+        return config.info.authors[0].name;
     }
 
     getVersion() {
