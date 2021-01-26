@@ -75,8 +75,6 @@ module.exports = !global.ZeresPluginLibrary ? class {
 } : (([Plugin, Library]) => {
     const { DiscordModules, WebpackModules, Patcher, DiscordContextMenu } = Library;
     const { React } = DiscordModules;
-    window.Patcher = Patcher;
-    window.DiscordContextMenu = DiscordContextMenu
     function configArrayPush(name, key, data) {
         const config = BdApi.getData(name, key) || [];
         if(config.includes(data)) return;
