@@ -5,7 +5,9 @@
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages
  */
 
+
 /// <reference types="bandagedbd/bdapi" />
+
 const request = require("request");
 const fs = require("fs");
 const path = require("path");
@@ -19,16 +21,15 @@ const config = {
                 discord_id: "678556376640913408",
             }
         ],
-        version: "1.0.0",
+        version: "1.0.1",
         description: "Save messages to quickly send them later, when you need.",
         github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages",
-        github_raw: "https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/QuickMessages/QuickMessages.plugin.js",
+        github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js",
         changelog: [
             {
-                title: "Bug Fixes!",
-                type: "fixed",
+                title: "Improvements",
                 items: [
-                    "The added context menu options now will be added only to the Slate Textarea (message box)."
+                    "Added auto update. "
                 ]
             }
         ]
