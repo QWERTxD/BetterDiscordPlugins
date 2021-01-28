@@ -19,15 +19,16 @@ const config = {
                 discord_id: "678556376640913408",
             }
         ],
-        version: "0.0.4",
+        version: "1.0.0",
         description: "Save messages to quickly send them later, when you need.",
         github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages",
         github_raw: "https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/QuickMessages/QuickMessages.plugin.js",
         changelog: [
             {
-                title: "First Commit!",
+                title: "Bug Fixes!",
+                type: "fixed",
                 items: [
-                    "Uploaded plugin."
+                    "The added context menu options now will be added only to the Slate Textarea (message box)."
                 ]
             }
         ]
@@ -110,7 +111,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
 
         patchTextAreaContextMenus() {
             var en = true;
-            const TextAreaContextMenus = WebpackModules.findAll(m => m.default && m.default.displayName.includes("TextAreaContextMenu"));
+            const TextAreaContextMenus = WebpackModules.findAll(m => m.default && m.default.displayName.includes("SlateTextAreaContextMenu"));
                 const children = [];                                 
                 messages.forEach(message => {
                     children.push(DiscordContextMenu.buildMenuItem({
