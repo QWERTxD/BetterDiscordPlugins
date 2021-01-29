@@ -21,15 +21,16 @@ const config = {
                 discord_id: "678556376640913408",
             }
         ],
-        version: "1.0.1",
+        version: "1.0.2",
         description: "Save messages to quickly send them later, when you need.",
         github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages",
         github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js",
         changelog: [
             {
                 title: "Improvements",
+                type: 'improved',
                 items: [
-                    "Added auto update. "
+                    ""
                 ]
             }
         ]
@@ -147,8 +148,9 @@ module.exports = !global.ZeresPluginLibrary ? class {
                     }),
                     DiscordContextMenu.buildMenuItem({
                         label: "Save as Quick Message",
+                        disabled: props.editor.containerRef.current.textContent.slice(0, -1) == props.editor.props.placeholder,
                         action:_ => {
-                            configArrayPush("QuickMessages", "messages", document.getElementsByClassName('textArea-12jD-V')[0].textContent);
+                            configArrayPush("QuickMessages", "messages", props.editor.containerRef.current.textContent);
                             updateMessages();
                             Patcher.unpatchAll();
                             this.patchTextAreaContextMenus();
