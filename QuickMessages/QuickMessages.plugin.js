@@ -25,15 +25,6 @@ const config = {
         description: "Save messages to quickly send them later, when you need.",
         github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages",
         github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js",
-        changelog: [
-            {
-                title: "Improvements",
-                type: 'improved',
-                items: [
-                    ""
-                ]
-            }
-        ]
     }
 };
 
