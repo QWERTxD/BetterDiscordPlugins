@@ -113,7 +113,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                         type: "separator"
                     }),
                     DiscordContextMenu.buildMenuItem({
-                        label: "RingEveryone",
+                        label: "Ring Everyone",
                         action: _ => {
                             const { getChannel } = BdApi.findModuleByProps("getChannel");
                             const { ring } = BdApi.findModuleByProps('ring');
