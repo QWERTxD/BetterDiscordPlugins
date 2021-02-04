@@ -5,7 +5,6 @@
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages
  */
 
-
 /// <reference types="bandagedbd/bdapi" />
 
 const request = require("request");
@@ -21,7 +20,7 @@ const config = {
                 discord_id: "678556376640913408",
             }
         ],
-        version: "1.0.2",
+        version: "1.0.3",
         description: "Save messages to quickly send them later, when you need.",
         github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages",
         github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js",
@@ -141,7 +140,8 @@ module.exports = !global.ZeresPluginLibrary ? class {
                         label: "Save as Quick Message",
                         disabled: props.editor.containerRef.current.textContent.slice(0, -1) == props.editor.props.placeholder,
                         action:_ => {
-                            configArrayPush("QuickMessages", "messages", props.editor.containerRef.current.textContent);
+                            const save = props.editor.containerRef.current.innerText.replace(new RegExp("\n\n", 'g'), '\n')
+                            configArrayPush("QuickMessages", "messages", save);
                             updateMessages();
                             Patcher.unpatchAll();
                             this.patchTextAreaContextMenus();
