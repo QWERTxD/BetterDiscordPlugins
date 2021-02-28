@@ -20,10 +20,17 @@ const config = {
                 discord_id: "678556376640913408",
             }
         ],
-        version: "1.0.3",
+        version: "1.0.31",
         description: "Save messages to quickly send them later, when you need.",
         github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages",
         github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js",
+        changelog: [
+            {
+                type: 'added',
+                title: 'Added',
+                items: ['Changelog']
+            }
+        ]
     }
 };
 
@@ -47,6 +54,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
 
 
     load() {
+        
         BdApi.showConfirmationModal("Library plugin is needed",
             `The library plugin needed for ${config.info.name} is missing. Please click Download Now to install it.`, {
                 confirmText: "Download",
@@ -62,11 +70,13 @@ module.exports = !global.ZeresPluginLibrary ? class {
             });
     }
 
-    start() { }
+    start() {  }
 
     stop() { }
 } : (([Plugin, Library]) => {
-    const { DiscordModules, WebpackModules, Patcher, DiscordContextMenu } = Library;
+    const { DiscordModules, WebpackModules, Patcher, DiscordContextMenu, Settings } = Library;
+    const { SettingPanel, SettingGroup, Dropdown } = Settings;
+
     const { React } = DiscordModules;
     function configArrayPush(name, key, data) {
         const config = BdApi.getData(name, key) || [];
@@ -93,6 +103,35 @@ module.exports = !global.ZeresPluginLibrary ? class {
             super();
         }
 
+        buildSettingsPanel() {
+            const that = this;
+            const settingGroup = new SettingGroup("Clear Quick Messages", {
+                shown: true,
+                collapsible: false
+            });
+            const div = document.createElement("div");
+            div.innerHTML = '<button class="button-38aScr lookFilled-1Gx00P colorRed-1TFJan sizeMedium-1AC_Sl grow-q77ONN">Delete All Quick Messages</button>'
+            div.onclick = _ => {
+                BdApi.showConfirmationModal('Are you sure?', 'This action is undonable. You will not be able to restore the deleted data.' , {
+                    confirmText: 'Delete',
+                    danger: true,
+                    onConfirm: function() {
+                        BdApi.setData(that.getName(), 'messages', []);
+                        that.forceUpdate();
+                        BdApi.alert('QuickMessages', 'Successfully Removed All Quick Messages!');
+                    }
+                })
+            }
+            settingGroup.append(div)
+            return new SettingPanel(this.saveSettings.bind(this), settingGroup);
+            
+
+        }
+
+        getSettingsPanel() {
+            return this.buildSettingsPanel().getElement();
+        }
+
         onStart() {
             this.patchTextAreaContextMenus();
         }
@@ -101,9 +140,15 @@ module.exports = !global.ZeresPluginLibrary ? class {
             Patcher.unpatchAll();
         }
 
+        forceUpdate() {
+            updateMessages();
+            Patcher.unpatchAll();
+            this.patchTextAreaContextMenus();
+        }
+
         patchTextAreaContextMenus() {
             var en = true;
-            const TextAreaContextMenus = WebpackModules.findAll(m => m.default && m.default.displayName.includes("SlateTextAreaContextMenu"));
+            const TextAreaContextMenus = WebpackModules.findAll(m => m.default && m.default.displayName.includes("SlateTextAreaContextMenu"))[0];
                 const children = [];                                 
                 messages.forEach(message => {
                     children.push(DiscordContextMenu.buildMenuItem({
@@ -140,11 +185,9 @@ module.exports = !global.ZeresPluginLibrary ? class {
                         label: "Save as Quick Message",
                         disabled: props.editor.containerRef.current.textContent.slice(0, -1) == props.editor.props.placeholder,
                         action:_ => {
-                            const save = props.editor.containerRef.current.innerText.replace(new RegExp("\n\n", 'g'), '\n')
+                            const save = props.editor.containerRef.current.innerText.replace(/\n\n/g, '\n').replace(/^\s+|\s+$/g, '');
                             configArrayPush("QuickMessages", "messages", save);
-                            updateMessages();
-                            Patcher.unpatchAll();
-                            this.patchTextAreaContextMenus();
+                            this.forceUpdate()
                             BdApi.showToast(`Successfully created new Quick Message!`, {type: 'success'})
 
                         }
@@ -156,9 +199,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 );
             };
  
-                for (const TextAreaContextMenu of TextAreaContextMenus) {
-                    Patcher.after(TextAreaContextMenu, "default", patch);
-                }
+                    Patcher.after(TextAreaContextMenus, "default", patch);
             }
             
             
