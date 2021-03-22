@@ -70,6 +70,7 @@
                  const StatusStore = BdApi.findModuleByProps('getStatus');
                  const currentUser = BdApi.findModuleByProps('getCurrentUser').getCurrentUser();
                  const status = StatusStore.getStatus(currentUser.id);
+                 if(status === 'offline') return;
                  if(status === 'dnd') return;
                  await BdApi.saveData("DndWhilePlaying", "status", status)
                  BdApi.findModuleByProps('updateRemoteSettings').updateRemoteSettings({status: "dnd"})
