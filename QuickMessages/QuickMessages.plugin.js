@@ -19,7 +19,7 @@ const config = {
                 discord_id: "678556376640913408",
             }
         ],
-        version: "1.2",
+        version: "1.2.0",
         description: "Save messages to quickly send them later, when you need.",
         github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages",
         github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js",
