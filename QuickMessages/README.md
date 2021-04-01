@@ -3,7 +3,7 @@
 Save messages to quickly send them later, when you need
 ![example](https://i.gyazo.com/ef1e20d5074cd2a633015c5a72d2f063.gif)
 
-## Changelog<sup>v1.1.1</sup>
+## Changelog<sup>v1.2</sup>
 Added:
 * Added categories 🥳 Hover the "Save as Quick Message" button to use the categories.
 I still need ideas and suggestions, so if you have some, feel free to send them to me in the support server https://discord.gg/zMnHFAKsu3
