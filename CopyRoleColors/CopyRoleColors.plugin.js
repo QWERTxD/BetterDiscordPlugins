@@ -17,15 +17,15 @@
                     name: "QWERT"
                 }
             ],
-            version: "0.0.1",
+            version: "0.0.2",
             description: "Adds option to copy role color in the role context menu.",
         },
         changelog: [
             {
-                title: "hello world",
-                type: "added",
+                title: "Fixed",
+                type: "fixed",
                 items: [
-                    "plugin"
+                    "Fixed default role color (from to #e1e1e1 #b9bbbe)"
                     ]
             }
         ],
@@ -79,7 +79,7 @@
                         {
                             label: "Copy Role Color",
                             action: _ => {
-                                ElectronModule.copy(props.role.colorString || "#e1e1e1");
+                                ElectronModule.copy(props.role.colorString || "#b9bbbe");
                                 Toasts.success(`Successfully copied role color for <strong>${props.role.name}</strong>!`)
                             }
                         },
