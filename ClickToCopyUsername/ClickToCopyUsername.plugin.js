@@ -17,7 +17,7 @@
                     name: "QWERT"
                 }
             ],
-            version: "0.0.1",
+            version: "0.0.2",
             description: "Allows you to copy someone's username by pressing their nametag, like on mobile.",
         },
         changelog: [
@@ -80,8 +80,8 @@
                         cursor: "pointer"
                     }
                     ret.props.onClick = _ => {
-                        ElectronModule.copy(props.user.tag);
-                        Toasts.success(`Successfully copied username for ${props.user.username}!`);
+                        ElectronModule.copy(`${props.name}#${props.discriminator}`);
+                        Toasts.success(`Successfully copied username for <strong>${props.name}</strong>!`);
                     };
                 })
             }
