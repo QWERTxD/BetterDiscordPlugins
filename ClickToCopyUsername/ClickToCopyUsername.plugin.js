@@ -67,16 +67,10 @@
 
             onStart() {
                 this.patchNameTag();
-                PluginUtilities.addStyle("ClickToCopyUsername", `
-                .ctcu-button {
-                    margin-left: 4px
-                }
-                `);
             }
     
             onStop() {
                 Patcher.unpatchAll();
-                PluginUtilities.removeStyle("ClickToCopyUsername");
             }   
 
             patchNameTag() {
