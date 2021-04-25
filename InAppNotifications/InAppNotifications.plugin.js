@@ -135,8 +135,9 @@ module.exports = !global.ZeresPluginLibrary ? class {
     const MuteStore = WebpackModules.getByProps("isSuppressEveryoneEnabled");
     const isMentioned = WebpackModules.getByProps('isRawMessageMentioned');
     const ParseUtils = WebpackModules.getByProps("parseTopic");
-    const CallJoin = BdApi.findModuleByDisplayName("CallJoin");
-    const ImagePlaceholder = BdApi.findModuleByDisplayName("ImagePlaceholder");
+    const CallJoin = WebpackModules.findByDisplayName("CallJoin");
+    const ImagePlaceholder = WebpackModules.findByDisplayName("ImagePlaceholder");
+    const PersonAdd = WebpackModules.findByDisplayName("PersonAdd");
 
     const classes = {
         ...WebpackModules.getByProps("horizontal", "flex", "justifyStart"),
@@ -341,6 +342,15 @@ module.exports = !global.ZeresPluginLibrary ? class {
                     BdApi.alert("InAppNotifications", "There was an error while trying to start the plugin and Discord.\nFor any further support, join my support server (https://discord.gg/zMnHFAKsu3)")
                 }
             }
+            const friendRequestFunc = this.friendRequest.bind(this);
+            this.friendRequest = e => {
+                try{
+                    friendRequestFunc(e);
+                }catch(e){
+                    console.log(`%c[InAppNotifications]%c Error!%c`, "color: #3a71c1;", "font-weight: 700; color: #b3001b;", "\n", e);
+                    BdApi.alert("InAppNotifications", "There was an error while trying to start the plugin and Discord.\nFor any further support, join my support server (https://discord.gg/zMnHFAKsu3)")
+                }
+            }
         }
 
         onStart() {
@@ -531,7 +541,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
         friendRequest({user}) {
             if(!this.settings.relationshipsNotis) return;
             user = UserStore.getUser(user.id);
-            QWERTLib.Toasts.create("Accepted your friend request.", {
+            QWERTLib.Toasts.create([React.createElement(PersonAdd, {style: {height: "16px", width: "16px", color: "rgb(67, 181, 129)", marginRight: "2px"}}), "Accepted your friend request."], {
                 author: user.tag,
                 avatar: user.avatarURL,
                 onClick: () => {
@@ -543,7 +553,8 @@ module.exports = !global.ZeresPluginLibrary ? class {
         onStop() {
             Dispatcher.unsubscribe("MESSAGE_CREATE", this.onMessage);
             Dispatcher.unsubscribe("FRIEND_REQUEST_ACCEPTED", this.friendRequest);
-            PluginUtilities.removeStyle("QWERTLib")
+            PluginUtilities.removeStyle("QWERTLib");
+            QWERTLib.shutdown();
        }
 
     }
