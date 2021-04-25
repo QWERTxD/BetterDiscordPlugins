@@ -18,7 +18,7 @@ const config = {
             }
         ],
         version: "0.0.1",
-        description: "",
+        description: "Displays notifications such as new messages, friends added in Discord.",
     },
     changelog: [
         {
