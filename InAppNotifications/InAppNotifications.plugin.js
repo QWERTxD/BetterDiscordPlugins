@@ -17,15 +17,24 @@ const config = {
                 name: "QWERT"
             }
         ],
-        version: "0.0.1",
+        version: "0.0.2",
         description: "Displays notifications such as new messages, friends added in Discord.",
     },
     changelog: [
         {
-            title: "hello world",
+            title: "Added",
             type: "added",
             items: [
-                "plugin"
+                "A setting to control notifications position",
+                "A setting to control whether to mark message as read when pressing the close button in a notification."
+            ]
+        },
+        {
+            title: "Fixed",
+            type: "fixed",
+            items: [
+                "\"Friend requests notifications\" settings description.",
+                "Jump to Message causing HUD issues."
             ]
         }
     ],
@@ -36,6 +45,26 @@ const config = {
             note: "Sets the amount of time for a notification to stay on-screen.",
             id: "notiTime",
             value: "3"
+        },
+        {
+            type: "dropdown",
+            name: "Notifications Position", 
+            note: "Note: a client reload is required for changes to take effect.", 
+            value: 0, 
+            id: "position",
+            options: [
+                { label: 'Top Right', value: 0 },
+                { label: 'Top Left', value: 1 },
+                { label: 'Bottom Right', value: 2 },
+                { label: 'Bottom Left', value: 3 },
+            ]
+        },
+        {
+            type: "switch",
+            name: "Mark message as read when closing",
+            note: "Marks the message as read if you press the close button on a notification.",
+            id: "markAsRead",
+            value: true
         },
         {
             type: "switch",
@@ -68,7 +97,7 @@ const config = {
         {
             type: "switch",
             name: "Friend requests notifications",
-            note: "Do not push notifications from DM chats.",
+            note: "Do not push notifications for accepted friend requests.",
             id: "relationshipsNotis",
             value: true
         },
@@ -99,8 +128,7 @@ const config = {
             note: "Do not push notifications if the message was sent from a specific channel.",
             id: "ignoredChannels",
             value: ""
-        },
-        
+        }    
 
     ]
 };
@@ -135,6 +163,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
     const MuteStore = WebpackModules.getByProps("isSuppressEveryoneEnabled");
     const isMentioned = WebpackModules.getByProps('isRawMessageMentioned');
     const ParseUtils = WebpackModules.getByProps("parseTopic");
+    const AckUtils = WebpackModules.getByProps("bulkAck", "ack");
     const CallJoin = WebpackModules.findByDisplayName("CallJoin");
     const ImagePlaceholder = WebpackModules.findByDisplayName("ImagePlaceholder");
     const PersonAdd = WebpackModules.findByDisplayName("PersonAdd");
@@ -201,7 +230,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             get RunningToasts() {return api.getState(e => e.toasts)},
 
             Toast: function Toast(props) {
-                const {children = [], avatar, id, author, onClick = _ => {}, color, time = 3000} = props;
+                const {children = [], avatar, id, author, onClick = _ => {}, color, time = 3000, onManualClose} = props;
                 const [readyToClose, setReadyToClose] = useState(false);
 
                 useEffect(_ => {
@@ -264,7 +293,10 @@ module.exports = !global.ZeresPluginLibrary ? class {
                             className: "qwert-toast-close", 
                             width: "16", height: "16", 
                             viewBox: "0 0 24 24", 
-                            onClick: _ => {setReadyToClose(true);}, 
+                            onClick: function() {
+                                onManualClose();
+                                setReadyToClose(true);
+                            }, 
                         }, React.createElement("path", {d: "M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z", fill: "currentColor"}))
                     ]
                 })
@@ -355,21 +387,21 @@ module.exports = !global.ZeresPluginLibrary ? class {
 
         onStart() {
             Dispatcher.subscribe("MESSAGE_CREATE", this.onMessage);
-            Dispatcher.subscribe("FRIEND_REQUEST_ACCEPTED", this.friendRequest);+
+            Dispatcher.subscribe("FRIEND_REQUEST_ACCEPTED", this.friendRequest);
             QWERTLib.initialize();
             PluginUtilities.addStyle("QWERTLib", `
             .qwert-toasts {
               position: absolute;
-              top: 10px;
               right: 10px;
               left: 10px;
-              bottom: 10px;
+              right: 10px;
+              ${[0,1].includes(this.settings.position) ? "top: 10px;" : "bottom: 30px;"}
               justify-content: flex-start;
-              align-items: flex-end;
+              align-items: ${[0,2].includes(this.settings.position) ? "flex-end" : "flex-start"};
               display: flex;
               flex-direction: column;
               pointer-events: none;
-              z-index: 100001;
+              z-index: 9999;
             }
 
             .qwert-toast {
@@ -487,6 +519,15 @@ module.exports = !global.ZeresPluginLibrary ? class {
                     content = [React.createElement(ImagePlaceholder, {style: {height: "16px", width: "16px", marginRight: "2px"}}), "Attachment"]
                 }
             }
+
+            if(message.embeds.length !== 0) {
+                content = [React.createElement(ImagePlaceholder, {style: {height: "16px", width: "16px", marginRight: "2px"}}), ParseUtils.parse(message.content)];
+
+                if(message.content === "") {
+                    content = [React.createElement(ImagePlaceholder, {style: {height: "16px", width: "16px", marginRight: "2px"}}), "Embed"];
+                }
+            }
+
             if(!this.checkSettings(message, channel)) return;
             const children = content ? content : ParseUtils.parse(message.content);
             const time = isNaN(notiTime * 1000) ? 3000 : notiTime * 1000;
@@ -495,7 +536,11 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 author: authorString,
                 time,
                 onClick: () => {
-                    NavigationUtils.transitionTo(`/channels/${channel.guild_id || "@me"}/${message.channel_id}`);
+                    NavigationUtils.transitionToGuild(channel.guild_id || "@me", message.channel_id, message.id);
+                },
+                onManualClose: () => {
+                    if(!this.settings.markAsRead) return;
+                    AckUtils.ack(message.channel_id);
                 }
             });
         }
