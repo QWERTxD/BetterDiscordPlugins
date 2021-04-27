@@ -17,24 +17,15 @@ const config = {
                 name: "QWERT"
             }
         ],
-        version: "0.0.2",
+        version: "0.0.3",
         description: "Displays notifications such as new messages, friends added in Discord.",
     },
     changelog: [
         {
-            title: "Added",
-            type: "added",
-            items: [
-                "A setting to control notifications position",
-                "A setting to control whether to mark message as read when pressing the close button in a notification."
-            ]
-        },
-        {
             title: "Fixed",
             type: "fixed",
             items: [
-                "\"Friend requests notifications\" settings description.",
-                "Jump to Message causing HUD issues."
+                "Error when getting message from a user without roles."
             ]
         }
     ],
@@ -371,7 +362,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                     om(e);
                 }catch(e){
                     console.log(`%c[InAppNotifications]%c Error!%c`, "color: #3a71c1;", "font-weight: 700; color: #b3001b;", "\n", e);
-                    BdApi.alert("InAppNotifications", "There was an error while trying to start the plugin and Discord.\nFor any further support, join my support server (https://discord.gg/zMnHFAKsu3)")
+                    BdApi.alert("InAppNotifications", "There was an error while trying to start the plugin and Discord.\n Try checking the console for any erros from this plugin.\nFor any further support, join my support server (https://discord.gg/zMnHFAKsu3)")
                 }
             }
             const friendRequestFunc = this.friendRequest.bind(this);
@@ -380,7 +371,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                     friendRequestFunc(e);
                 }catch(e){
                     console.log(`%c[InAppNotifications]%c Error!%c`, "color: #3a71c1;", "font-weight: 700; color: #b3001b;", "\n", e);
-                    BdApi.alert("InAppNotifications", "There was an error while trying to start the plugin and Discord.\nFor any further support, join my support server (https://discord.gg/zMnHFAKsu3)")
+                    BdApi.alert("InAppNotifications", "There was an error while trying to start the plugin and Discord.\n Try checking the console for any erros from this plugin.\nFor any further support, join my support server (https://discord.gg/zMnHFAKsu3)")
                 }
             }
         }
@@ -483,8 +474,8 @@ module.exports = !global.ZeresPluginLibrary ? class {
             if(!this.supposedToNotify(message, xChannel)) return;
             let authorString = "";
             if(channel.guild) {
-                const colorString = GuildMemberStore.getMember(channel.guild.id, author.id).colorString;
-                if(this.settings.roleColor) {
+                const colorString = GuildMemberStore.getMember(channel.guild.id, author.id)?.colorString;
+                if(this.settings.roleColor && colorString) {
                     authorString = [
                         React.createElement("div", {
                             style: {
