@@ -17,15 +17,15 @@ const config = {
                 name: "QWERT"
             }
         ],
-        version: "0.0.3",
+        version: "0.0.4",
         description: "Displays notifications such as new messages, friends added in Discord.",
     },
     changelog: [
         {
-            title: "Fixed",
-            type: "fixed",
+            title: "Added",
+            type: "added",
             items: [
-                "Error when getting message from a user without roles."
+                "Option to hover notifications to expand and view the whole message content."
             ]
         }
     ],
@@ -235,18 +235,23 @@ module.exports = !global.ZeresPluginLibrary ? class {
                         if (props.onClose) props.onClose();
                     }
                 }, [readyToClose]);
-
                 const spring = useSpring({
                     from: {
                         progress: 0,
+                        scale: readyToClose ? 1 : 0
                     },
                     to: {
                         progress: 100, 
+                        scale: readyToClose ? 0 : 1
                     },
                     onRest: _ => {
                         setReadyToClose(true);
                     },
-                    config: {duration: time},
+                    config: key => {
+                        let duration = time;
+                        if(key === "scale") duration = 100;
+                        return {duration};
+                    },
                 });
 
                 return React.createElement(animated.div, {
@@ -257,6 +262,11 @@ module.exports = !global.ZeresPluginLibrary ? class {
                     },
                     onMouseOut: _ => {
                         spring.progress.resume();
+                    },
+                    style: {
+                        scale: spring.scale.to(e => {
+                            return e;
+                        })
                     },
                     children: [
                         avatar && React.createElement("div", {
@@ -288,7 +298,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                                 onManualClose();
                                 setReadyToClose(true);
                             }, 
-                        }, React.createElement("path", {d: "M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z", fill: "currentColor"}))
+                        }, React.createElement("path", {d: "M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z", fill: "currentColor"})),
                     ]
                 })
             },
@@ -397,7 +407,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
 
             .qwert-toast {
              position: relative;
-             display: flex;
+             display: -webkit-inline-box;
              pointer-events: all;
              align-items: center;
              min-height: 24px;
@@ -416,15 +426,20 @@ module.exports = !global.ZeresPluginLibrary ? class {
             
             .qwert-toast-text {
              position: relative;
-             display: flex;
+             display: block;
              max-width: 400px;
-             max-height: 24px;
              flex: 1 0 auto;
              font-size: 14px;
              font-weight: 500;
              white-space: nowrap;
              word-wrap: break-word;
-             text-overflow: ellipsis;
+             overflow: hidden;
+             text-overflow: ellipsis;         
+            }
+
+            .qwert-toast:hover .qwert-toast-text {
+             display: block;
+             white-space: break-spaces;
             }
 
             .qwert-toast-author {
@@ -453,13 +468,14 @@ module.exports = !global.ZeresPluginLibrary ? class {
             .qwert-toast-icon-container {
              padding-right: 5px;
              margin-top: 1px;
+             top: 10px;
             }
 
             .qwert-toast-close {
              margin-left: 5px;
              cursor: pointer;
             }
-          }`);
+            }`);
         }
 
         onMessage({message}) {
@@ -515,7 +531,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 content = [React.createElement(ImagePlaceholder, {style: {height: "16px", width: "16px", marginRight: "2px"}}), ParseUtils.parse(message.content)];
 
                 if(message.content === "") {
-                    content = [React.createElement(ImagePlaceholder, {style: {height: "16px", width: "16px", marginRight: "2px"}}), "Embed"];
+                    content = [React.createElement(ImagePlaceholder, {style: {height: "16px", width: "16px", marginRight: "2px"}}), message.embeds[0].description !== "" ? message.embeds[0].description : "Embed"];
                 }
             }
 
