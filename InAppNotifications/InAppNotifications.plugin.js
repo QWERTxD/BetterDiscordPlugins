@@ -3,7 +3,7 @@
 * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
 * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
 * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
-* @version 0.0.5
+* @version 0.0.51
 */
 
 const request = require("request");
@@ -20,29 +20,15 @@ const config = {
                 github_username: "QWERTxD"
             }
         ],
-        version: "0.0.5",
+        version: "0.0.51",
         description: "Displays notifications such as new messages, friends added in Discord.",
     },
     changelog: [
         {
-            title: "Improved",
-            type: "improved",
-            items: [
-                "Author avatar style"
-            ]
-        },
-        {
-            title: "Added",
-            type: "added",
-            items: [
-                "When receiving a message with an image attached, a preview of the image will show up when hovering the notification"
-            ]
-        },
-        {
-            title: "Changed",
+            title: "Fixed",
             type: "fixed",
             items: [
-                "Default notification color"
+                "Images preview"
             ]
         }
     ],
@@ -595,7 +581,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
         onMessage({message}) {
             const author = UserStore.getUser(message.author.id);
             const channel = Structs.Channel.fromId(message.channel_id);
-            const images = message.attachments.filter(e => e.content_type.startsWith("image"));
+            const images = message.attachments.filter(e => e?.content_type.startsWith("image"));
             const xChannel = ChannelStore.getChannel(message.channel_id);
             const notiTime = this.settings.notiTime;
             if(channel.id === SelectedChannelStore.getChannelId()) return false;
