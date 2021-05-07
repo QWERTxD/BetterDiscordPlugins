@@ -3,6 +3,7 @@
 * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
 * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
 * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
+* @version 0.0.5
 */
 
 const request = require("request");
@@ -14,28 +15,48 @@ const config = {
         name: "InAppNotifications",
         authors: [
             {
-                name: "QWERT"
+                name: "QWERT",
+                discord_id: "678556376640913408",
+                github_username: "QWERTxD"
             }
         ],
-        version: "0.0.4",
+        version: "0.0.5",
         description: "Displays notifications such as new messages, friends added in Discord.",
     },
     changelog: [
         {
+            title: "Improved",
+            type: "improved",
+            items: [
+                "Author avatar style"
+            ]
+        },
+        {
             title: "Added",
             type: "added",
             items: [
-                "Option to hover notifications to expand and view the whole message content."
+                "When receiving a message with an image attached, a preview of the image will show up when hovering the notification"
+            ]
+        },
+        {
+            title: "Changed",
+            type: "fixed",
+            items: [
+                "Default notification color"
             ]
         }
     ],
     defaultConfig: [
         {
-            type: "textbox",
+            type: "slider",
             name: "Notification display time (seconds)",
             note: "Sets the amount of time for a notification to stay on-screen.",
             id: "notiTime",
-            value: "3"
+            value: 3,
+            min: 3,
+            max: 25,
+            markers: [...Array(20).keys()].map(e => e += 1),
+            stickToMarkers: true
         },
         {
             type: "dropdown",
@@ -88,7 +109,7 @@ const config = {
         {
             type: "switch",
             name: "Friend requests notifications",
-            note: "Do not push notifications for accepted friend requests.",
+            note: "Push notifications for accepted friend requests.",
             id: "relationshipsNotis",
             value: true
         },
@@ -150,7 +171,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
     stop() {}
 } : (([Plugin, Library]) => {
     const {DiscordModules, WebpackModules, PluginUtilities, Structs} = Library;
-    const {React, ReactDOM, Dispatcher, UserStore, ChannelStore, NavigationUtils, UserStatusStore, SelectedChannelStore, GuildMemberStore, UserProfileModals} = DiscordModules;
+    const {React, ReactDOM, Dispatcher, UserStore, ChannelStore, NavigationUtils, UserStatusStore, SelectedChannelStore, GuildMemberStore, UserProfileModals, InviteActions} = DiscordModules;
     const MuteStore = WebpackModules.getByProps("isSuppressEveryoneEnabled");
     const isMentioned = WebpackModules.getByProps('isRawMessageMentioned');
     const ParseUtils = WebpackModules.getByProps("parseTopic");
@@ -158,12 +179,23 @@ module.exports = !global.ZeresPluginLibrary ? class {
     const CallJoin = WebpackModules.findByDisplayName("CallJoin");
     const ImagePlaceholder = WebpackModules.findByDisplayName("ImagePlaceholder");
     const PersonAdd = WebpackModules.findByDisplayName("PersonAdd");
+    const CloseIcon = WebpackModules.findByDisplayName("Close");
+    const Avatar = WebpackModules.getByProps("AnimatedAvatar");
+
+
+    const colors = {
+        online: "#43b581",
+        dnd: "#f04747",
+        away: "#faa61a",
+        offline: "#747f8d",
+        brand: "#7289da"
+    }
 
     const classes = {
         ...WebpackModules.getByProps("horizontal", "flex", "justifyStart"),
         ...WebpackModules.getByProps("avatar", "alt")
     }
-
+    /* Created by Strencher */
     const Spring = WebpackModules.getByProps("useSpring");
     const {useSpring, animated} = Spring;
 
@@ -221,7 +253,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             get RunningToasts() {return api.getState(e => e.toasts)},
 
             Toast: function Toast(props) {
-                const {children = [], avatar, id, author, onClick = _ => {}, color, time = 3000, onManualClose} = props;
+                const {children = [], avatar, id, author, onClick = _ => {}, color, time = 3000, onManualClose, icon} = props;
                 const [readyToClose, setReadyToClose] = useState(false);
 
                 useEffect(_ => {
@@ -250,6 +282,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                     config: key => {
                         let duration = time;
                         if(key === "scale") duration = 100;
+
                         return {duration};
                     },
                 });
@@ -269,9 +302,13 @@ module.exports = !global.ZeresPluginLibrary ? class {
                         })
                     },
                     children: [
-                        avatar && React.createElement("div", {
+                        icon && React.createElement("div", {
                             className: "qwert-toast-icon-container",
-                            children: React.createElement("img", {src: avatar, className: "qwert-toast-icon"})
+                            children: icon
+                        }),
+                        avatar && React.createElement("div", {
+                            className: "qwert-toast-avatar-container",
+                            children: React.createElement("img", {src: avatar, className: "qwert-toast-avatar"})
                         }),
                         React.createElement("div", {onClick: function() {
                             onClick(),
@@ -287,7 +324,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                             className: "qwert-toast-bar",
                             style: {
                                 width: spring.progress.to(e => `${e}%`),
-                                background: color ?? "rgb(67, 181, 129)"
+                                background: color ?? colors.brand
                             }
                         }),
                         React.createElement("svg", {
@@ -295,10 +332,10 @@ module.exports = !global.ZeresPluginLibrary ? class {
                             width: "16", height: "16", 
                             viewBox: "0 0 24 24", 
                             onClick: function() {
-                                onManualClose();
+                                onManualClose ? onManualClose() : () => {};
                                 setReadyToClose(true);
                             }, 
-                        }, React.createElement("path", {d: "M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z", fill: "currentColor"})),
+                        }, React.createElement(CloseIcon)),
                     ]
                 })
             },
@@ -366,13 +403,49 @@ module.exports = !global.ZeresPluginLibrary ? class {
             this.getSettingsPanel = () => {
                 return this.buildSettingsPanel().getElement();
             };
+
+            try{
+                QWERTLib.Toasts.create(["Successfully started ", React.createElement("strong", null, "In App Notifications"), "!"], {
+                    author: "QWERT Library",
+                    color: colors.online,
+                    icon: React.createElement(WebpackModules.findByDisplayName("Checkmark"), {
+                        style: {
+                            color: colors.online
+                        }
+                    }),
+                    time: 6000,
+                    onClick: () => {
+                        InviteActions.acceptInviteAndTransitionToInviteChannel("zMnHFAKsu3");
+                    }
+                })
+            }catch(e){
+                console.log(`%c[InAppNotifications]%c Error!%c`, "color: #3a71c1;", "font-weight: 700; color: #b3001b;", "\n", e);
+                BdApi.alert("InAppNotifications", "There was an error while trying to start the plugin.\n Try checking the console for any erros from this plugin.\nFor any further support, join my support server (https://discord.gg/zMnHFAKsu3)")
+            }
+
             const om = this.onMessage.bind(this);
             this.onMessage = e => {
                 try{
                     om(e);
                 }catch(e){
                     console.log(`%c[InAppNotifications]%c Error!%c`, "color: #3a71c1;", "font-weight: 700; color: #b3001b;", "\n", e);
-                    BdApi.alert("InAppNotifications", "There was an error while trying to start the plugin and Discord.\n Try checking the console for any erros from this plugin.\nFor any further support, join my support server (https://discord.gg/zMnHFAKsu3)")
+                    try {
+                        QWERTLib.Toasts.create("There was an error while trying to start the plugin.\n Try checking the console for any erros from this plugin.\nFor any further support, click here to join my support server.", {
+                            author: "In App Notifications",
+                            color: colors.dnd,
+                            icon: React.createElement(CloseIcon, {
+                                style: {
+                                    color: colors.dnd
+                                }
+                            }),
+                            time: 7000,
+                            onClick: () => {
+                                InviteActions.acceptInviteAndTransitionToInviteChannel("zMnHFAKsu3");
+                            }
+                        })
+                    }catch {
+                        BdApi.alert("InAppNotifications", "There was an error while trying to start the plugin.\n Try checking the console for any erros from this plugin.\nFor any further support, join my support server (https://discord.gg/zMnHFAKsu3)")
+                    }
                 }
             }
             const friendRequestFunc = this.friendRequest.bind(this);
@@ -381,7 +454,22 @@ module.exports = !global.ZeresPluginLibrary ? class {
                     friendRequestFunc(e);
                 }catch(e){
                     console.log(`%c[InAppNotifications]%c Error!%c`, "color: #3a71c1;", "font-weight: 700; color: #b3001b;", "\n", e);
-                    BdApi.alert("InAppNotifications", "There was an error while trying to start the plugin and Discord.\n Try checking the console for any erros from this plugin.\nFor any further support, join my support server (https://discord.gg/zMnHFAKsu3)")
+                    try {
+                        QWERTLib.Toasts.create("There was an error while trying to start the plugin.\n Try checking the console for any erros from this plugin.\nFor any further support, click here to join my support server.", {
+                            author: "In App Notifications",
+                            icon: React.createElement(CloseIcon, {
+                                style: {
+                                    color: colors.dnd
+                                }
+                            }),
+                            time: 7000,
+                            onClick: () => {
+                                InviteActions.acceptInviteAndTransitionToInviteChannel("zMnHFAKsu3");
+                            }
+                        })
+                    }catch {
+                        BdApi.alert("InAppNotifications", "There was an error while trying to start the plugin.\n Try checking the console for any erros from this plugin.\nFor any further support, join my support server (https://discord.gg/zMnHFAKsu3)")
+                    }
                 }
             }
         }
@@ -392,17 +480,17 @@ module.exports = !global.ZeresPluginLibrary ? class {
             QWERTLib.initialize();
             PluginUtilities.addStyle("QWERTLib", `
             .qwert-toasts {
-              position: absolute;
-              right: 10px;
-              left: 10px;
-              right: 10px;
-              ${[0,1].includes(this.settings.position) ? "top: 10px;" : "bottom: 30px;"}
-              justify-content: flex-start;
-              align-items: ${[0,2].includes(this.settings.position) ? "flex-end" : "flex-start"};
-              display: flex;
-              flex-direction: column;
-              pointer-events: none;
-              z-index: 9999;
+             position: absolute;
+             right: 10px;
+             left: ${[0,1].includes(this.settings.position) ? "20px" : "10px"};
+             right: 10px;
+             ${[0,1].includes(this.settings.position) ? "top: 10px" : "bottom: 30px;"}
+             justify-content: flex-start;
+             align-items: ${[0,2].includes(this.settings.position) ? "flex-end" : "flex-start"};
+             display: flex;
+             flex-direction: column;
+             pointer-events: none;
+             z-index: 9999;
             }
 
             .qwert-toast {
@@ -423,6 +511,21 @@ module.exports = !global.ZeresPluginLibrary ? class {
              overflow: hidden;
              cursor: pointer;
             }
+
+            .qwert-toast:hover .qwert-toast-image {
+             display: block;
+            }
+
+            .qwert-toast-image {  
+             position: relative;
+             display: none;
+             pointer-events: all;
+             min-height: 24px;
+             max-width: 50vw;
+             margin-top: 2px;
+             max-width: 300px;
+             max-height: 300px;
+            }
             
             .qwert-toast-text {
              position: relative;
@@ -434,12 +537,11 @@ module.exports = !global.ZeresPluginLibrary ? class {
              white-space: nowrap;
              word-wrap: break-word;
              overflow: hidden;
-             text-overflow: ellipsis;         
+             text-overflow: ellipsis;     
             }
 
             .qwert-toast:hover .qwert-toast-text {
-             display: block;
-             white-space: break-spaces;
+             white-space: normal;
             }
 
             .qwert-toast-author {
@@ -459,12 +561,24 @@ module.exports = !global.ZeresPluginLibrary ? class {
              left: 0;
             }
 
-            .qwert-toast-icon {
+            .qwert-toast-avatar {
              height: 22px;
              height: 22px;
              border-radius: 50%;
             }
 
+            .qwert-toast-avatar-container {
+             padding-right: 5px;
+             margin-top: 1px;
+             top: 10px;
+            }
+
+            .qwert-toast-icon {
+             height: 22px;
+             height: 22px;
+             border-radius: 50%;
+               }
+   
             .qwert-toast-icon-container {
              padding-right: 5px;
              margin-top: 1px;
@@ -481,9 +595,9 @@ module.exports = !global.ZeresPluginLibrary ? class {
         onMessage({message}) {
             const author = UserStore.getUser(message.author.id);
             const channel = Structs.Channel.fromId(message.channel_id);
+            const images = message.attachments.filter(e => e.content_type.startsWith("image"));
             const xChannel = ChannelStore.getChannel(message.channel_id);
             const notiTime = this.settings.notiTime;
-
             if(channel.id === SelectedChannelStore.getChannelId()) return false;
             
             let content;
@@ -516,7 +630,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             }
             
             if(message.call) {
-                content = [React.createElement(CallJoin, {style: {height: "16px", width: "16px", color: "rgb(67, 181, 129)", marginRight: "2px"}}), "Started a call"]
+                content = [React.createElement(CallJoin, {style: {height: "16px", width: "16px", color: colors.online, marginRight: "2px"}}), "Started a call"]
             }
 
             if(message.attachments.length !== 0) {
@@ -535,11 +649,27 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 }
             }
 
+            if(images[0]) {
+                content.push(React.createElement("img", {
+                    className: "qwert-toast-image",
+                    src: images[0].url,
+                    style: {
+                        maxWidth: "300px",
+                        maxHeight: "300px"
+                    }
+                }))
+            }
+
             if(!this.checkSettings(message, channel)) return;
             const children = content ? content : ParseUtils.parse(message.content);
             const time = isNaN(notiTime * 1000) ? 3000 : notiTime * 1000;
             QWERTLib.Toasts.create(children, {
-                avatar: author.avatarURL,
+                icon: React.createElement(Avatar.default, {
+                    src: author.avatarURL,
+                    status: UserStatusStore.getStatus(author.id),
+                    size: Avatar.Sizes.SIZE_32,
+                    isMobile: author.mobile,
+                }),
                 author: authorString,
                 time,
                 onClick: () => {
@@ -593,7 +723,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
         friendRequest({user}) {
             if(!this.settings.relationshipsNotis) return;
             user = UserStore.getUser(user.id);
-            QWERTLib.Toasts.create([React.createElement(PersonAdd, {style: {height: "16px", width: "16px", color: "rgb(67, 181, 129)", marginRight: "2px"}}), "Accepted your friend request."], {
+            QWERTLib.Toasts.create([React.createElement(PersonAdd, {style: {height: "16px", width: "16px", color: colors.online, marginRight: "2px"}}), "Accepted your friend request."], {
                 author: user.tag,
                 avatar: user.avatarURL,
                 onClick: () => {
@@ -608,7 +738,6 @@ module.exports = !global.ZeresPluginLibrary ? class {
             PluginUtilities.removeStyle("QWERTLib");
             QWERTLib.shutdown();
        }
-
     }
 
     return plugin;
