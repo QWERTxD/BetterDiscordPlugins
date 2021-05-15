@@ -3,7 +3,7 @@
 * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
 * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
 * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
-* @version 0.0.51
+* @version 0.0.6
 */
 
 const request = require("request");
@@ -20,7 +20,7 @@ const config = {
                 github_username: "QWERTxD"
             }
         ],
-        version: "0.0.51",
+        version: "0.0.6",
         description: "Displays notifications such as new messages, friends added in Discord.",
     },
     changelog: [
@@ -28,7 +28,14 @@ const config = {
             title: "Fixed",
             type: "fixed",
             items: [
-                "Images preview"
+                "some bugs."
+            ]
+        },
+        {
+            title: "Added",
+            type: "added",
+            items: [
+                "Keyword notifications."
             ]
         }
     ],
@@ -37,10 +44,10 @@ const config = {
             type: "slider",
             name: "Notification display time (seconds)",
             note: "Sets the amount of time for a notification to stay on-screen.",
-            id: "notiTime",
-            value: 3,
             min: 3,
             max: 25,
+            id: "notiTime",
+            value: 3,
             markers: [...Array(20).keys()].map(e => e += 1),
             stickToMarkers: true
         },
@@ -56,6 +63,13 @@ const config = {
                 { label: 'Bottom Right', value: 2 },
                 { label: 'Bottom Left', value: 3 },
             ]
+        },
+        {
+            type: "textbox",
+            name: "Keyword Notifications",
+            note: "Push notifications if certain words were sent in a message. (Separate with a comma)",
+            id: "keywords",
+            value: ""
         },
         {
             type: "switch",
@@ -156,18 +170,18 @@ module.exports = !global.ZeresPluginLibrary ? class {
 
     stop() {}
 } : (([Plugin, Library]) => {
-    const {DiscordModules, WebpackModules, PluginUtilities, Structs} = Library;
+    const {DiscordModules, WebpackModules, PluginUtilities, Structs, Settings, Patcher} = Library;
     const {React, ReactDOM, Dispatcher, UserStore, ChannelStore, NavigationUtils, UserStatusStore, SelectedChannelStore, GuildMemberStore, UserProfileModals, InviteActions} = DiscordModules;
     const MuteStore = WebpackModules.getByProps("isSuppressEveryoneEnabled");
     const isMentioned = WebpackModules.getByProps('isRawMessageMentioned');
-    const ParseUtils = WebpackModules.getByProps("parseTopic");
+    const Markdown = WebpackModules.getByProps("parse", "parseTopic");
     const AckUtils = WebpackModules.getByProps("bulkAck", "ack");
     const CallJoin = WebpackModules.findByDisplayName("CallJoin");
     const ImagePlaceholder = WebpackModules.findByDisplayName("ImagePlaceholder");
     const PersonAdd = WebpackModules.findByDisplayName("PersonAdd");
     const CloseIcon = WebpackModules.findByDisplayName("Close");
+    const StickerIcon = WebpackModules.findByDisplayName("StickerSmall");
     const Avatar = WebpackModules.getByProps("AnimatedAvatar");
-
 
     const colors = {
         online: "#43b581",
@@ -386,24 +400,25 @@ module.exports = !global.ZeresPluginLibrary ? class {
     class plugin extends Plugin {
         constructor() {
             super();
+
             this.getSettingsPanel = () => {
                 return this.buildSettingsPanel().getElement();
             };
 
             try{
-                QWERTLib.Toasts.create(["Successfully started ", React.createElement("strong", null, "In App Notifications"), "!"], {
-                    author: "QWERT Library",
-                    color: colors.online,
-                    icon: React.createElement(WebpackModules.findByDisplayName("Checkmark"), {
-                        style: {
-                            color: colors.online
-                        }
-                    }),
-                    time: 6000,
-                    onClick: () => {
-                        InviteActions.acceptInviteAndTransitionToInviteChannel("zMnHFAKsu3");
-                    }
-                })
+                // QWERTLib.Toasts.create(["Successfully started ", React.createElement("strong", null, "In App Notifications"), "!"], {
+                //     author: "QWERT Library",
+                //     color: colors.online,
+                //     icon: React.createElement(WebpackModules.findByDisplayName("Checkmark"), {
+                //         style: {
+                //             color: colors.online
+                //         }
+                //     }),
+                //     time: 6000,
+                //     onClick: () => {
+                //         InviteActions.acceptInviteAndTransitionToInviteChannel("zMnHFAKsu3");
+                //     }
+                // })
             }catch(e){
                 console.log(`%c[InAppNotifications]%c Error!%c`, "color: #3a71c1;", "font-weight: 700; color: #b3001b;", "\n", e);
                 BdApi.alert("InAppNotifications", "There was an error while trying to start the plugin.\n Try checking the console for any erros from this plugin.\nFor any further support, join my support server (https://discord.gg/zMnHFAKsu3)")
@@ -466,128 +481,119 @@ module.exports = !global.ZeresPluginLibrary ? class {
             QWERTLib.initialize();
             PluginUtilities.addStyle("QWERTLib", `
             .qwert-toasts {
-             position: absolute;
-             right: 10px;
-             left: ${[0,1].includes(this.settings.position) ? "20px" : "10px"};
-             right: 10px;
-             ${[0,1].includes(this.settings.position) ? "top: 10px" : "bottom: 30px;"}
-             justify-content: flex-start;
-             align-items: ${[0,2].includes(this.settings.position) ? "flex-end" : "flex-start"};
-             display: flex;
-             flex-direction: column;
-             pointer-events: none;
-             z-index: 9999;
-            }
-
-            .qwert-toast {
-             position: relative;
-             display: -webkit-inline-box;
-             pointer-events: all;
-             align-items: center;
-             min-height: 24px;
-             backdrop-filter: blur(5px);
-             border-radius: 3px;
-             box-shadow: var(--elevation-medium);
-             padding: 10px 12px 10px 10px;
-             max-width: 50vw;
-             opacity: 1;
-             margin-top: 10px;
-             color: white;
-             background: rgba(10,10,10,0.5);
-             overflow: hidden;
-             cursor: pointer;
-            }
-
-            .qwert-toast:hover .qwert-toast-image {
-             display: block;
-            }
-
-            .qwert-toast-image {  
-             position: relative;
-             display: none;
-             pointer-events: all;
-             min-height: 24px;
-             max-width: 50vw;
-             margin-top: 2px;
-             max-width: 300px;
-             max-height: 300px;
-            }
-            
-            .qwert-toast-text {
-             position: relative;
-             display: block;
-             max-width: 400px;
-             flex: 1 0 auto;
-             font-size: 14px;
-             font-weight: 500;
-             white-space: nowrap;
-             word-wrap: break-word;
-             overflow: hidden;
-             text-overflow: ellipsis;     
-            }
-
-            .qwert-toast:hover .qwert-toast-text {
-             white-space: normal;
-            }
-
-            .qwert-toast-author {
-             font-size: 14px;
-             max-width: 400px;
-             max-height: 24px;
-             white-space: nowrap;
-             word-wrap: break-word;
-             text-overflow: ellipsis;
-             margin-bottom: 2px;
-            }
-
-            .qwert-toast-bar {
-             height: 3px;
-             position: absolute;
-             bottom: 0;
-             left: 0;
-            }
-
-            .qwert-toast-avatar {
-             height: 22px;
-             height: 22px;
-             border-radius: 50%;
-            }
-
-            .qwert-toast-avatar-container {
-             padding-right: 5px;
-             margin-top: 1px;
-             top: 10px;
-            }
-
-            .qwert-toast-icon {
-             height: 22px;
-             height: 22px;
-             border-radius: 50%;
+                position: absolute;
+                right: 10px;
+                left: ${[0,1].includes(this.settings.position) ? "20px" : "10px"};
+                right: 10px;
+                ${[0,1].includes(this.settings.position) ? "top: 10px" : "bottom: 30px;"}
+                justify-content: flex-start;
+                align-items: ${[0,2].includes(this.settings.position) ? "flex-end" : "flex-start"};
+                display: flex;
+                flex-direction: column;
+                pointer-events: none;
+                z-index: 9999;
                }
-   
-            .qwert-toast-icon-container {
-             padding-right: 5px;
-             margin-top: 1px;
-             top: 10px;
-            }
-
-            .qwert-toast-close {
-             margin-left: 5px;
-             cursor: pointer;
-            }
+               .qwert-toast {
+                position: relative;
+                display: -webkit-inline-box;
+                pointer-events: all;
+                align-items: center;
+                min-height: 24px;
+                backdrop-filter: blur(5px);
+                border-radius: 3px;
+                box-shadow: var(--elevation-medium);
+                padding: 10px 12px 10px 10px;
+                max-width: 50vw;
+                opacity: 1;
+                margin-top: 10px;
+                color: white;
+                background: rgba(10,10,10,0.5);
+                overflow: hidden;
+                cursor: pointer;
+               }
+               .qwert-toast:hover .qwert-toast-image {
+                display: block;
+               }
+               .qwert-toast-image {  
+                position: relative;
+                display: none;
+                pointer-events: all;
+                min-height: 24px;
+                max-width: 50vw;
+                margin-top: 2px;
+                max-width: 300px;
+                max-height: 300px;
+               }
+               
+               .qwert-toast-text {
+                position: relative;
+                display: block;
+                max-width: 400px;
+                flex: 1 0 auto;
+                font-size: 14px;
+                font-weight: 500;
+                white-space: nowrap;
+                word-wrap: break-word;
+                overflow: hidden;
+                text-overflow: ellipsis;     
+               }
+               .qwert-toast:hover .qwert-toast-text {
+                white-space: normal;
+               }
+               .qwert-toast-author {
+                font-size: 14px;
+                max-width: 400px;
+                max-height: 24px;
+                white-space: nowrap;
+                word-wrap: break-word;
+                text-overflow: ellipsis;
+                margin-bottom: 2px;
+               }
+               .qwert-toast-bar {
+                height: 3px;
+                position: absolute;
+                bottom: 0;
+                left: 0;
+               }
+               .qwert-toast-avatar {
+                height: 22px;
+                height: 22px;
+                border-radius: 50%;
+               }
+               .qwert-toast-avatar-container {
+                padding-right: 5px;
+                margin-top: 1px;
+                top: 10px;
+               }
+               .qwert-toast-icon {
+                height: 22px;
+                height: 22px;
+                border-radius: 50%;
+                  }
+      
+               .qwert-toast-icon-container {
+                padding-right: 5px;
+                margin-top: 1px;
+                top: 10px;
+               }
+               .qwert-toast-close {
+                margin-left: 5px;
+                cursor: pointer;
+               }
             }`);
         }
-
+        
         onMessage({message}) {
             const author = UserStore.getUser(message.author.id);
             const channel = Structs.Channel.fromId(message.channel_id);
-            const images = message.attachments.filter(e => e?.content_type.startsWith("image"));
+            const images = message.attachments.filter(e => typeof e?.content_type === "string" && e?.content_type.startsWith("image"));
             const xChannel = ChannelStore.getChannel(message.channel_id);
             const notiTime = this.settings.notiTime;
             if(channel.id === SelectedChannelStore.getChannelId()) return false;
             
             let content;
-            if(!this.supposedToNotify(message, xChannel)) return;
+            const keywordFound = this.checkKeywords(message);
+            if(!this.supposedToNotify(message, xChannel) && !keywordFound) return;
             let authorString = "";
             if(channel.guild) {
                 const colorString = GuildMemberStore.getMember(channel.guild.id, author.id)?.colorString;
@@ -620,7 +626,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             }
 
             if(message.attachments.length !== 0) {
-                content = [React.createElement(ImagePlaceholder, {style: {height: "16px", width: "16px", marginRight: "2px"}}), ParseUtils.parse(message.content)]
+                content = [React.createElement(ImagePlaceholder, {style: {height: "16px", width: "16px", marginRight: "2px"}}), Markdown.parse(message.content, "div", {channelId: channel.id})]
                 
                 if(message.content === "") {
                     content = [React.createElement(ImagePlaceholder, {style: {height: "16px", width: "16px", marginRight: "2px"}}), "Attachment"]
@@ -628,10 +634,18 @@ module.exports = !global.ZeresPluginLibrary ? class {
             }
 
             if(message.embeds.length !== 0) {
-                content = [React.createElement(ImagePlaceholder, {style: {height: "16px", width: "16px", marginRight: "2px"}}), ParseUtils.parse(message.content)];
+                content = [React.createElement(ImagePlaceholder, {style: {height: "16px", width: "16px", marginRight: "2px"}}), Markdown.parse(message.content, "div", {channelId: channel.id})];
 
                 if(message.content === "") {
                     content = [React.createElement(ImagePlaceholder, {style: {height: "16px", width: "16px", marginRight: "2px"}}), message.embeds[0].description !== "" ? message.embeds[0].description : "Embed"];
+                }
+            }
+
+            if(message.stickers) {
+                content = [React.createElement(StickerIcon, {style: {height: "16px", width: "16px", marginRight: "2px"}}), Markdown.parse(message.content, "div", {channelId: channel.id})];
+
+                if(message.content === "") {
+                    content = [React.createElement(StickerIcon, {style: {height: "16px", width: "16px", marginRight: "2px"}}), "Sticker"];
                 }
             }
 
@@ -647,19 +661,19 @@ module.exports = !global.ZeresPluginLibrary ? class {
             }
 
             if(!this.checkSettings(message, channel)) return;
-            const children = content ? content : ParseUtils.parse(message.content);
+            const children = content ? content : Markdown.parse(message.content, "div", {channelId: channel.id});
             const time = isNaN(notiTime * 1000) ? 3000 : notiTime * 1000;
             QWERTLib.Toasts.create(children, {
                 icon: React.createElement(Avatar.default, {
                     src: author.avatarURL,
                     status: UserStatusStore.getStatus(author.id),
                     size: Avatar.Sizes.SIZE_32,
-                    isMobile: author.mobile,
+                    isMobile: UserStatusStore.isMobileOnline(author.id),
                 }),
                 author: authorString,
                 time,
                 onClick: () => {
-                    NavigationUtils.transitionToGuild(channel.guild_id || "@me", message.channel_id, message.id);
+                    NavigationUtils.replaceWith(`/channels/${channel.guild_id || "@me"}/${message.channel_id}/${message.id}`);
                 },
                 onManualClose: () => {
                     if(!this.settings.markAsRead) return;
@@ -667,6 +681,28 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 }
             });
         }
+
+        escapeRegex(string) {
+            return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // https://stackoverflow.com/questions/3446170/escape-string-for-use-in-javascript-regex
+        }
+
+        checkKeywords(message) {
+            let found = false;
+            const {content} = message;
+            const keywords = this.settings.keywords.trim().split(",").map(e => e.trim()).filter(e => e !== "");
+            if(keywords.length === 0) return false;
+            
+            for(let keyword of keywords) {
+                keyword = this.escapeRegex(keyword);
+                const keywordRegex = new RegExp(`\\b${keyword}\\b`, "g");
+                if(keywordRegex.test(content)) {
+                    found = true;
+                    break;
+                }
+            };
+            return found;
+        }
+
 
         supposedToNotify(message, channel) {
             if(message.author.id === UserStore.getCurrentUser().id) return false;
@@ -677,10 +713,11 @@ module.exports = !global.ZeresPluginLibrary ? class {
         }
 
         checkSettings(message, channel) {
+            message.content = message.content.toLowerCase();
             let shouldNotify = true;
-            const ignoredUsers = this.settings.ignoredUsers.replace(/\s/g, "").split(",");
-            const ignoredServers = this.settings.ignoredServers.replace(/\s/g, "").split(",");
-            const ignoredChannels = this.settings.ignoredChannels.replace(/\s/g, "").split(",");
+            const ignoredUsers = this.settings.ignoredUsers.trim().split(",");
+            const ignoredServers = this.settings.ignoredServers.trim().split(",");
+            const ignoredChannels = this.settings.ignoredChannels.trim().split(",");
             const ignoreDMs = this.settings.ignoreDMs;
             const ignoreDMGroups = this.settings.ignoreDMGroups;
 
@@ -723,6 +760,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             Dispatcher.unsubscribe("FRIEND_REQUEST_ACCEPTED", this.friendRequest);
             PluginUtilities.removeStyle("QWERTLib");
             QWERTLib.shutdown();
+            Patcher.unpatchAll();
        }
     }
 
