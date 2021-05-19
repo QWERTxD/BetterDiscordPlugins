@@ -67,7 +67,7 @@
             render() {
                 const {user, status} = this.props;
                 return React.createElement(Avatar.default, {
-                src: `https://discord.com/${user.avatarURL}`,
+                src: user.avatarURL.startsWith("http") ? user.avatarURL : `https://discord.com/${user.avatarURL}`,
                 status: status,
                 size: Avatar.Sizes.SIZE_16,
                 onClick() {
