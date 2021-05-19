@@ -673,7 +673,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 author: authorString,
                 time,
                 onClick: () => {
-                    NavigationUtils.replaceWith(`/channels/${channel.guild_id || "@me"}/${message.channel_id}/${message.id}`);
+                    NavigationUtils.replaceWith(`/channels/${message.guild_id || "@me"}/${message.channel_id}/${message.id}`);
                 },
                 onManualClose: () => {
                     if(!this.settings.markAsRead) return;
