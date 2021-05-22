@@ -3,7 +3,7 @@
     * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/TypingUsersAvatars/TypingUsersAvatars.plugin.js
     * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/TypingUsersAvatars/TypingUsersAvatars.plugin.js
     * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/TypingUsersAvatars
-    * @version 1.0.0
+    * @version 1.0.1
     * @description Shows avatars of typing users.
     */
     
@@ -19,19 +19,33 @@
                      name: 'QWERT'
                  }
              ],
-             version: '1.0.0',
+             version: '1.0.1',
              description: 'Shows avatars of typing users.',
          },
          changelog: [
              {
-                 title: 'hello world',
+                 title: 'Added',
                  type: 'added',
                  items: [
-                     'plugin'
+                     'Option to show/hide typing user\'s status'
                      ]
-             }
+             },
+             {
+                title: 'Fixed',
+                type: 'fixed',
+                items: [
+                    'Some CSS problems'
+                    ]
+            }
          ],
-         defaultConfig: [  ]
+         defaultConfig: [
+             {
+                 type: 'switch',
+                 name: 'Show users status',
+                 id: 'showStatus',
+                 value: true
+             }
+         ]
      };
      
      module.exports = !global.ZeresPluginLibrary ? class {
@@ -60,9 +74,10 @@
          stop() { }
      } : (([Plugin, Library]) => {
          const { DiscordModules, WebpackModules, PluginUtilities, Patcher, ReactComponents, Popouts, Utilities, DiscordSelectors } = Library;
-         const { React, UserStore, RelationshipStore, UserStatusStore } = DiscordModules;
+         const { React, UserStore, RelationshipStore, UserStatusStore, Strings } = DiscordModules;
          const Avatar = WebpackModules.getByProps('AnimatedAvatar');
-    
+         const VoiceUserSummary = WebpackModules.findByDisplayName("VoiceUserSummaryItem")
+
          class AvatarComponent extends React.Component {
             render() {
                 const {user, status} = this.props;
@@ -73,7 +88,8 @@
                 onClick() {
                     Popouts.showUserPopout(document.getElementById(`typing-user-${user.id}`), user)
                 }
-            })}
+            })
+        }
         }
     
          class plugin extends Plugin {
@@ -88,18 +104,29 @@
                Utilities.suppressErrors(this.patch.bind(this))();
     
                PluginUtilities.addStyle('TypingUsersAvatars', `
-                .text-1y-e8- {
+                .typing-2GQL18 > .text-1y-e8- {
                     margin: 0;
                 }
                   
-                .wrapper-3t9DeA {
+                .typing-2GQL18 .wrapper-3t9DeA {
                     display: flex;
                     margin: 0 4px;
                 }
     
-                .text-1y-e8- > strong {
+                .typing-2GQL18 > .text-1y-e8-,
+                .typing-2GQL18 > .text-1y-e8- > strong {
                     display: contents;
-                }`)
+                }
+
+                .several-users {
+                    margin-left: 5px;
+                    margin-right: 5px;
+                }
+
+                .several-users > .avatarSize-EXG1Is {
+                    margin: 0;
+                }
+                `)
              }
      
              onStop() { 
@@ -118,13 +145,26 @@
                  const TypingUsers = await ReactComponents.getComponentByName('TypingUsers', DiscordSelectors.Typing.typing);
                  Patcher.after(TypingUsers.component.prototype, 'render', (thisObject, [props], ret) => {
                     const typingUsers = this.filter({...thisObject.props.typingUsers});
+
                     for (let u = 0; u < typingUsers.length; u++) {
-                        const user = UserStore.getUser(typingUsers[u]);
-                        const status = UserStatusStore.getStatus(user.id);
-                        ret.props.children[1].props.children[2* u].props.children.unshift(React.createElement("div", {
-                            id: `typing-user-${user.id}`, 
-                            children: React.createElement(AvatarComponent, {user, status})
-                        }));
+                        const user = UserStore.getUser(typingUsers[u]); 
+                        const status = this.settings.showStatus ? UserStatusStore.getStatus(user.id) : null; 
+                        if(ret.props.children[1].props.children !== Strings.SEVERAL_USERS_TYPING) {
+                            ret.props.children[1].props.children[2* u].props.children.unshift(React.createElement("div", {
+                                id: `typing-user-${user.id}`, 
+                                children: React.createElement(AvatarComponent, {user, status})
+                            }));
+                        }else{
+                            ret.props.children[1].props.children = [
+                                React.createElement(VoiceUserSummary, {
+                                    className: "several-users",
+                                    users: typingUsers.map(UserStore.getUser),
+                                    max: 3
+                                }),
+                                ret.props.children[1].props.children
+                            ]
+                            
+                        }
                     }
                     
                      if(!ret) return;
