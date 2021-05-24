@@ -1,0 +1,17 @@
+{
+		"info": {
+				"name": "UserVolumeBooster",
+				"description": "Allows you to set a user's volume above the normal 200%",
+				"version": "1.0.0",
+				"author": "QWERT"
+		},
+		"build": {
+				"zlibrary": false,
+				"copy": true,
+				"production": false,
+				"scssHash": false,
+				"alias": {
+						"icons": "components/icons"
+				}
+		}
+}
