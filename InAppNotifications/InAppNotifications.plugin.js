@@ -3,7 +3,7 @@
 * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
 * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
 * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
-* @version 0.0.6
+* @version 0.0.61
 */
 
 const request = require("request");
@@ -20,7 +20,7 @@ const config = {
                 github_username: "QWERTxD"
             }
         ],
-        version: "0.0.6",
+        version: "0.0.61",
         description: "Displays notifications such as new messages, friends added in Discord.",
     },
     changelog: [
@@ -29,13 +29,6 @@ const config = {
             type: "fixed",
             items: [
                 "some bugs."
-            ]
-        },
-        {
-            title: "Added",
-            type: "added",
-            items: [
-                "Keyword notifications."
             ]
         }
     ],
@@ -70,6 +63,12 @@ const config = {
             note: "Push notifications if certain words were sent in a message. (Separate with a comma)",
             id: "keywords",
             value: ""
+        },
+        {
+            type: "switch",
+            name: "keywords case sensitive",
+            id: "case",
+            value: false
         },
         {
             type: "switch",
@@ -673,7 +672,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 author: authorString,
                 time,
                 onClick: () => {
-                    NavigationUtils.replaceWith(`/channels/${channel.guild_id || "@me"}/${message.channel_id}/${message.id}`);
+                    NavigationUtils.replaceWith(`/channels/${message.guild_id || "@me"}/${message.channel_id}/${message.id}`);
                 },
                 onManualClose: () => {
                     if(!this.settings.markAsRead) return;
@@ -695,7 +694,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             for(let keyword of keywords) {
                 keyword = this.escapeRegex(keyword);
                 const keywordRegex = new RegExp(`\\b${keyword}\\b`, "g");
-                if(keywordRegex.test(content)) {
+                if(keywordRegex.test(this.settings.case ? content : content.toLowerCase())) {
                     found = true;
                     break;
                 }
@@ -713,7 +712,6 @@ module.exports = !global.ZeresPluginLibrary ? class {
         }
 
         checkSettings(message, channel) {
-            message.content = message.content.toLowerCase();
             let shouldNotify = true;
             const ignoredUsers = this.settings.ignoredUsers.trim().split(",");
             const ignoredServers = this.settings.ignoredServers.trim().split(",");
