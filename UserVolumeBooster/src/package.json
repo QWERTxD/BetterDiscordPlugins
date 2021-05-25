@@ -12,6 +12,10 @@
 				"scssHash": false,
 				"alias": {
 						"icons": "components/icons"
+				},
+				"release": {
+					"source": true,
+					"readme": true
 				}
 		}
 }
