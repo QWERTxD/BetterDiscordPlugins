@@ -6,7 +6,7 @@
 				"author": "QWERT"
 		},
 		"build": {
-				"zlibrary": false,
+				"zlibrary": true,
 				"copy": true,
 				"production": false,
 				"scssHash": false,

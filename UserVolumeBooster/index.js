@@ -1,5 +1,6 @@
 const {
 	React,
+	ReactDOM,
 	Patcher,
 	findModule: get,
 	findModuleByProps: getByProps,
