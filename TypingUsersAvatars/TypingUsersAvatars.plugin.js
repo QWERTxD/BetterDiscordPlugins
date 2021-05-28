@@ -3,7 +3,7 @@
     * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/TypingUsersAvatars/TypingUsersAvatars.plugin.js
     * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/TypingUsersAvatars/TypingUsersAvatars.plugin.js
     * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/TypingUsersAvatars
-    * @version 1.0.1
+    * @version 1.0.2
     * @description Shows avatars of typing users.
     */
     
@@ -19,22 +19,15 @@
                      name: 'QWERT'
                  }
              ],
-             version: '1.0.1',
+             version: '1.0.2',
              description: 'Shows avatars of typing users.',
          },
          changelog: [
              {
-                 title: 'Added',
-                 type: 'added',
-                 items: [
-                     'Option to show/hide typing user\'s status'
-                     ]
-             },
-             {
                 title: 'Fixed',
                 type: 'fixed',
                 items: [
-                    'Some CSS problems'
+                    'the crashing issue'
                     ]
             }
          ],
@@ -81,8 +74,9 @@
          class AvatarComponent extends React.Component {
             render() {
                 const {user, status} = this.props;
+                console.log(user);
                 return React.createElement(Avatar.default, {
-                src: user.avatarURL.startsWith("http") ? user.avatarURL : `https://discord.com/${user.avatarURL}`,
+                src: user.getAvatarURL(),
                 status: status,
                 size: Avatar.Sizes.SIZE_16,
                 onClick() {
