@@ -74,7 +74,6 @@
          class AvatarComponent extends React.Component {
             render() {
                 const {user, status} = this.props;
-                console.log(user);
                 return React.createElement(Avatar.default, {
                 src: user.getAvatarURL(),
                 status: status,
