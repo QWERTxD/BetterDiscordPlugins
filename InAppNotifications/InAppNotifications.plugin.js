@@ -20,7 +20,7 @@ const config = {
                 github_username: "QWERTxD"
             }
         ],
-        version: "0.0.61",
+        version: "0.0.62",
         description: "Displays notifications such as new messages, friends added in Discord.",
     },
     changelog: [
@@ -28,7 +28,7 @@ const config = {
             title: "Fixed",
             type: "fixed",
             items: [
-                "some bugs."
+                "users avatars will now be shown."
             ]
         }
     ],
@@ -664,7 +664,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             const time = isNaN(notiTime * 1000) ? 3000 : notiTime * 1000;
             QWERTLib.Toasts.create(children, {
                 icon: React.createElement(Avatar.default, {
-                    src: author.avatarURL,
+                    src: author.getAvatarURL(),
                     status: UserStatusStore.getStatus(author.id),
                     size: Avatar.Sizes.SIZE_32,
                     isMobile: UserStatusStore.isMobileOnline(author.id),
@@ -746,7 +746,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             user = UserStore.getUser(user.id);
             QWERTLib.Toasts.create([React.createElement(PersonAdd, {style: {height: "16px", width: "16px", color: colors.online, marginRight: "2px"}}), "Accepted your friend request."], {
                 author: user.tag,
-                avatar: user.avatarURL,
+                avatar: user.getAvatarURL(),
                 onClick: () => {
                     UserProfileModals.open(user.id);
                 }
