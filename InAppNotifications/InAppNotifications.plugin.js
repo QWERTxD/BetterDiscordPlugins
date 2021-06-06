@@ -20,7 +20,7 @@ const config = {
                 github_username: "QWERTxD"
             }
         ],
-        version: "0.0.62",
+        version: "0.0.61",
         description: "Displays notifications such as new messages, friends added in Discord.",
     },
     changelog: [
@@ -28,7 +28,7 @@ const config = {
             title: "Fixed",
             type: "fixed",
             items: [
-                "users avatars will now be shown."
+                "Plugin version on GitHub (no changes in the plugin)"
             ]
         }
     ],
