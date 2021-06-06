@@ -4,7 +4,7 @@ import { GuildMemberStore } from "@zlibrary/discord";
 
 const UserPopoutHeader = WebpackModules.find(m => m?.default?.displayName === "UserPopoutHeader");
 
-export default class HideUserAvatarsPerServer extends BasePlugin {
+export default class HidePerServerAvatars extends BasePlugin {
 	onStart() {
 		this.patch();
 	}
