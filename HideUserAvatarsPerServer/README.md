@@ -1,4 +1,4 @@
-# DisableServerAvatars
+# HideUserAvatarsPerServer
 
 > Shows the actual users avatars in chat instead of the server avatars
 <hr/>

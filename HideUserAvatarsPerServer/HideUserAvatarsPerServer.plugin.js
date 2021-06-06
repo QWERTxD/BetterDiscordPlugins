@@ -1,10 +1,10 @@
 /**
- * @name DisableServerAvatars
+ * @name HideUserAvatarsPerServer
  * @version 1.0.0
  * @description Shows the actual users avatars in chat instead of the server avatars
  * @author QWERT
- * @source https://github.com/QWERTxD/BetterDiscordPlugins/DisableServerAvatars
- * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/DisableServerAvatars/DisableServerAvatars.plugin.js
+ * @source https://github.com/QWERTxD/BetterDiscordPlugins/HideUserAvatarsPerServer
+ * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/HideUserAvatarsPerServer/HideUserAvatarsPerServer.plugin.js
  */
 /*@cc_on
 @if (@_jscript)
@@ -31,7 +31,7 @@
 /* Generated Code */
 const config = {
 	"info": {
-		"name": "DisableServerAvatars",
+		"name": "HideUserAvatarsPerServer",
 		"version": "1.0.0",
 		"description": "Shows the actual users avatars in chat instead of the server avatars",
 		"authors": [{
@@ -39,8 +39,8 @@ const config = {
 			"discord_id": "678556376640913408",
 			"github_username": "QWERTxD"
 		}],
-		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/DisableServerAvatars",
-		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/DisableServerAvatars/DisableServerAvatars.plugin.js"
+		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/HideUserAvatarsPerServer",
+		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/HideUserAvatarsPerServer/HideUserAvatarsPerServer.plugin.js"
 	},
 	"build": {
 		"zlibrary": true,
@@ -99,7 +99,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 		var __webpack_exports__ = {};
 		__webpack_require__.r(__webpack_exports__);
 		__webpack_require__.d(__webpack_exports__, {
-			default: () => DisableServerAvatars
+			default: () => HideUserAvatarsPerServer
 		});
 		const external_BasePlugin_namespaceObject = BasePlugin;
 		var external_BasePlugin_default = __webpack_require__.n(external_BasePlugin_namespaceObject);
@@ -109,7 +109,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			var _m$default;
 			return "UserPopoutHeader" === (null === m || void 0 === m ? void 0 : null === (_m$default = m.default) || void 0 === _m$default ? void 0 : _m$default.displayName);
 		}));
-		class DisableServerAvatars extends(external_BasePlugin_default()) {
+		class HideUserAvatarsPerServer extends(external_BasePlugin_default()) {
 			onStart() {
 				this.patch();
 			}
