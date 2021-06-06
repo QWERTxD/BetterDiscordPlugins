@@ -1,6 +1,6 @@
 {
 	"info": {
-		"name": "HideUserAvatarsPerServer",
+		"name": "HidePerServerAvatars",
 		"version": "1.0.0",
 		"description": "Shows the actual users avatars in chat instead of the server avatars",
 		"authors": [
@@ -10,8 +10,8 @@
 				"github_username": "QWERTxD"
 			}
 		],
-		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/HideUserAvatarsPerServer",
-		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/HideUserAvatarsPerServer/HideUserAvatarsPerServer.plugin.js"
+		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/HidePerServerAvatars",
+		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/HidePerServerAvatars/HidePerServerAvatars.plugin.js"
 	},
 	"build": {
 		"zlibrary": true,
