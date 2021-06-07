@@ -1,10 +1,10 @@
 /**
  * @name HidePerServerAvatars
  * @version 1.0.0
- * @description Shows the actual users avatars in chat instead of their per-server avatar
+ * @description Shows the actual users avatars in chat instead of the server avatars
  * @author QWERT
- * @source https://github.com/QWERTxD/BetterDiscordPlugins/HideUserAvatarsPerServer
- * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/HideUserAvatarsPerServer/HideUserAvatarsPerServer.plugin.js
+ * @source https://github.com/QWERTxD/BetterDiscordPlugins/HidePerServerAvatars
+ * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/HidePerServerAvatars/HidePerServerAvatars.plugin.js
  */
 /*@cc_on
 @if (@_jscript)
@@ -33,14 +33,14 @@ const config = {
 	"info": {
 		"name": "HidePerServerAvatars",
 		"version": "1.0.0",
-		"description": "Shows the actual users avatars in chat instead of their per-server avatar",
+		"description": "Shows the actual users avatars in chat instead of the server avatars",
 		"authors": [{
 			"name": "QWERT",
 			"discord_id": "678556376640913408",
 			"github_username": "QWERTxD"
 		}],
-		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/HideUserAvatarsPerServer",
-		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/HideUserAvatarsPerServer/HideUserAvatarsPerServer.plugin.js"
+		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/HidePerServerAvatars",
+		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/HidePerServerAvatars/HidePerServerAvatars.plugin.js"
 	},
 	"build": {
 		"zlibrary": true,
@@ -99,7 +99,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 		var __webpack_exports__ = {};
 		__webpack_require__.r(__webpack_exports__);
 		__webpack_require__.d(__webpack_exports__, {
-			default: () => HideUserAvatarsPerServer
+			default: () => HidePerServerAvatars
 		});
 		const external_BasePlugin_namespaceObject = BasePlugin;
 		var external_BasePlugin_default = __webpack_require__.n(external_BasePlugin_namespaceObject);
@@ -109,7 +109,8 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			var _m$default;
 			return "UserPopoutHeader" === (null === m || void 0 === m ? void 0 : null === (_m$default = m.default) || void 0 === _m$default ? void 0 : _m$default.displayName);
 		}));
-		class HideUserAvatarsPerServer extends(external_BasePlugin_default()) {
+		const Avatar = external_PluginApi_namespaceObject.WebpackModules.getByProps("AnimatedAvatar");
+		class HidePerServerAvatars extends(external_BasePlugin_default()) {
 			onStart() {
 				this.patch();
 			}
@@ -122,6 +123,10 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				}));
 				external_PluginApi_namespaceObject.Patcher.after(UserPopoutHeader, "default", ((_this, [props]) => {
 					if (null !== props && void 0 !== props && props.user) props.user.guildMemberAvatars = {};
+				}));
+				external_PluginApi_namespaceObject.Patcher.after(Avatar, "default", ((_this, [props]) => {
+					const match = props.src.match(/.*\/\/.*\/guilds\/\d{16,20}\/users\/\d{16,20}\/avatars\/.*/);
+					if (match) props.src = external_PluginApi_DiscordModules_namespaceObject.UserStore.getUser(match[0].split("/")[6]).getAvatarURL();
 				}));
 			}
 		}

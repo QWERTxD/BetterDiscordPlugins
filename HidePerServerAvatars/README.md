@@ -1,6 +1,6 @@
 # HidePerServerAvatars
 
-> Shows the actual users avatars in chat instead of their per-server avatar
+> Shows the actual users avatars in chat instead of the server avatars
 <hr/>
 
 <br/>

@@ -2,7 +2,7 @@
 	"info": {
 		"name": "HidePerServerAvatars",
 		"version": "1.0.0",
-		"description": "Shows the actual users avatars in chat instead of their per-server avatar",
+		"description": "Shows the actual users avatars in chat instead of the server avatars",
 		"authors": [
 			{
 				"name": "QWERT",
