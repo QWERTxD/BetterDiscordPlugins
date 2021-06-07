@@ -1,7 +1,7 @@
 /**
  * @name HidePerServerAvatars
  * @version 1.0.0
- * @description Shows the actual users avatars in chat instead of the server avatars
+ * @description Shows the actual users avatars in chat instead of their per-server avatar.
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/HidePerServerAvatars
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/HidePerServerAvatars/HidePerServerAvatars.plugin.js
@@ -33,7 +33,7 @@ const config = {
 	"info": {
 		"name": "HidePerServerAvatars",
 		"version": "1.0.0",
-		"description": "Shows the actual users avatars in chat instead of the server avatars",
+		"description": "Shows the actual users avatars in chat instead of their per-server avatar.",
 		"authors": [{
 			"name": "QWERT",
 			"discord_id": "678556376640913408",
