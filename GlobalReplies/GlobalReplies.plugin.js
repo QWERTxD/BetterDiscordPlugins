@@ -3,7 +3,7 @@
  * @version 1.0.0
  * @description Allows you to reply to messages outside of the channel they were sent in.
  * @author QWERT
- * @source https://github.com/QWERTxD/BetterDiscordPlugins/GlobalReplies
+ * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/GlobalReplies
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/GlobalReplies/GlobalReplies.plugin.js
  */
 /*@cc_on
