@@ -4,6 +4,7 @@
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/DndWhilePlaying/DndWhilePlaying.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/DndWhilePlaying
  * @invite zMnHFAKsu3
+ * @version 0.0.2
  */
 
  const request = require("request");

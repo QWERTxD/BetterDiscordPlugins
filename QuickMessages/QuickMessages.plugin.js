@@ -4,6 +4,7 @@
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages
  * @invite zMnHFAKsu3
+ * @version 1.2.0
  */
 
 const request = require("request");

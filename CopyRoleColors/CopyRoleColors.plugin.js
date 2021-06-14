@@ -3,7 +3,8 @@
     * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/CopyRoleColors/CopyRoleColors.plugin.js
     * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CopyRoleColors/CopyRoleColors.plugin.js
     * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/CopyRoleColors
-    */
+    * @version 0.0.2    
+*/
     
     const request = require("request");
     const fs = require("fs");
