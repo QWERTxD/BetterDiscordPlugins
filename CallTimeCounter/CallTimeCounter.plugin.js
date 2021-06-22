@@ -4,7 +4,7 @@
     * @description Shows how much time you are in a voice chat.
     * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CallTimeCounter/CallTimeCounter.plugin.js
     * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/CallTimeCounter
-    * @version 0.0.2
+    * @version 0.0.3
     */
 
 const request = require("request");
@@ -19,7 +19,7 @@ const config = {
                 name: "QWERT"
             }
         ],
-        version: "0.0.2",
+        version: "0.0.3",
         description: "Shows how much time you are in a voice chat.",
     },
     changelog: [
@@ -27,7 +27,7 @@ const config = {
             title: "Fixes",
             type: "fixed",
             items: [
-                "Timer resets when switching channels (was caused by SpotifyControls)"
+                "Timer continues to count after rejoining the call."
             ]
         }
     ],
@@ -104,6 +104,10 @@ module.exports = !global.ZeresPluginLibrary ? class {
             Dispatcher.unsubscribe('RTC_CONNECTION_STATE', this.connected);
             lastVoice = this.state.lastVoice;
             lastState = this.state;
+            setTimeout(() => {
+                lastVoice = null;
+                lastState = {};
+            }, 1000)
             clearInterval(this.interval);
         }
 
@@ -115,9 +119,6 @@ module.exports = !global.ZeresPluginLibrary ? class {
     class plugin extends Plugin {
         constructor() {
             super();
-            this.getSettingsPanel = () => {
-                return this.buildSettingsPanel().getElement();
-            };
         }
 
 
