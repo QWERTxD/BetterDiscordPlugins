@@ -386,13 +386,13 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				value: 1 << 9,
 				name: "Early Supporter",
 				icon: classes.profileBadgeEarlySupporter,
-				key: 11
+				key: 12
 			}, {
 				id: "dev",
 				value: 1 << 17,
 				name: "Early Verified Bot Developer",
 				icon: classes.profileBadgeVerifiedDeveloper,
-				key: 12
+				key: 11
 			}, {
 				id: "mod",
 				value: 1 << 18,
@@ -506,7 +506,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 								id: "assign-badge",
 								label: "Manage Badges",
 								children: [flags.map((flag => {
-									const [state, setState] = React.useState([false, true].includes(settings?.[props.user.id]?.[flag.id]) ? settings?.[props.user.id]?.[flag.id] : userBadges.includes(flag.key));
+									const [state, setState] = React.useState(settings?.[props.user.id]?.hasOwnProperty(flag.id) ? settings?.[props.user.id]?.[flag.id] : userBadges.includes(flag.key));
 									return React.createElement(MenuCheckboxItem, {
 										id: flag.id,
 										label: !["verifiedBot", "system"].includes(flag.id) ? React.createElement("div", {
@@ -564,6 +564,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 									action: () => {
 										delete settings[props.user.id];
 										this.saveSettings(settings);
+										settings[props.user.id] = {};
 										external_PluginApi_namespaceObject.Toasts.success(`Successfully cleared preferences for <strong>${props.user}</strong>!`);
 									}
 								}))]

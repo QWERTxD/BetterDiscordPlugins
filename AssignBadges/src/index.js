@@ -19,8 +19,8 @@ const flags = [
 	{ id: "verifiedBot", value: 1 << 16, name: "Verified Bot", key: -1 },
 	{ id: "bugHunter1", value: 1 << 3, name: "Bug Hunter Level 1", icon: classes.profileBadgeBugHunterLevel1, key: 9 },
 	{ id: "bugHunter2", value: 1 << 14, name: "Bug Hunter Level 2", icon: classes.profileBadgeBugHunterLevel2, key: 10 },
-	{ id: "earlySupporter", value: 1 << 9, name: "Early Supporter", icon: classes.profileBadgeEarlySupporter, key: 11 },
-	{ id: "dev", value: 1 << 17, name: "Early Verified Bot Developer", icon: classes.profileBadgeVerifiedDeveloper, key: 12 },
+	{ id: "earlySupporter", value: 1 << 9, name: "Early Supporter", icon: classes.profileBadgeEarlySupporter, key: 12 },
+	{ id: "dev", value: 1 << 17, name: "Early Verified Bot Developer", icon: classes.profileBadgeVerifiedDeveloper, key: 11 },
 	{ id: "mod", value: 1 << 18, name: "Discord Certified Moderator", icon: classes.profileBadgeCertifiedModerator, key: 13 },
 	{ id: "nitro", value: 0 << 0, name: "Nitro", icon: classes.profileBadgePremium, key: 1337 }
 	// { id: "system", value: 0, name: "System", icon: "", key: 1337 }, / seems to work randomally
@@ -94,7 +94,7 @@ export default class AssignBadges extends BasePlugin {
 					label="Manage Badges"
 					children={
 						[flags.map(flag => {
-							const [state, setState] = React.useState(([false, true].includes(settings?.[props.user.id]?.[flag.id]) ? settings?.[props.user.id]?.[flag.id] : userBadges.includes(flag.key)));
+							const [state, setState] = React.useState((settings?.[props.user.id]?.hasOwnProperty(flag.id) ? settings?.[props.user.id]?.[flag.id] : userBadges.includes(flag.key)));
 							return <MenuCheckboxItem
 							id={flag.id}
 							label={
@@ -164,6 +164,7 @@ export default class AssignBadges extends BasePlugin {
 							action={() => {
 								delete settings[props.user.id];
 								this.saveSettings(settings);
+								settings[props.user.id] = {};
 								Toasts.success(`Successfully cleared preferences for <strong>${props.user}</strong>!`)
 							}}
 						/>
