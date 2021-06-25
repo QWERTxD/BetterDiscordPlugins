@@ -2,40 +2,46 @@ import { Patcher, PluginUtilities, Utilities, WebpackModules, Toasts } from "@zl
 import BasePlugin from "@zlibrary/plugin";
 import { MenuGroup, MenuItem } from "@discord/contextmenu";
 import { UserStore } from "@zlibrary/discord";
-import { joinClassNames } from "@discord/utils";
-const { MenuCheckboxItem } = WebpackModules.getByProps("MenuRadioItem");
 
 const months = function(n) { return n * 2629800000 };
 const day = 86400000;
-const classes = WebpackModules.getByProps("profileBadgeHypesquad", "profileBadgeBugHunterLevel2", "profileBadgeEarlySupporter", "profileBadgeCertifiedModerator");
-const getFlags = WebpackModules.getByIndex(8874);
+const { MenuCheckboxItem } = WebpackModules.getByProps("MenuRadioItem");
+const classes = WebpackModules.getByProps("container", "profileBadge18", "profileBadge22", "profileBadge22")
+
+const getFlags = WebpackModules.find(m => {
+	let d = m.default.toString();
+	return ~d.indexOf("closeUserProfileModal") && ~d.indexOf("openPremiumSettings")
+});
+
+const User = WebpackModules.getByPrototypes("getAvatarURL");
+const BadgeList = WebpackModules.getByProps("BadgeSizes").default;
+
 const flags = [
-	{ id: "staff", value: 1 << 0, name: "Discord Staff", icon: classes.profileBadgeStaff, key: 0 },
-	{ id: "partner", value: 1 << 1, name: "Partnered Server Owner", icon: classes.profileBadgePartner, key: 1 },
-	{ id: "hypeSquad", value: 1 << 2, name: "HypeSquad Events", icon: classes.profileBadgeHypesquad, key: 2 },
-	{ id: "bravery", value: 1 << 6, name: "House Bravery", icon: classes.profileBadgeHypeSquadOnlineHouse1, key: 3 },
-	{ id: "brilliance", value: 1 << 7, name: "House Brilliance", icon: classes.profileBadgeHypeSquadOnlineHouse2, key: 5 },
-	{ id: "balance", value: 1 << 8, name: "House Balance", icon: classes.profileBadgeHypeSquadOnlineHouse3, key: 7 },
+	{ id: "staff", value: 1 << 0, name: "Discord Staff", key: 0 },
+	{ id: "partner", value: 1 << 1, name: "Partnered Server Owner", key: 1 },
+	{ id: "hypeSquad", value: 1 << 2, name: "HypeSquad Events", key: 2 },
+	{ id: "bravery", value: 1 << 6, name: "House Bravery", key: 3 },
+	{ id: "brilliance", value: 1 << 7, name: "House Brilliance", key: 5 },
+	{ id: "balance", value: 1 << 8, name: "House Balance", key: 7 },
 	{ id: "verifiedBot", value: 1 << 16, name: "Verified Bot", key: -1 },
-	{ id: "bugHunter1", value: 1 << 3, name: "Bug Hunter Level 1", icon: classes.profileBadgeBugHunterLevel1, key: 9 },
-	{ id: "bugHunter2", value: 1 << 14, name: "Bug Hunter Level 2", icon: classes.profileBadgeBugHunterLevel2, key: 10 },
-	{ id: "earlySupporter", value: 1 << 9, name: "Early Supporter", icon: classes.profileBadgeEarlySupporter, key: 12 },
-	{ id: "dev", value: 1 << 17, name: "Early Verified Bot Developer", icon: classes.profileBadgeVerifiedDeveloper, key: 11 },
-	{ id: "mod", value: 1 << 18, name: "Discord Certified Moderator", icon: classes.profileBadgeCertifiedModerator, key: 13 },
-	{ id: "nitro", value: 0 << 0, name: "Nitro", icon: classes.profileBadgePremium, key: 1337 }
-	// { id: "system", value: 0, name: "System", icon: "", key: 1337 }, / seems to work randomally
+	{ id: "bugHunter1", value: 1 << 3, name: "Bug Hunter Level 1", key: 9 },
+	{ id: "bugHunter2", value: 1 << 14, name: "Bug Hunter Level 2", key: 10 },
+	{ id: "earlySupporter", value: 1 << 9, name: "Early Supporter", key: 12 },
+	{ id: "dev", value: 1 << 17, name: "Early Verified Bot Developer", key: 11 },
+	{ id: "mod", value: 1 << 18, name: "Discord Certified Moderator", key: 13 },
+	{ id: "nitro", value: 0 << 0, name: "Nitro", key: 1337 }
 ]
 
 const boosts = [
-	{ id: "boost1", value: 0 << 0, name: "Booster - 1 Month", icon: classes.profileGuildSubscriberlvl1, time: 1 },
-	{ id: "boost2", value: 0 << 0, name: "Booster - 2 Months", icon: classes.profileGuildSubscriberlvl2, time: 2 },
-	{ id: "boost3", value: 0 << 0, name: "Booster - 3 Months", icon: classes.profileGuildSubscriberlvl3, time: 3 },
-	{ id: "boost4", value: 0 << 0, name: "Booster - 6 Months", icon: classes.profileGuildSubscriberlvl4, time: 4 },
-	{ id: "boost5", value: 0 << 0, name: "Booster - 9 Months", icon: classes.profileGuildSubscriberlvl5, time: 9 },
-	{ id: "boost6", value: 0 << 0, name: "Booster - 1 Year", icon: classes.profileGuildSubscriberlvl6, time: 12 },
-	{ id: "boost7", value: 0 << 0, name: "Booster - 1 Year and 3 Months", icon: classes.profileGuildSubscriberlvl7, time: 15 },
-	{ id: "boost8", value: 0 << 0, name: "Booster - 1 Year and 6 Months", icon: classes.profileGuildSubscriberlvl8, time: 18 },
-	{ id: "boost9", value: 0 << 0, name: "Booster - 2 Years", icon: classes.profileGuildSubscriberlvl9, time: 24 }
+	{ id: "boost1", value: 0 << 0, name: "Booster - 1 Month", time: 1 },
+	{ id: "boost2", value: 0 << 0, name: "Booster - 2 Months", time: 2 },
+	{ id: "boost3", value: 0 << 0, name: "Booster - 3 Months", time: 3 },
+	{ id: "boost4", value: 0 << 0, name: "Booster - 6 Months", time: 4 },
+	{ id: "boost5", value: 0 << 0, name: "Booster - 9 Months", time: 9 },
+	{ id: "boost6", value: 0 << 0, name: "Booster - 1 Year", time: 12 },
+	{ id: "boost7", value: 0 << 0, name: "Booster - 1 Year and 3 Months", time: 15 },
+	{ id: "boost8", value: 0 << 0, name: "Booster - 1 Year and 6 Months", time: 18 },
+	{ id: "boost9", value: 0 << 0, name: "Booster - 2 Years", time: 24 }
 ]
 
 const UserContextMenus = WebpackModules.findAll(m => m.default?.displayName.endsWith("UserContextMenu"));
@@ -99,14 +105,14 @@ export default class AssignBadges extends BasePlugin {
 							id={flag.id}
 							label={
 								!["verifiedBot", "system"].includes(flag.id) ? 
-								<div className={joinClassNames(classes.container, classes.badgeList, classes.colored)}>
-									<div className={joinClassNames(classes.profileBadge18, flag.icon || "")}/>
+								<div className={classes?.container}>
+								<BadgeList user={this.fakeUser(flag.value)} premiumSince={flag.id === "nitro" ? new Date(0) : null} size={2}/>
 									{flag.name}
 								</div>
 								:
-								<div className={classes.container}>
+								<div className={classes?.container}>
 									{<BotTag verified={true} type={flag.id === "system" ? 2 : 0}/>, flag.name}
-								</div>
+								</div> 
 							}
 							checked={state}
 							action={() => {
@@ -121,8 +127,10 @@ export default class AssignBadges extends BasePlugin {
 						<MenuItem
 						id="boosts"
 						label={
-						<div className={joinClassNames(classes.container, classes.badgeList, classes.colored)}>
-						<div className={joinClassNames(classes.profileBadge18, classes.profileGuildSubscriberlvl3)}/>Boosts</div>	
+							<div className={classes?.container}>
+							<BadgeList user={this.fakeUser(0)} premiumGuildSince={new Date(Date.now() - months(3) - day)} size={2}/>
+								Boosts
+							</div>
 						}>
 						{
 							[
@@ -130,8 +138,8 @@ export default class AssignBadges extends BasePlugin {
 								return <MenuItem
 								id={boost.id}
 								label={
-									<div className={joinClassNames(classes.container, classes.badgeList, classes.colored)}>
-									<div className={joinClassNames(classes.profileBadge18, boost.icon)}/>
+								<div className={classes?.container}>
+								<BadgeList user={this.fakeUser(0)} premiumGuildSince={new Date(Date.now() - months(boost.time) - day)} size={2}/>
 									{boost.name}
 								</div>
 								}
@@ -175,6 +183,14 @@ export default class AssignBadges extends BasePlugin {
 				)
 			})
 		}
+	}
+
+	fakeUser(flags) {
+		return new User({
+			id: 1337,
+			username: "Lana",
+			publicFlags: flags
+		})
 	}
 
 	getSettings() {
