@@ -323,7 +323,8 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			};
 			const day = 864e5;
 			const {
-				MenuCheckboxItem
+				MenuCheckboxItem,
+				MenuRadioItem
 			} = external_PluginApi_namespaceObject.WebpackModules.getByProps("MenuRadioItem");
 			const classes = external_PluginApi_namespaceObject.WebpackModules.getByProps("container", "profileBadge18", "profileBadge22", "profileBadge22");
 			const getFlags = external_PluginApi_namespaceObject.WebpackModules.find((m => {
@@ -332,71 +333,74 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			}));
 			const User = external_PluginApi_namespaceObject.WebpackModules.getByPrototypes("getAvatarURL");
 			const BadgeList = external_PluginApi_namespaceObject.WebpackModules.getByProps("BadgeSizes").default;
+			const {
+				BadgeKeys
+			} = external_PluginApi_namespaceObject.WebpackModules.getByProps("BadgeKeys");
 			const flags = [{
-				id: "staff",
+				id: "STAFF",
 				value: 1 << 0,
 				name: "Discord Staff",
-				key: 0
+				key: BadgeKeys["STAFF"]
 			}, {
-				id: "partner",
+				id: "PARTNER",
 				value: 1 << 1,
 				name: "Partnered Server Owner",
-				key: 1
+				key: BadgeKeys["PARTNER"]
 			}, {
-				id: "hypeSquad",
+				id: "HYPESQUAD",
 				value: 1 << 2,
 				name: "HypeSquad Events",
-				key: 2
+				key: BadgeKeys["HYPESQUAD"]
 			}, {
-				id: "bravery",
+				id: "HYPESQUAD_ONLINE_HOUSE_1",
 				value: 1 << 6,
 				name: "House Bravery",
-				key: 3
+				key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_1"]
 			}, {
-				id: "brilliance",
+				id: "HYPESQUAD_ONLINE_HOUSE_2",
 				value: 1 << 7,
 				name: "House Brilliance",
-				key: 5
+				key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_2"]
 			}, {
-				id: "balance",
+				id: "HYPESQUAD_ONLINE_HOUSE_3",
 				value: 1 << 8,
 				name: "House Balance",
-				key: 7
+				key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_3"]
 			}, {
-				id: "verifiedBot",
+				id: "EARLY_VERIFIED_BOT",
 				value: 1 << 16,
 				name: "Verified Bot",
-				key: -1
+				key: 1337
 			}, {
-				id: "bugHunter1",
+				id: "BUG_HUNTER_LEVEL_1",
 				value: 1 << 3,
 				name: "Bug Hunter Level 1",
-				key: 9
+				key: BadgeKeys["BUG_HUNTER_LEVEL_1"]
 			}, {
-				id: "bugHunter2",
+				id: "BUG_HUNTER_LEVEL_2",
 				value: 1 << 14,
 				name: "Bug Hunter Level 2",
-				key: 10
+				key: BadgeKeys["BUG_HUNTER_LEVEL_2"]
 			}, {
-				id: "earlySupporter",
+				id: "EARLY_SUPPORTER",
 				value: 1 << 9,
 				name: "Early Supporter",
-				key: 12
+				key: BadgeKeys["EARLY_SUPPORTER"]
 			}, {
-				id: "dev",
+				id: "EARLY_VERIFIED_DEVELOPER",
 				value: 1 << 17,
 				name: "Early Verified Bot Developer",
-				key: 11
+				key: BadgeKeys["EARLY_VERIFIED_DEVELOPER"]
 			}, {
-				id: "mod",
+				id: "CERTIFIED_MODERATOR",
 				value: 1 << 18,
 				name: "Discord Certified Moderator",
-				key: 13
+				key: BadgeKeys["CERTIFIED_MODERATOR"]
 			}, {
-				id: "nitro",
+				id: "PREMIUM",
 				value: 0 << 0,
 				name: "Nitro",
-				key: 1337
+				key: BadgeKeys["PREMIUM"]
 			}];
 			const boosts = [{
 				id: "boost1",
@@ -445,7 +449,9 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				time: 24
 			}];
 			const UserContextMenus = external_PluginApi_namespaceObject.WebpackModules.findAll((m => m.default?.displayName.endsWith("UserContextMenu")));
+			const UserGenericContextMenu = external_PluginApi_namespaceObject.WebpackModules.find((m => "UserGenericContextMenu" === m.default?.displayName));
 			const BotTag = external_PluginApi_namespaceObject.WebpackModules.getByDisplayName("BotTag");
+			UserContextMenus.push(UserGenericContextMenu);
 			class AssignBadges extends(external_BasePlugin_default()) {
 				onStart() {
 					this.patchUserContextMenus();
@@ -489,20 +495,19 @@ function buildPlugin([BasePlugin, PluginApi]) {
 								id: "assign-badge",
 								label: "Manage Badges",
 								children: [flags.map((flag => {
-									const [state, setState] = React.useState(settings?.[props.user.id]?.hasOwnProperty(flag.id) ? settings?.[props.user.id]?.[flag.id] : userBadges.includes(flag.key));
+									const [state, setState] = React.useState(settings?.[props.user.id]?.hasOwnProperty(flag.id) ? settings?.[props.user.id]?.[flag.id] : ~userBadges.indexOf(flag.key));
 									return React.createElement(MenuCheckboxItem, {
 										id: flag.id,
-										label: !["verifiedBot", "system"].includes(flag.id) ? React.createElement("div", {
+										label: "EARLY_VERIFIED_BOT" !== flag.id ? React.createElement("div", {
 											className: classes?.container
 										}, React.createElement(BadgeList, {
 											user: this.fakeUser(flag.value),
-											premiumSince: "nitro" === flag.id ? new Date(0) : null,
+											premiumSince: "PREMIUM" === flag.id ? new Date(0) : null,
 											size: 2
 										}), flag.name) : React.createElement("div", {
 											className: classes?.container
 										}, (React.createElement(BotTag, {
-											verified: true,
-											type: "system" === flag.id ? 2 : 0
+											verified: true
 										}), flag.name)),
 										checked: state,
 										action: () => {
@@ -522,8 +527,9 @@ function buildPlugin([BasePlugin, PluginApi]) {
 										premiumGuildSince: new Date(Date.now() - months(3) - day),
 										size: 2
 									}), "Boosts")
-								}, [boosts.map((boost => React.createElement(contextmenu_namespaceObject.MenuItem, {
+								}, [boosts.map((boost => React.createElement(MenuRadioItem, {
 									id: boost.id,
+									checked: settings[props.user.id]?.boost === boost.id,
 									label: React.createElement("div", {
 										className: classes?.container
 									}, React.createElement(BadgeList, {
@@ -537,8 +543,8 @@ function buildPlugin([BasePlugin, PluginApi]) {
 										settings[props.user.id] = user;
 										this.saveSettings(settings);
 									}
-								}))), React.createElement(contextmenu_namespaceObject.MenuItem, {
-									label: "Reset Boosts",
+								}))), React.createElement(contextmenu_namespaceObject.MenuGroup, null, React.createElement(contextmenu_namespaceObject.MenuItem, {
+									label: "Reset Boost Preferences",
 									id: "reset-boosts",
 									color: "colorDanger",
 									action: () => {
@@ -546,7 +552,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 										this.saveSettings(settings);
 										external_PluginApi_namespaceObject.Toasts.success(`Successfully cleared boost preferences for <strong>${props.user}</strong>!`);
 									}
-								})]), React.createElement(contextmenu_namespaceObject.MenuGroup, null, React.createElement(contextmenu_namespaceObject.MenuItem, {
+								}))]), React.createElement(contextmenu_namespaceObject.MenuGroup, null, React.createElement(contextmenu_namespaceObject.MenuItem, {
 									color: "colorDanger",
 									label: "Reset Preferences",
 									id: "reset",

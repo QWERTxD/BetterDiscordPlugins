@@ -5,7 +5,7 @@ import { UserStore } from "@zlibrary/discord";
 
 const months = function(n) { return n * 2629800000 };
 const day = 86400000;
-const { MenuCheckboxItem } = WebpackModules.getByProps("MenuRadioItem");
+const { MenuCheckboxItem, MenuRadioItem } = WebpackModules.getByProps("MenuRadioItem");
 const classes = WebpackModules.getByProps("container", "profileBadge18", "profileBadge22", "profileBadge22")
 
 const getFlags = WebpackModules.find(m => {
@@ -15,21 +15,22 @@ const getFlags = WebpackModules.find(m => {
 
 const User = WebpackModules.getByPrototypes("getAvatarURL");
 const BadgeList = WebpackModules.getByProps("BadgeSizes").default;
+const { BadgeKeys } = WebpackModules.getByProps("BadgeKeys");
 
 const flags = [
-	{ id: "staff", value: 1 << 0, name: "Discord Staff", key: 0 },
-	{ id: "partner", value: 1 << 1, name: "Partnered Server Owner", key: 1 },
-	{ id: "hypeSquad", value: 1 << 2, name: "HypeSquad Events", key: 2 },
-	{ id: "bravery", value: 1 << 6, name: "House Bravery", key: 3 },
-	{ id: "brilliance", value: 1 << 7, name: "House Brilliance", key: 5 },
-	{ id: "balance", value: 1 << 8, name: "House Balance", key: 7 },
-	{ id: "verifiedBot", value: 1 << 16, name: "Verified Bot", key: -1 },
-	{ id: "bugHunter1", value: 1 << 3, name: "Bug Hunter Level 1", key: 9 },
-	{ id: "bugHunter2", value: 1 << 14, name: "Bug Hunter Level 2", key: 10 },
-	{ id: "earlySupporter", value: 1 << 9, name: "Early Supporter", key: 12 },
-	{ id: "dev", value: 1 << 17, name: "Early Verified Bot Developer", key: 11 },
-	{ id: "mod", value: 1 << 18, name: "Discord Certified Moderator", key: 13 },
-	{ id: "nitro", value: 0 << 0, name: "Nitro", key: 1337 }
+	{ id: "STAFF", value: 1 << 0, name: "Discord Staff", key: BadgeKeys["STAFF"] },
+	{ id: "PARTNER", value: 1 << 1, name: "Partnered Server Owner", key: BadgeKeys["PARTNER"] },
+	{ id: "HYPESQUAD", value: 1 << 2, name: "HypeSquad Events", key: BadgeKeys["HYPESQUAD"] },
+	{ id: "HYPESQUAD_ONLINE_HOUSE_1", value: 1 << 6, name: "House Bravery", key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_1"] },
+	{ id: "HYPESQUAD_ONLINE_HOUSE_2", value: 1 << 7, name: "House Brilliance", key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_2"] },
+	{ id: "HYPESQUAD_ONLINE_HOUSE_3", value: 1 << 8, name: "House Balance", key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_3"] },
+	{ id: "EARLY_VERIFIED_BOT", value: 1 << 16, name: "Verified Bot", key: 1337 },
+	{ id: "BUG_HUNTER_LEVEL_1", value: 1 << 3, name: "Bug Hunter Level 1", key: BadgeKeys["BUG_HUNTER_LEVEL_1"] },
+	{ id: "BUG_HUNTER_LEVEL_2", value: 1 << 14, name: "Bug Hunter Level 2", key: BadgeKeys["BUG_HUNTER_LEVEL_2"] },
+	{ id: "EARLY_SUPPORTER", value: 1 << 9, name: "Early Supporter", key: BadgeKeys["EARLY_SUPPORTER"] },
+	{ id: "EARLY_VERIFIED_DEVELOPER", value: 1 << 17, name: "Early Verified Bot Developer", key: BadgeKeys["EARLY_VERIFIED_DEVELOPER"] },
+	{ id: "CERTIFIED_MODERATOR", value: 1 << 18, name: "Discord Certified Moderator", key: BadgeKeys["CERTIFIED_MODERATOR"] },
+	{ id: "PREMIUM", value: 0 << 0, name: "Nitro", key: BadgeKeys["PREMIUM"] }
 ]
 
 const boosts = [
@@ -45,7 +46,9 @@ const boosts = [
 ]
 
 const UserContextMenus = WebpackModules.findAll(m => m.default?.displayName.endsWith("UserContextMenu"));
-const BotTag = WebpackModules.getByDisplayName("BotTag")
+const UserGenericContextMenu = WebpackModules.find(m => m.default?.displayName === "UserGenericContextMenu")
+const BotTag = WebpackModules.getByDisplayName("BotTag");
+UserContextMenus.push(UserGenericContextMenu);
 
 export default class AssignBadges extends BasePlugin {
 	onStart() {
@@ -100,18 +103,18 @@ export default class AssignBadges extends BasePlugin {
 					label="Manage Badges"
 					children={
 						[flags.map(flag => {
-							const [state, setState] = React.useState((settings?.[props.user.id]?.hasOwnProperty(flag.id) ? settings?.[props.user.id]?.[flag.id] : userBadges.includes(flag.key)));
+							const [state, setState] = React.useState((settings?.[props.user.id]?.hasOwnProperty(flag.id) ? settings?.[props.user.id]?.[flag.id] : ~userBadges.indexOf(flag.key)));
 							return <MenuCheckboxItem
 							id={flag.id}
 							label={
-								!["verifiedBot", "system"].includes(flag.id) ? 
+								flag.id !== "EARLY_VERIFIED_BOT" ? 
 								<div className={classes?.container}>
-								<BadgeList user={this.fakeUser(flag.value)} premiumSince={flag.id === "nitro" ? new Date(0) : null} size={2}/>
+								<BadgeList user={this.fakeUser(flag.value)} premiumSince={flag.id === "PREMIUM" ? new Date(0) : null} size={2}/>
 									{flag.name}
 								</div>
 								:
 								<div className={classes?.container}>
-									{<BotTag verified={true} type={flag.id === "system" ? 2 : 0}/>, flag.name}
+									{<BotTag verified={true}/>, flag.name}
 								</div> 
 							}
 							checked={state}
@@ -135,32 +138,35 @@ export default class AssignBadges extends BasePlugin {
 						{
 							[
 								boosts.map(boost => {
-								return <MenuItem
-								id={boost.id}
-								label={
-								<div className={classes?.container}>
-								<BadgeList user={this.fakeUser(0)} premiumGuildSince={new Date(Date.now() - months(boost.time) - day)} size={2}/>
-									{boost.name}
-								</div>
-								}
-								action={() => {
-									const user = settings[props.user.id] || {};
-									user.boost = boost.id;
-									settings[props.user.id] = user;
-									this.saveSettings(settings);
+									return <MenuRadioItem
+									id={boost.id}
+									checked={settings[props.user.id]?.boost === boost.id}
+									label={
+									<div className={classes?.container}>
+									<BadgeList user={this.fakeUser(0)} premiumGuildSince={new Date(Date.now() - months(boost.time) - day)} size={2}/>
+										{boost.name}
+									</div>
+									}
+									action={() => {
+										const user = settings[props.user.id] || {};
+										user.boost = boost.id;
+										settings[props.user.id] = user;
+										this.saveSettings(settings);
 								}}
 							/>
 							}),
-							<MenuItem
-							label="Reset Boosts"
-							id="reset-boosts"
-							color="colorDanger"
-							action={() => {
-								delete settings[props.user.id]?.boost;
-								this.saveSettings(settings);
-								Toasts.success(`Successfully cleared boost preferences for <strong>${props.user}</strong>!`)
-							}}
-							/>
+							<MenuGroup>
+								<MenuItem
+									label="Reset Boost Preferences"
+									id="reset-boosts"
+									color="colorDanger"
+									action={() => {
+										delete settings[props.user.id]?.boost;
+										this.saveSettings(settings);
+										Toasts.success(`Successfully cleared boost preferences for <strong>${props.user}</strong>!`)
+									}}
+								/>					
+							</MenuGroup>
 						]
 						}
 						</MenuItem>,
