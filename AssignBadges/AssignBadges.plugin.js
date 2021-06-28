@@ -1,10 +1,10 @@
 /**
  * @name AssignBadges
- * @version 1.0.0
+ * @version 1.0.1
  * @description Allows you to locally assign badges to users through the user context menu.
  * @author QWERT
- * @source https://github.com/QWERTxD/BetterDiscordPlugins/AssignBadges
- * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/AssignBadges/AssignBadges.plugin.js
+ * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/AssignBadges
+ * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/AssignBadges/AssignBadges.plugin.js
  */
 /*@cc_on
 @if (@_jscript)
@@ -34,15 +34,15 @@ Are you sure it's even installed?", 0, "Can't install myself", 0x10);
 const config = {
 	"info": {
 		"name": "AssignBadges",
-		"version": "1.0.0",
+		"version": "1.0.1",
 		"description": "Allows you to locally assign badges to users through the user context menu.",
 		"authors": [{
 			"name": "QWERT",
 			"discord_id": "678556376640913408",
 			"github_username": "QWERTxD"
 		}],
-		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/AssignBadges",
-		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/AssignBadges/AssignBadges.plugin.js"
+		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/AssignBadges",
+		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/AssignBadges/AssignBadges.plugin.js"
 	},
 	"build": {
 		"zlibrary": true,
@@ -56,7 +56,23 @@ const config = {
 			"source": true,
 			"readme": true
 		}
-	}
+	},
+	"changelog": [{
+			"type": "fixed",
+			"title": "Fixes",
+			"items": [
+				"Nitro will now be added to users when checked",
+				"Verified Bot Badge will now work properly and be shown"
+			]
+		},
+		{
+			"type": "added",
+			"title": "New Stuff",
+			"items": [
+				"Verified Bot Badge can be assigned to users"
+			]
+		}
+	]
 };
 function buildPlugin([BasePlugin, PluginApi]) {
 	const module = {
@@ -336,69 +352,72 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			const {
 				BadgeKeys
 			} = external_PluginApi_namespaceObject.WebpackModules.getByProps("BadgeKeys");
+			const {
+				UserFlags
+			} = external_PluginApi_namespaceObject.WebpackModules.getByProps("UserFlags");
 			const flags = [{
 				id: "STAFF",
-				value: 1 << 0,
+				value: UserFlags["STAFF"],
 				name: "Discord Staff",
 				key: BadgeKeys["STAFF"]
 			}, {
 				id: "PARTNER",
-				value: 1 << 1,
+				value: UserFlags["PARTNER"],
 				name: "Partnered Server Owner",
 				key: BadgeKeys["PARTNER"]
 			}, {
 				id: "HYPESQUAD",
-				value: 1 << 2,
+				value: UserFlags["HYPESQUAD"],
 				name: "HypeSquad Events",
 				key: BadgeKeys["HYPESQUAD"]
 			}, {
 				id: "HYPESQUAD_ONLINE_HOUSE_1",
-				value: 1 << 6,
+				value: UserFlags["HYPESQUAD_ONLINE_HOUSE_1"],
 				name: "House Bravery",
 				key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_1"]
 			}, {
 				id: "HYPESQUAD_ONLINE_HOUSE_2",
-				value: 1 << 7,
+				value: UserFlags["HYPESQUAD_ONLINE_HOUSE_2"],
 				name: "House Brilliance",
 				key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_2"]
 			}, {
 				id: "HYPESQUAD_ONLINE_HOUSE_3",
-				value: 1 << 8,
+				value: UserFlags["HYPESQUAD_ONLINE_HOUSE_3"],
 				name: "House Balance",
 				key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_3"]
 			}, {
 				id: "EARLY_VERIFIED_BOT",
-				value: 1 << 16,
+				value: UserFlags["VERIFIED_BOT"],
 				name: "Verified Bot",
-				key: 1337
+				key: BadgeKeys["VERIFIED_BOT"]
 			}, {
 				id: "BUG_HUNTER_LEVEL_1",
-				value: 1 << 3,
+				value: UserFlags["BUG_HUNTER_LEVEL_1"],
 				name: "Bug Hunter Level 1",
 				key: BadgeKeys["BUG_HUNTER_LEVEL_1"]
 			}, {
 				id: "BUG_HUNTER_LEVEL_2",
-				value: 1 << 14,
+				value: UserFlags["BUG_HUNTER_LEVEL_2"],
 				name: "Bug Hunter Level 2",
 				key: BadgeKeys["BUG_HUNTER_LEVEL_2"]
 			}, {
 				id: "EARLY_SUPPORTER",
-				value: 1 << 9,
+				value: UserFlags["PREMIUM_EARLY_SUPPORTER"],
 				name: "Early Supporter",
 				key: BadgeKeys["EARLY_SUPPORTER"]
 			}, {
 				id: "EARLY_VERIFIED_DEVELOPER",
-				value: 1 << 17,
+				value: UserFlags["VERIFIED_DEVELOPER"],
 				name: "Early Verified Bot Developer",
 				key: BadgeKeys["EARLY_VERIFIED_DEVELOPER"]
 			}, {
 				id: "CERTIFIED_MODERATOR",
-				value: 1 << 18,
+				value: UserFlags["CERTIFIED_MODERATOR"],
 				name: "Discord Certified Moderator",
 				key: BadgeKeys["CERTIFIED_MODERATOR"]
 			}, {
 				id: "PREMIUM",
-				value: 0 << 0,
+				value: 0,
 				name: "Nitro",
 				key: BadgeKeys["PREMIUM"]
 			}];
@@ -465,7 +484,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					external_PluginApi_namespaceObject.Patcher.before(getFlags, "default", ((_this, [props]) => {
 						const settings = this.getSettings()?.[props.user.id];
 						if (settings)
-							if (true === settings?.nitro) props.premiumSince = new Date(0);
+							if (true === settings?.PREMIUM) props.premiumSince = new Date(0);
 						if (settings?.boost) {
 							const boost = boosts[boosts.findIndex((e => e.id === settings.boost))];
 							props.premiumGuildSince = new Date(Date.now() - months(boost.time) - day);
@@ -475,10 +494,12 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				patchUserStore() {
 					external_PluginApi_namespaceObject.Patcher.after(external_PluginApi_DiscordModules_namespaceObject.UserStore, "getUser", ((_this, [id], ret) => {
 						const settings = this.getSettings();
-						if (settings[id]) {
+						const userSettings = settings?.[id];
+						if (userSettings) {
 							const userSettings = settings[id];
 							const newFlags = Object.keys(userSettings).filter((e => userSettings[e])).map((e => flags[flags.findIndex((f => f.id === e))])).filter((e => e)).map((e => e.value)).reduce(((a, b) => a + b), 0);
 							ret.publicFlags = newFlags;
+							if (true === userSettings?.EARLY_VERIFIED_BOT) ret.bot = true;
 						}
 					}));
 				}

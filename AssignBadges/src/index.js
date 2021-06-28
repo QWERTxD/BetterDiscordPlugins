@@ -16,21 +16,22 @@ const getFlags = WebpackModules.find(m => {
 const User = WebpackModules.getByPrototypes("getAvatarURL");
 const BadgeList = WebpackModules.getByProps("BadgeSizes").default;
 const { BadgeKeys } = WebpackModules.getByProps("BadgeKeys");
+const { UserFlags } = WebpackModules.getByProps("UserFlags");
 
 const flags = [
-	{ id: "STAFF", value: 1 << 0, name: "Discord Staff", key: BadgeKeys["STAFF"] },
-	{ id: "PARTNER", value: 1 << 1, name: "Partnered Server Owner", key: BadgeKeys["PARTNER"] },
-	{ id: "HYPESQUAD", value: 1 << 2, name: "HypeSquad Events", key: BadgeKeys["HYPESQUAD"] },
-	{ id: "HYPESQUAD_ONLINE_HOUSE_1", value: 1 << 6, name: "House Bravery", key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_1"] },
-	{ id: "HYPESQUAD_ONLINE_HOUSE_2", value: 1 << 7, name: "House Brilliance", key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_2"] },
-	{ id: "HYPESQUAD_ONLINE_HOUSE_3", value: 1 << 8, name: "House Balance", key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_3"] },
-	{ id: "EARLY_VERIFIED_BOT", value: 1 << 16, name: "Verified Bot", key: 1337 },
-	{ id: "BUG_HUNTER_LEVEL_1", value: 1 << 3, name: "Bug Hunter Level 1", key: BadgeKeys["BUG_HUNTER_LEVEL_1"] },
-	{ id: "BUG_HUNTER_LEVEL_2", value: 1 << 14, name: "Bug Hunter Level 2", key: BadgeKeys["BUG_HUNTER_LEVEL_2"] },
-	{ id: "EARLY_SUPPORTER", value: 1 << 9, name: "Early Supporter", key: BadgeKeys["EARLY_SUPPORTER"] },
-	{ id: "EARLY_VERIFIED_DEVELOPER", value: 1 << 17, name: "Early Verified Bot Developer", key: BadgeKeys["EARLY_VERIFIED_DEVELOPER"] },
-	{ id: "CERTIFIED_MODERATOR", value: 1 << 18, name: "Discord Certified Moderator", key: BadgeKeys["CERTIFIED_MODERATOR"] },
-	{ id: "PREMIUM", value: 0 << 0, name: "Nitro", key: BadgeKeys["PREMIUM"] }
+	{ id: "STAFF", value: UserFlags["STAFF"], name: "Discord Staff", key: BadgeKeys["STAFF"] },
+	{ id: "PARTNER", value: UserFlags["PARTNER"], name: "Partnered Server Owner", key: BadgeKeys["PARTNER"] },
+	{ id: "HYPESQUAD", value: UserFlags["HYPESQUAD"], name: "HypeSquad Events", key: BadgeKeys["HYPESQUAD"] },
+	{ id: "HYPESQUAD_ONLINE_HOUSE_1", value: UserFlags["HYPESQUAD_ONLINE_HOUSE_1"], name: "House Bravery", key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_1"] },
+	{ id: "HYPESQUAD_ONLINE_HOUSE_2", value: UserFlags["HYPESQUAD_ONLINE_HOUSE_2"], name: "House Brilliance", key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_2"] },
+	{ id: "HYPESQUAD_ONLINE_HOUSE_3", value: UserFlags["HYPESQUAD_ONLINE_HOUSE_3"], name: "House Balance", key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_3"] },
+	{ id: "EARLY_VERIFIED_BOT", value: UserFlags["VERIFIED_BOT"], name: "Verified Bot", key: BadgeKeys["VERIFIED_BOT"] },
+	{ id: "BUG_HUNTER_LEVEL_1", value: UserFlags["BUG_HUNTER_LEVEL_1"], name: "Bug Hunter Level 1", key: BadgeKeys["BUG_HUNTER_LEVEL_1"] },
+	{ id: "BUG_HUNTER_LEVEL_2", value: UserFlags["BUG_HUNTER_LEVEL_2"], name: "Bug Hunter Level 2", key: BadgeKeys["BUG_HUNTER_LEVEL_2"] },
+	{ id: "EARLY_SUPPORTER", value: UserFlags["PREMIUM_EARLY_SUPPORTER"], name: "Early Supporter", key: BadgeKeys["EARLY_SUPPORTER"] },
+	{ id: "EARLY_VERIFIED_DEVELOPER", value: UserFlags["VERIFIED_DEVELOPER"], name: "Early Verified Bot Developer", key: BadgeKeys["EARLY_VERIFIED_DEVELOPER"] },
+	{ id: "CERTIFIED_MODERATOR", value: UserFlags["CERTIFIED_MODERATOR"], name: "Discord Certified Moderator", key: BadgeKeys["CERTIFIED_MODERATOR"] },
+	{ id: "PREMIUM", value: 0, name: "Nitro", key: BadgeKeys["PREMIUM"] }
 ]
 
 const boosts = [
@@ -65,7 +66,7 @@ export default class AssignBadges extends BasePlugin {
 		Patcher.before(getFlags, "default", (_this, [props], ret) => {
 			const settings = this.getSettings()?.[props.user.id];
 			if(settings) {
-				if(settings?.nitro === true) {
+				if(settings?.PREMIUM === true) {
 					props.premiumSince = new Date(0);
 				}
 			}
@@ -80,10 +81,15 @@ export default class AssignBadges extends BasePlugin {
 	patchUserStore() {
 		Patcher.after(UserStore, "getUser", (_this, [id], ret) => {
 			const settings = this.getSettings();
-			if(settings[id]) {
+			const userSettings = settings?.[id];
+			if(userSettings) {
 				const userSettings = settings[id];
 				const newFlags = Object.keys(userSettings).filter(e => userSettings[e]).map(e => flags[flags.findIndex(f => f.id === e)]).filter(e => e).map(e => e.value).reduce((a, b) => a + b, 0);
 				ret.publicFlags = newFlags;
+
+				if(userSettings?.EARLY_VERIFIED_BOT === true) {
+					ret.bot = true;
+				}
 			}
 		})
 	}
