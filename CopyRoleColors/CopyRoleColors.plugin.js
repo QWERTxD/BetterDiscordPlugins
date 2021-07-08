@@ -6,27 +6,27 @@
     * @version 0.0.2    
 */
     
-    const request = require("request");
-    const fs = require("fs");
-    const path = require("path");
+    const request = require('request');
+    const fs = require('fs');
+    const path = require('path');
     
     const config = {
         info: {
-            name: "CopyRoleColors",
+            name: 'CopyRoleColors',
             authors: [
                 {
-                    name: "QWERT"
+                    name: 'QWERT'
                 }
             ],
-            version: "0.0.2",
-            description: "Adds option to copy role color in the role context menu.",
+            version: '0.0.2',
+            description: 'Adds option to copy role color in the role context menu.',
         },
         changelog: [
             {
-                title: "Fixed",
-                type: "fixed",
+                title: 'Fixed',
+                type: 'fixed',
                 items: [
-                    "Fixed default role color (from to #e1e1e1 #b9bbbe)"
+                    'Fixed default role color (from to #e1e1e1 #b9bbbe)'
                     ]
             }
         ],
@@ -39,16 +39,16 @@
         }
     
         load() {
-            BdApi.showConfirmationModal("Library plugin is needed",
+            BdApi.showConfirmationModal('Library plugin is needed',
                 `The library plugin needed for AQWERT'sPluginBuilder is missing. Please click Download Now to install it.`, {
-                    confirmText: "Download",
-                    cancelText: "Cancel",
+                    confirmText: 'Download',
+                    cancelText: 'Cancel',
                     onConfirm: () => {
-                        request.get("https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js", (error, response, body) => {
+                        request.get('https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js', (error, response, body) => {
                             if (error)
-                                return electron.shell.openExternal("https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js");
+                                return electron.shell.openExternal('https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js');
     
-                            fs.writeFileSync(path.join(BdApi.Plugins.folder, "0PluginLibrary.plugin.js"), body);
+                            fs.writeFileSync(path.join(BdApi.Plugins.folder, '0PluginLibrary.plugin.js'), body);
                         });
                     }
                 });
@@ -75,17 +75,17 @@
             }
 
             patch() {
-                Patcher.after(MemberRole, "render", (_, [props], ret) => {
+                Patcher.after(MemberRole, 'render', (_, [props], ret) => {
                     const newContextMenu = DiscordContextMenu.buildMenu([
                         {
-                            label: "Copy Role Color",
+                            label: 'Copy Role Color',
                             action: _ => {
-                                ElectronModule.copy(props.role.colorString || "#b9bbbe");
+                                ElectronModule.copy(props.role.colorString || '#b9bbbe');
                                 Toasts.success(`Successfully copied role color for <strong>${props.role.name}</strong>!`)
                             }
                         },
                         {
-                            type: "separator"
+                            type: 'separator'
                         },
                         {
                             label: Strings.COPY_ID,
