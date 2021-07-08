@@ -10,8 +10,8 @@
 				"github_username": "QWERTxD"
 			}
 		],
-		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/tree/undefined/QuickToggler",
-		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/QuickToggler/QuickToggler.plugin.js"
+		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickToggler",
+		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickToggler/QuickToggler.plugin.js"
 	},
 	"build": {
 		"zlibrary": true,

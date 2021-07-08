@@ -24,7 +24,7 @@ export default class QuickToggler extends BasePlugin {
 			keys = {};
 			ModalStack.push(() => <QuickTogglerComponent/>);
 		} else {
-		  setTimeout(() => keys = {}, 400)
+		  setTimeout(() => keys = {}, 300)
 		}
 		keys[e.key] = false;
 	}

@@ -3,8 +3,8 @@
  * @version 1.0.0
  * @description Allows you to open a toggle-able addon search with a keybind (default keybind: CTRL+D)
  * @author QWERT
- * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/undefined/QuickToggler
- * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/QuickToggler/QuickToggler.plugin.js
+ * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickToggler
+ * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickToggler/QuickToggler.plugin.js
  */
 /*@cc_on
 @if (@_jscript)
@@ -595,7 +595,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					if (keybinds.every((key => true === keys[key]))) {
 						keys = {};
 						external_PluginApi_DiscordModules_namespaceObject.ModalStack.push((() => plugins_QuickToggler_React.createElement(QuickToggler_QuickToggler, null)));
-					} else setTimeout((() => keys = {}), 400);
+					} else setTimeout((() => keys = {}), 300);
 					keys[e.key] = false;
 				}
 				onStop() {
