@@ -1,6 +1,6 @@
 # QuickToggler
 
-> Allows you to open a toggle-able addon search with a keybind
+> Allows you to open a toggle-able addon search with a keybind (default keybind: CTRL+D)
 <hr/>
 
 ## Addon Modal
