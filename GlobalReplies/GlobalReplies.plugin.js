@@ -238,6 +238,9 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					}), React.createElement(Variable, {
 						title: "{{channel}}",
 						desc: "Being replaced with the channel of the replied message"
+					}), React.createElement(Variable, {
+						title: "{{message}}",
+						desc: "Will be replaced with the user message"
 					})]
 				})];
 			}
@@ -295,6 +298,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 											messageLink: `https://discord.com/channels/${server.id}/${channel.id}/${props.message.id}`,
 											author: `<@${props.message.author.id}>`,
 											authorTag: props.message.author.tag,
+											message: props.message.content,
 											channel: `<#${channel.id}>`
 										})
 									});
