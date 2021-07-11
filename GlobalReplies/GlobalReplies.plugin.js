@@ -241,6 +241,9 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					}), React.createElement(Variable, {
 						title: "{{message}}",
 						desc: "Will be replaced with the user message"
+					}), React.createElement(Variable, {
+						title: "{{newLine}}",
+						desc: "Switching to a new line"
 					})]
 				})];
 			}
@@ -299,7 +302,8 @@ function buildPlugin([BasePlugin, PluginApi]) {
 											author: `<@${props.message.author.id}>`,
 											authorTag: props.message.author.tag,
 											message: props.message.content,
-											channel: `<#${channel.id}>`
+											channel: `<#${channel.id}>`,
+											newLine: "\n"
 										})
 									});
 								},
