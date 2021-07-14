@@ -12,7 +12,7 @@ const path = require("path");
 
 const config = {
     info: {
-        name: "InAppNotifications",
+        name: "AppNotifications",
         authors: [
             {
                 name: "QWERT",
