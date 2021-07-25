@@ -51,7 +51,7 @@ function actuallyDoSomething() {
 function buildPlugin(pluginName) {
   console.log(`Building ${pluginName}...`);
 
-  _cp.execSync("npm i", {
+  _cp.execSync("npm i @babel/plugin-transform-react-jsx", {
     cwd: pluginName,
     stdio: ["ignore", "inherit", "inherit"]
   });
