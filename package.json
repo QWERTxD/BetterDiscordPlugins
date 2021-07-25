@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "QWERTxD",
-  "license": "ISC"
+  "license": "ISC",
   
   "dependencies": {
   "@babel/plugin-transform-react-jsx": "latest"
