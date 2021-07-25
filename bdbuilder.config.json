@@ -1,0 +1,21 @@
+{
+    "build": {
+        "watch": true,
+        "folder": "./[plugin]",
+        "readme": true,
+        "filename": "[name].plugin.js"
+    },
+    "discord": {
+        "userId": "678556376640913408",
+        "username": "QWERT"
+    },
+    "github": {
+        "username": "QWERTxD",
+        "branch": "main",
+        "repo": "BetterDiscordPlugins"
+    },
+    "paths": {
+        "bdfolder": "C:/Users/Yahel/AppData/Roaming/BetterDiscord",
+        "release_folder": "<seret>"
+    }
+}
