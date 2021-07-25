@@ -91,4 +91,4 @@ jobs:
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ github.token }}
-          branch: master # *release* branch
+          branch: main # *release* branch
