@@ -8,8 +8,7 @@
   },
   "author": "QWERTxD",
   "license": "ISC",
-  
-  "dependencies": {
-  "@babel/plugin-transform-react-jsx": "latest"
+  "devDependencies": {
+    "@betterdiscordbuilder/bdbuilder": "^1.2.9-preview.4"
   }
 }
