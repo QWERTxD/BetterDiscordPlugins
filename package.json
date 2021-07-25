@@ -8,4 +8,8 @@
   },
   "author": "QWERTxD",
   "license": "ISC"
+  
+  "dependencies": {
+  "@babel/plugin-transform-react-jsx": "latest"
+  }
 }
