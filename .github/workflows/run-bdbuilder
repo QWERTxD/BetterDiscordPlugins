@@ -43,11 +43,10 @@ function actuallyDoSomething() {
 
   for (const pluginName of changedPlugins) {
     buildPlugin(pluginName);
+    console.log("Finished building " + pluginName);
   }
 
   cleanup();
-  console.log("Finished cleanup.");
-  process.exit(0);
 }
 
 function buildPlugin(pluginName) {
