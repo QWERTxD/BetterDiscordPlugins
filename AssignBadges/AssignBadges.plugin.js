@@ -1,6 +1,6 @@
 /**
  * @name AssignBadges
- * @version 1.0.1
+ * @version 1.0.2
  * @description Allows you to locally assign badges to users through the user context menu.
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/AssignBadges
@@ -12,16 +12,14 @@
     // Offer to self-install for clueless users that try to run this directly.
     var shell = WScript.CreateObject("WScript.Shell");
     var fs = new ActiveXObject("Scripting.FileSystemObject");
-    var pathPlugins = shell.ExpandEnvironmentStrings("%APPDATA%BetterDiscordplugins");
+    var pathPlugins = shell.ExpandEnvironmentStrings("%APPDATA%\BetterDiscord\plugins");
     var pathSelf = WScript.ScriptFullName;
     // Put the user at ease by addressing them in the first person
-    shell.Popup("It looks like you've mistakenly tried to run me directly. 
-(Don't do that!)", 0, "I'm a plugin for BetterDiscord", 0x30);
+    shell.Popup("It looks like you've mistakenly tried to run me directly. \n(Don't do that!)", 0, "I'm a plugin for BetterDiscord", 0x30);
     if (fs.GetParentFolderName(pathSelf) === fs.GetAbsolutePathName(pathPlugins)) {
         shell.Popup("I'm in the correct folder already.", 0, "I'm already installed", 0x40);
     } else if (!fs.FolderExists(pathPlugins)) {
-        shell.Popup("I can't find the BetterDiscord plugins folder.
-Are you sure it's even installed?", 0, "Can't install myself", 0x10);
+        shell.Popup("I can't find the BetterDiscord plugins folder.\nAre you sure it's even installed?", 0, "Can't install myself", 0x10);
     } else if (shell.Popup("Should I copy myself to BetterDiscord's plugins folder for you?", 0, "Do you need some help?", 0x34) === 6) {
         fs.CopyFile(pathSelf, fs.BuildPath(pathPlugins, fs.GetFileName(pathSelf)), true);
         // Show the user where to put plugins in the future
@@ -34,7 +32,7 @@ Are you sure it's even installed?", 0, "Can't install myself", 0x10);
 const config = {
 	"info": {
 		"name": "AssignBadges",
-		"version": "1.0.1",
+		"version": "1.0.2",
 		"description": "Allows you to locally assign badges to users through the user context menu.",
 		"authors": [{
 			"name": "QWERT",
@@ -58,21 +56,13 @@ const config = {
 		}
 	},
 	"changelog": [{
-			"type": "fixed",
-			"title": "Fixes",
-			"items": [
-				"Nitro will now be added to users when checked",
-				"Verified Bot Badge will now work properly and be shown"
-			]
-		},
-		{
-			"type": "added",
-			"title": "New Stuff",
-			"items": [
-				"Verified Bot Badge can be assigned to users"
-			]
-		}
-	]
+		"type": "fixed",
+		"title": "Fixes",
+		"items": [
+			"Fixed 6 Month Booster badge",
+			"Users with Verified Bot badge will now act like regular users"
+		]
+	}]
 };
 function buildPlugin([BasePlugin, PluginApi]) {
 	const module = {
@@ -195,7 +185,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'Status', () => BdApi.findModuleByProps('getStatus'))
 				},
 				get 'Users'() {
-					return ___createMemoize___(this, 'Users', () => BdApi.findModuleByProps('getUser'))
+					return ___createMemoize___(this, 'Users', () => BdApi.findModuleByProps('getUser', 'getCurrentUser'))
 				},
 				get 'SettingsStore'() {
 					return ___createMemoize___(this, 'SettingsStore', () => BdApi.findModuleByProps('afkTimeout', 'status'))
@@ -222,6 +212,9 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			'@discord/actions': {
 				get 'ProfileActions'() {
 					return ___createMemoize___(this, 'ProfileActions', () => BdApi.findModuleByProps('fetchProfile'))
+				},
+				get 'GuildActions'() {
+					return ___createMemoize___(this, 'GuildActions', () => BdApi.findModuleByProps('requestMembersById'))
 				}
 			},
 			get '@discord/i18n'() {
@@ -333,29 +326,13 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			var external_BasePlugin_default = __webpack_require__.n(external_BasePlugin_namespaceObject);
 			const contextmenu_namespaceObject = Modules["@discord/contextmenu"];
 			const external_PluginApi_DiscordModules_namespaceObject = PluginApi.DiscordModules;
-			var React = __webpack_require__(832);
-			const months = function(n) {
-				return 26298e5 * n;
-			};
-			const day = 864e5;
-			const {
-				MenuCheckboxItem,
-				MenuRadioItem
-			} = external_PluginApi_namespaceObject.WebpackModules.getByProps("MenuRadioItem");
-			const classes = external_PluginApi_namespaceObject.WebpackModules.getByProps("container", "profileBadge18", "profileBadge22", "profileBadge22");
-			const getFlags = external_PluginApi_namespaceObject.WebpackModules.find((m => {
-				let d = m.default.toString();
-				return ~d.indexOf("closeUserProfileModal") && ~d.indexOf("openPremiumSettings");
-			}));
-			const User = external_PluginApi_namespaceObject.WebpackModules.getByPrototypes("getAvatarURL");
-			const BadgeList = external_PluginApi_namespaceObject.WebpackModules.getByProps("BadgeSizes").default;
 			const {
 				BadgeKeys
 			} = external_PluginApi_namespaceObject.WebpackModules.getByProps("BadgeKeys");
 			const {
 				UserFlags
 			} = external_PluginApi_namespaceObject.WebpackModules.getByProps("UserFlags");
-			const flags = [{
+			const UserFlagsFormatted = [{
 				id: "STAFF",
 				value: UserFlags["STAFF"],
 				name: "Discord Staff",
@@ -387,7 +364,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_3"]
 			}, {
 				id: "EARLY_VERIFIED_BOT",
-				value: UserFlags["VERIFIED_BOT"],
+				value: 0,
 				name: "Verified Bot",
 				key: BadgeKeys["VERIFIED_BOT"]
 			}, {
@@ -421,6 +398,28 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				name: "Nitro",
 				key: BadgeKeys["PREMIUM"]
 			}];
+			const modules_UserFlags = UserFlagsFormatted;
+			const utils_namespaceObject = Modules["@discord/utils"];
+			var React = __webpack_require__(832);
+			const months = function(n) {
+				return 26298e5 * n;
+			};
+			const day = 864e5;
+			const {
+				MenuCheckboxItem,
+				MenuRadioItem
+			} = external_PluginApi_namespaceObject.WebpackModules.getByProps("MenuRadioItem");
+			const classes = {
+				...external_PluginApi_namespaceObject.WebpackModules.getByProps("executedCommand", "buttonContainer", "applicationName"),
+				...external_PluginApi_namespaceObject.WebpackModules.getByProps("container", "profileBadge18", "profileBadge22", "profileBadge22")
+			};
+			const UserFlagValues = external_PluginApi_namespaceObject.WebpackModules.getByProps("UserFlags").UserFlags;
+			const getFlags = external_PluginApi_namespaceObject.WebpackModules.find((m => {
+				let d = m.default.toString();
+				return ~d.indexOf("closeUserProfileModal") && ~d.indexOf("openPremiumSettings");
+			}));
+			const User = external_PluginApi_namespaceObject.WebpackModules.getByPrototypes("getAvatarURL");
+			const BadgeList = external_PluginApi_namespaceObject.WebpackModules.getByProps("BadgeSizes").default;
 			const boosts = [{
 				id: "boost1",
 				value: 0 << 0,
@@ -440,7 +439,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				id: "boost4",
 				value: 0 << 0,
 				name: "Booster - 6 Months",
-				time: 4
+				time: 6
 			}, {
 				id: "boost5",
 				value: 0 << 0,
@@ -470,17 +469,21 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			const UserContextMenus = external_PluginApi_namespaceObject.WebpackModules.findAll((m => m.default?.displayName.endsWith("UserContextMenu")));
 			const UserGenericContextMenu = external_PluginApi_namespaceObject.WebpackModules.find((m => "UserGenericContextMenu" === m.default?.displayName));
 			const BotTag = external_PluginApi_namespaceObject.WebpackModules.getByDisplayName("BotTag");
+			const MessageAuthor = external_PluginApi_namespaceObject.WebpackModules.find((m => m.default.toString().indexOf("userOverride") > -1));
+			const NameTag = external_PluginApi_namespaceObject.WebpackModules.find((m => "DiscordTag" === m.default.displayName));
 			UserContextMenus.push(UserGenericContextMenu);
 			class AssignBadges extends(external_BasePlugin_default()) {
 				onStart() {
 					this.patchUserContextMenus();
-					this.patchFlagGetter();
+					this.patchUserFlagGetter();
 					this.patchUserStore();
+					this.patchMessageAuthor();
+					this.patchNameTag();
 				}
 				onStop() {
 					external_PluginApi_namespaceObject.Patcher.unpatchAll();
 				}
-				patchFlagGetter() {
+				patchUserFlagGetter() {
 					external_PluginApi_namespaceObject.Patcher.before(getFlags, "default", ((_this, [props]) => {
 						const settings = this.getSettings()?.[props.user.id];
 						if (settings)
@@ -496,10 +499,36 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						const settings = this.getSettings();
 						const userSettings = settings?.[id];
 						if (userSettings) {
-							const userSettings = settings[id];
-							const newFlags = Object.keys(userSettings).filter((e => userSettings[e])).map((e => flags[flags.findIndex((f => f.id === e))])).filter((e => e)).map((e => e.value)).reduce(((a, b) => a + b), 0);
+							const newFlags = Object.keys(userSettings).filter((e => userSettings[e])).map((e => modules_UserFlags.find((f => f.id === e)))).filter((e => e)).map((e => e.value)).reduce(((a, b) => a + b), 0);
 							ret.publicFlags = newFlags;
-							if (true === userSettings?.EARLY_VERIFIED_BOT) ret.bot = true;
+						}
+					}));
+				}
+				patchMessageAuthor() {
+					external_PluginApi_namespaceObject.Patcher.after(MessageAuthor, "default", ((_this, [props], ret) => {
+						const user = props.message.author;
+						if (!user) return;
+						const settings = this.getSettings();
+						const userSettings = settings?.[user.id];
+						if (userSettings && userSettings?.EARLY_VERIFIED_BOT) {
+							const badgeIndex = props.compact ? 0 : 2;
+							const displayClass = props.compact ? classes.botTagCompact : classes.botTagCozy;
+							ret.props.children[badgeIndex] = React.createElement(BotTag, {
+								verified: true,
+								className: (0, utils_namespaceObject.joinClassNames)(displayClass, classes.botTag)
+							});
+						}
+					}));
+				}
+				patchNameTag() {
+					external_PluginApi_namespaceObject.Patcher.after(NameTag, "default", ((_this, [props], ret) => {
+						const user = props.user;
+						if (!user) return;
+						const settings = this.getSettings();
+						const userSettings = settings?.[user.id];
+						if (userSettings && userSettings?.EARLY_VERIFIED_BOT) {
+							ret.props.botType = 0;
+							ret.props.botVerified = true;
 						}
 					}));
 				}
@@ -515,7 +544,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 							tree.splice(7, 0, React.createElement(contextmenu_namespaceObject.MenuGroup, null, React.createElement(contextmenu_namespaceObject.MenuItem, {
 								id: "assign-badge",
 								label: "Manage Badges",
-								children: [flags.map((flag => {
+								children: [modules_UserFlags.map((flag => {
 									const [state, setState] = React.useState(settings?.[props.user.id]?.hasOwnProperty(flag.id) ? settings?.[props.user.id]?.[flag.id] : ~userBadges.indexOf(flag.key));
 									return React.createElement(MenuCheckboxItem, {
 										id: flag.id,
