@@ -1,6 +1,6 @@
 {
     "build": {
-        "watch": true,
+        "watch": false,
         "folder": "./[plugin]",
         "readme": true,
         "filename": "[name].plugin.js"
