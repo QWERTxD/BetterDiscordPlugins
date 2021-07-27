@@ -1,6 +1,6 @@
 /**
  * @name AssignBadges
- * @version 1.0.2
+ * @version 1.0.21
  * @description Allows you to locally assign badges to users through the user context menu.
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/AssignBadges
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "AssignBadges",
-		"version": "1.0.2",
+		"version": "1.0.21",
 		"description": "Allows you to locally assign badges to users through the user context menu.",
 		"authors": [{
 			"name": "QWERT",
@@ -59,8 +59,7 @@ const config = {
 		"type": "fixed",
 		"title": "Fixes",
 		"items": [
-			"Fixed 6 Month Booster badge",
-			"Users with Verified Bot badge will now act like regular users"
+			"Verified Bot Badge will now be shown for users in memberlist as well"
 		]
 	}]
 };
@@ -413,7 +412,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				...external_PluginApi_namespaceObject.WebpackModules.getByProps("executedCommand", "buttonContainer", "applicationName"),
 				...external_PluginApi_namespaceObject.WebpackModules.getByProps("container", "profileBadge18", "profileBadge22", "profileBadge22")
 			};
-			const UserFlagValues = external_PluginApi_namespaceObject.WebpackModules.getByProps("UserFlags").UserFlags;
+			const memberlistClasses = external_PluginApi_namespaceObject.WebpackModules.getByProps("placeholder", "activity", "icon");
 			const getFlags = external_PluginApi_namespaceObject.WebpackModules.find((m => {
 				let d = m.default.toString();
 				return ~d.indexOf("closeUserProfileModal") && ~d.indexOf("openPremiumSettings");
@@ -471,6 +470,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			const BotTag = external_PluginApi_namespaceObject.WebpackModules.getByDisplayName("BotTag");
 			const MessageAuthor = external_PluginApi_namespaceObject.WebpackModules.find((m => m.default.toString().indexOf("userOverride") > -1));
 			const NameTag = external_PluginApi_namespaceObject.WebpackModules.find((m => "DiscordTag" === m.default.displayName));
+			const MemberListItem = external_PluginApi_namespaceObject.WebpackModules.find((m => "MemberListItem" === m.default.displayName));
 			UserContextMenus.push(UserGenericContextMenu);
 			class AssignBadges extends(external_BasePlugin_default()) {
 				onStart() {
@@ -479,9 +479,16 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					this.patchUserStore();
 					this.patchMessageAuthor();
 					this.patchNameTag();
+					this.patchMemberlistItem();
 				}
 				onStop() {
 					external_PluginApi_namespaceObject.Patcher.unpatchAll();
+				}
+				isUserVerifiedBot(user) {
+					const settings = this.getSettings();
+					const userSettings = settings?.[user.id];
+					if (userSettings && userSettings?.EARLY_VERIFIED_BOT) return true;
+					return false;
 				}
 				patchUserFlagGetter() {
 					external_PluginApi_namespaceObject.Patcher.before(getFlags, "default", ((_this, [props]) => {
@@ -508,9 +515,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					external_PluginApi_namespaceObject.Patcher.after(MessageAuthor, "default", ((_this, [props], ret) => {
 						const user = props.message.author;
 						if (!user) return;
-						const settings = this.getSettings();
-						const userSettings = settings?.[user.id];
-						if (userSettings && userSettings?.EARLY_VERIFIED_BOT) {
+						if (this.isUserVerifiedBot(user)) {
 							const badgeIndex = props.compact ? 0 : 2;
 							const displayClass = props.compact ? classes.botTagCompact : classes.botTagCozy;
 							ret.props.children[badgeIndex] = React.createElement(BotTag, {
@@ -524,98 +529,102 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					external_PluginApi_namespaceObject.Patcher.after(NameTag, "default", ((_this, [props], ret) => {
 						const user = props.user;
 						if (!user) return;
-						const settings = this.getSettings();
-						const userSettings = settings?.[user.id];
-						if (userSettings && userSettings?.EARLY_VERIFIED_BOT) {
+						if (this.isUserVerifiedBot(user)) {
 							ret.props.botType = 0;
 							ret.props.botVerified = true;
 						}
 					}));
 				}
+				patchMemberlistItem() {
+					external_PluginApi_namespaceObject.Patcher.after(MemberListItem.default.prototype, "renderBot", ((_this, [props]) => {
+						const user = _this.props.user;
+						if (this.isUserVerifiedBot(user)) return React.createElement(BotTag, {
+							verified: true,
+							className: memberlistClasses.botTag
+						});
+					}));
+				}
 				patchUserContextMenus() {
-					for (var n = 0; n < UserContextMenus.length; n++) {
-						const ContextMenu = UserContextMenus[n];
-						external_PluginApi_namespaceObject.Patcher.after(ContextMenu, "default", ((_this, [props], ret) => {
-							const settings = this.getSettings();
-							const tree = external_PluginApi_namespaceObject.Utilities.getNestedProp(ret, "props.children.props.children");
-							const userBadges = getFlags.default({
-								user: external_PluginApi_DiscordModules_namespaceObject.UserStore.getUser(props.user.id)
-							}).map((badge => badge?.key));
-							tree.splice(7, 0, React.createElement(contextmenu_namespaceObject.MenuGroup, null, React.createElement(contextmenu_namespaceObject.MenuItem, {
-								id: "assign-badge",
-								label: "Manage Badges",
-								children: [modules_UserFlags.map((flag => {
-									const [state, setState] = React.useState(settings?.[props.user.id]?.hasOwnProperty(flag.id) ? settings?.[props.user.id]?.[flag.id] : ~userBadges.indexOf(flag.key));
-									return React.createElement(MenuCheckboxItem, {
-										id: flag.id,
-										label: "EARLY_VERIFIED_BOT" !== flag.id ? React.createElement("div", {
-											className: classes?.container
-										}, React.createElement(BadgeList, {
-											user: this.fakeUser(flag.value),
-											premiumSince: "PREMIUM" === flag.id ? new Date(0) : null,
-											size: 2
-										}), flag.name) : React.createElement("div", {
-											className: classes?.container
-										}, (React.createElement(BotTag, {
-											verified: true
-										}), flag.name)),
-										checked: state,
-										action: () => {
-											const user = settings[props.user.id] || {};
-											user[flag.id] = !state;
-											settings[props.user.id] = user;
-											this.saveSettings(settings);
-											setState(!state);
-										}
-									});
-								})), React.createElement(contextmenu_namespaceObject.MenuItem, {
-									id: "boosts",
-									label: React.createElement("div", {
+					for (const UserContextMenu of UserContextMenus) external_PluginApi_namespaceObject.Patcher.after(UserContextMenu, "default", ((_this, [props], ret) => {
+						const settings = this.getSettings();
+						const tree = external_PluginApi_namespaceObject.Utilities.getNestedProp(ret, "props.children.props.children");
+						const userBadges = getFlags.default({
+							user: external_PluginApi_DiscordModules_namespaceObject.UserStore.getUser(props.user.id)
+						}).map((badge => badge?.key));
+						tree.splice(7, 0, React.createElement(contextmenu_namespaceObject.MenuGroup, null, React.createElement(contextmenu_namespaceObject.MenuItem, {
+							id: "assign-badge",
+							label: "Manage Badges",
+							children: [modules_UserFlags.map((flag => {
+								const [state, setState] = React.useState(settings?.[props.user.id]?.hasOwnProperty(flag.id) ? settings?.[props.user.id]?.[flag.id] : ~userBadges.indexOf(flag.key));
+								return React.createElement(MenuCheckboxItem, {
+									id: flag.id,
+									label: "EARLY_VERIFIED_BOT" !== flag.id ? React.createElement("div", {
 										className: classes?.container
 									}, React.createElement(BadgeList, {
-										user: this.fakeUser(0),
-										premiumGuildSince: new Date(Date.now() - months(3) - day),
+										user: this.fakeUser(flag.value),
+										premiumSince: "PREMIUM" === flag.id ? new Date(0) : null,
 										size: 2
-									}), "Boosts")
-								}, [boosts.map((boost => React.createElement(MenuRadioItem, {
-									id: boost.id,
-									checked: settings[props.user.id]?.boost === boost.id,
-									label: React.createElement("div", {
+									}), flag.name) : React.createElement("div", {
 										className: classes?.container
-									}, React.createElement(BadgeList, {
-										user: this.fakeUser(0),
-										premiumGuildSince: new Date(Date.now() - months(boost.time) - day),
-										size: 2
-									}), boost.name),
+									}, (React.createElement(BotTag, {
+										verified: true
+									}), flag.name)),
+									checked: state,
 									action: () => {
 										const user = settings[props.user.id] || {};
-										user.boost = boost.id;
+										user[flag.id] = !state;
 										settings[props.user.id] = user;
 										this.saveSettings(settings);
+										setState(!state);
 									}
-								}))), React.createElement(contextmenu_namespaceObject.MenuGroup, null, React.createElement(contextmenu_namespaceObject.MenuItem, {
-									label: "Reset Boost Preferences",
-									id: "reset-boosts",
-									color: "colorDanger",
-									action: () => {
-										settings[props.user.id]?.boost, true;
-										this.saveSettings(settings);
-										external_PluginApi_namespaceObject.Toasts.success(`Successfully cleared boost preferences for <strong>${props.user}</strong>!`);
-									}
-								}))]), React.createElement(contextmenu_namespaceObject.MenuGroup, null, React.createElement(contextmenu_namespaceObject.MenuItem, {
-									color: "colorDanger",
-									label: "Reset Preferences",
-									id: "reset",
-									action: () => {
-										delete settings[props.user.id];
-										this.saveSettings(settings);
-										settings[props.user.id] = {};
-										external_PluginApi_namespaceObject.Toasts.success(`Successfully cleared preferences for <strong>${props.user}</strong>!`);
-									}
-								}))]
-							})));
-						}));
-					}
+								});
+							})), React.createElement(contextmenu_namespaceObject.MenuItem, {
+								id: "boosts",
+								label: React.createElement("div", {
+									className: classes?.container
+								}, React.createElement(BadgeList, {
+									user: this.fakeUser(0),
+									premiumGuildSince: new Date(Date.now() - months(3) - day),
+									size: 2
+								}), "Boosts")
+							}, [boosts.map((boost => React.createElement(MenuRadioItem, {
+								id: boost.id,
+								checked: settings[props.user.id]?.boost === boost.id,
+								label: React.createElement("div", {
+									className: classes?.container
+								}, React.createElement(BadgeList, {
+									user: this.fakeUser(0),
+									premiumGuildSince: new Date(Date.now() - months(boost.time) - day),
+									size: 2
+								}), boost.name),
+								action: () => {
+									const user = settings[props.user.id] || {};
+									user.boost = boost.id;
+									settings[props.user.id] = user;
+									this.saveSettings(settings);
+								}
+							}))), React.createElement(contextmenu_namespaceObject.MenuGroup, null, React.createElement(contextmenu_namespaceObject.MenuItem, {
+								label: "Reset Boost Preferences",
+								id: "reset-boosts",
+								color: "colorDanger",
+								action: () => {
+									settings[props.user.id]?.boost, true;
+									this.saveSettings(settings);
+									external_PluginApi_namespaceObject.Toasts.success(`Successfully cleared boost preferences for <strong>${props.user}</strong>!`);
+								}
+							}))]), React.createElement(contextmenu_namespaceObject.MenuGroup, null, React.createElement(contextmenu_namespaceObject.MenuItem, {
+								color: "colorDanger",
+								label: "Reset Preferences",
+								id: "reset",
+								action: () => {
+									delete settings[props.user.id];
+									this.saveSettings(settings);
+									settings[props.user.id] = {};
+									external_PluginApi_namespaceObject.Toasts.success(`Successfully cleared preferences for <strong>${props.user}</strong>!`);
+								}
+							}))]
+						})));
+					}));
 				}
 				fakeUser(flags) {
 					return new User({
