@@ -12,7 +12,8 @@ const classes = {
 	...WebpackModules.getByProps("executedCommand", "buttonContainer", "applicationName"),
 	...WebpackModules.getByProps("container", "profileBadge18", "profileBadge22", "profileBadge22")
 }
-const UserFlagValues = WebpackModules.getByProps("UserFlags").UserFlags;
+
+const memberlistClasses = WebpackModules.getByProps("placeholder", "activity", "icon");
 
 const getFlags = WebpackModules.find(m => {
 	let d = m.default.toString();
@@ -39,6 +40,7 @@ const UserGenericContextMenu = WebpackModules.find(m => m.default?.displayName =
 const BotTag = WebpackModules.getByDisplayName("BotTag");
 const MessageAuthor = WebpackModules.find(m => m.default.toString().indexOf("userOverride") > -1)
 const NameTag = WebpackModules.find(m => m.default.displayName === "DiscordTag");
+const MemberListItem = WebpackModules.find(m => m.default.displayName === "MemberListItem");
 
 UserContextMenus.push(UserGenericContextMenu);
 
@@ -49,10 +51,18 @@ export default class AssignBadges extends BasePlugin {
 		this.patchUserStore();
 		this.patchMessageAuthor();
 		this.patchNameTag();
+		this.patchMemberlistItem();
 	}
 
 	onStop() {
 		Patcher.unpatchAll();
+	}
+
+	isUserVerifiedBot(user) {
+		const settings = this.getSettings();
+		const userSettings = settings?.[user.id];
+		if(userSettings && userSettings?.EARLY_VERIFIED_BOT) return true;
+		return false;
 	}
 
 	patchUserFlagGetter() {
@@ -87,9 +97,7 @@ export default class AssignBadges extends BasePlugin {
 			const user = props.message.author;
 			if(!user) return;
 
-			const settings = this.getSettings();
-			const userSettings = settings?.[user.id];
-			if(userSettings && userSettings?.EARLY_VERIFIED_BOT) {
+			if(this.isUserVerifiedBot(user)) {
 				const badgeIndex = props.compact ? 0 : 2;
 				const displayClass = props.compact ? classes.botTagCompact : classes.botTagCozy;
 				ret.props.children[badgeIndex] = (
@@ -107,20 +115,30 @@ export default class AssignBadges extends BasePlugin {
 			const user = props.user;
 			if(!user) return;
 
-			const settings = this.getSettings();
-			const userSettings = settings?.[user.id];
-			if(userSettings && userSettings?.EARLY_VERIFIED_BOT) {
+			if(this.isUserVerifiedBot(user)) {
 				ret.props.botType = 0;
 				ret.props.botVerified = true;
 			}		
 		})
 	}
 
-	patchUserContextMenus() {
-		for(var n = 0; n < UserContextMenus.length; n++) {
-			const ContextMenu = UserContextMenus[n];
+	patchMemberlistItem() {
+		Patcher.after(MemberListItem.default.prototype, 'renderBot', (_this, [props], ret) => {
+			const user = _this.props.user;
+			if(this.isUserVerifiedBot(user)) {
+				return (
+					<BotTag
+					verified={true}
+					className={memberlistClasses.botTag}
+					/>
+				)
+			}
+		})
+	}
 
-			Patcher.after(ContextMenu, "default", (_this, [props], ret) => {
+	patchUserContextMenus() {
+		for(const UserContextMenu of UserContextMenus) {
+			Patcher.after(UserContextMenu, "default", (_this, [props], ret) => {
 				const settings = this.getSettings();
 				const tree = Utilities.getNestedProp(ret, "props.children.props.children");
 				const userBadges = getFlags.default({user: UserStore.getUser(props.user.id)}).map(badge => badge?.key);

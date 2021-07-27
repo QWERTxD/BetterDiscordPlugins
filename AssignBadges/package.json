@@ -1,7 +1,7 @@
 {
 	"info": {
 		"name": "AssignBadges",
-		"version": "1.0.2",
+		"version": "1.0.21",
 		"description": "Allows you to locally assign badges to users through the user context menu.",
 		"authors": [
 			{
@@ -31,8 +31,7 @@
 			"type": "fixed",
 			"title": "Fixes",
 			"items": [
-				"Fixed 6 Month Booster badge",
-				"Users with Verified Bot badge will now act like regular users"
+				"Verified Bot Badge will now be shown for users in memberlist as well"
 			]
 		}
 	]
