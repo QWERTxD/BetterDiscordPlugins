@@ -3,7 +3,7 @@
 * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
 * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
 * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
-* @version 1.0.0
+* @version 1.0.1
 */
 
 const request = require("request");
@@ -20,7 +20,7 @@ const config = {
                 github_username: "QWERTxD"
             }
         ],
-        version: "1.0.0",
+        version: "1.0.1",
         description: "Displays notifications such as new messages, friends added in Discord.",
     },
     changelog: [
@@ -28,7 +28,7 @@ const config = {
             title: "Fixed",
             type: "fixed",
             items: [
-                "Plugin version on GitHub (no changes in the plugin)"
+                "Temporary fix, thanks Strencher."
             ]
         }
     ],
@@ -588,7 +588,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             const images = message.attachments.filter(e => typeof e?.content_type === "string" && e?.content_type.startsWith("image"));
             const xChannel = ChannelStore.getChannel(message.channel_id);
             const notiTime = this.settings.notiTime;
-            if(channel.id === SelectedChannelStore.getChannelId()) return false;
+            if(!channel || channel.id === SelectedChannelStore.getChannelId()) return false;
             
             let content;
             const keywordFound = this.checkKeywords(message);
