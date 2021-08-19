@@ -588,7 +588,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             const images = message.attachments.filter(e => typeof e?.content_type === "string" && e?.content_type.startsWith("image"));
             const xChannel = ChannelStore.getChannel(message.channel_id);
             const notiTime = this.settings.notiTime;
-            if(channel.id === SelectedChannelStore.getChannelId()) return false;
+            if(!channel || channel.id === SelectedChannelStore.getChannelId()) return false;
             
             let content;
             const keywordFound = this.checkKeywords(message);
