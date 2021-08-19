@@ -28,7 +28,7 @@ const config = {
             title: "Fixed",
             type: "fixed",
             items: [
-                "Plugin version on GitHub (no changes in the plugin)"
+                "Temporary fix, thanks Strencher."
             ]
         }
     ],
