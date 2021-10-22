@@ -30,11 +30,11 @@ export default class DiscordActivities extends BasePlugin {
                 activities.WATCH_YOUTUBE_PROD_APP_ID,
                 activities.WATCH_YOUTUBE_DEV_APP_ID
         ];
-        activitiesExperiment.getEnabledAppIds = function (e) {
+        Patcher.instead(activitiesExperiment, "getEnabledAppIds", function (e) {
             return applicationIds;
-        };
-        activitiesExperiment.isActivitiesEnabled = function (e) {
+        });
+        Patcher.instead(activitiesExperiment, "isActivitiesEnabled", function (e) {
             return true;
-        };
+        });
     }
 }
