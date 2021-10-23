@@ -1,6 +1,6 @@
 /**
  * @name DiscordActivities
- * @version 1.1.0
+ * @version 1.1.1
  * @description Allows you to play Discord's Activity Games (Such as watching YouTube together and Chess) with friends in voice chats.
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/DiscordActivities
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "DiscordActivities",
-		"version": "1.1.0",
+		"version": "1.1.1",
 		"description": "Allows you to play Discord's Activity Games (Such as watching YouTube together and Chess) with friends in voice chats.",
 		"authors": [{
 			"name": "QWERT",
@@ -164,7 +164,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'EmojiUtils', () => BdApi.findModuleByProps('uploadEmoji'))
 				},
 				get 'PermissionUtils'() {
-					return ___createMemoize___(this, 'PermissionUtils', () => BdApi.findModuleByProps('computePermissions'))
+					return ___createMemoize___(this, 'PermissionUtils', () => BdApi.findModuleByProps('computePermissions', 'canManageUser'))
 				},
 				get 'DMUtils'() {
 					return ___createMemoize___(this, 'DMUtils', () => BdApi.findModuleByProps('openPrivateChannel'))
@@ -318,7 +318,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 		const external_PluginApi_DiscordModules_namespaceObject = PluginApi.DiscordModules;
 		const external_BasePlugin_namespaceObject = BasePlugin;
 		var external_BasePlugin_default = __webpack_require__.n(external_BasePlugin_namespaceObject);
-		const activitiesExperiment = external_PluginApi_namespaceObject.WebpackModules.getByProps("isActivitiesEnabled");
+		const activitiesExperiment = external_PluginApi_namespaceObject.WebpackModules.getByProps("getEmbeddedActivitiesForUser");
 		const activities = external_PluginApi_namespaceObject.WebpackModules.getByProps("YOUTUBE_APPLICATION_ID");
 		class DiscordActivities extends(external_BasePlugin_default()) {
 			onStart() {
@@ -335,13 +335,13 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				}));
 			}
 			enableExperiment() {
-				const applicationIds = [activities.POKER_NIGHT_APPLICATION_ID, activities.CHESS_IN_THE_PARK_APPLICATION_ID, activities.END_GAME_APPLICATION_ID, activities.FISHINGTON_APPLICATION_ID, activities.YOUTUBE_APPLICATION_ID];
-				activitiesExperiment.getEnabledAppIds = function() {
+				const applicationIds = [activities.POKER_NIGHT_APPLICATION_ID, activities.END_GAME_APPLICATION_ID, activities.FISHINGTON_APPLICATION_ID, activities.WATCH_YOUTUBE_PROD_APP_ID, activities.WATCH_YOUTUBE_DEV_APP_ID];
+				external_PluginApi_namespaceObject.Patcher.instead(activitiesExperiment, "getEnabledAppIds", (function() {
 					return applicationIds;
-				};
-				activitiesExperiment.isActivitiesEnabled = function() {
+				}));
+				external_PluginApi_namespaceObject.Patcher.instead(activitiesExperiment, "isActivitiesEnabled", (function() {
 					return true;
-				};
+				}));
 			}
 		}
 		module.exports.LibraryPluginHack = __webpack_exports__;
