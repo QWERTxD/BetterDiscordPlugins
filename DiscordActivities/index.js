@@ -2,7 +2,7 @@ import { Patcher, WebpackModules } from '@zlibrary';
 import { GuildStore } from '@zlibrary/discord';
 import BasePlugin from '@zlibrary/plugin';
 
-const activities = WebpackModules.getByProps("getEmbeddedActivitiesForUser");
+const activities = WebpackModules.getByProps("getSelfEmbeddedActivities");
 
 export default class DiscordActivities extends BasePlugin {
     onStart() {
@@ -48,8 +48,8 @@ export default class DiscordActivities extends BasePlugin {
             "832012682520428625",
             "832013108234289153",
         ];
-        Patcher.instead(activities, "getEnabledAppIds", (function() {
+        Patcher.instead(activities, "getEnabledAppIds", function() {
             return applicationIds;
-        }));
+        });
     }
 }
