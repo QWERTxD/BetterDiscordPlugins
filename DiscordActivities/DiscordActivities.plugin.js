@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "DiscordActivities",
-		"version": "1.1.1",
+		"version": "1.1.2",
 		"description": "Allows you to play Discord's Activity Games (Such as watching YouTube together and Chess) with friends in voice chats.",
 		"authors": [{
 			"name": "QWERT",
