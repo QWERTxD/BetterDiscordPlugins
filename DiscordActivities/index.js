@@ -2,13 +2,12 @@ import { Patcher, WebpackModules } from '@zlibrary';
 import { GuildStore } from '@zlibrary/discord';
 import BasePlugin from '@zlibrary/plugin';
 
-const activitiesExperiment = WebpackModules.getByProps("getEmbeddedActivitiesForUser");
-const activities = WebpackModules.getByProps("YOUTUBE_APPLICATION_ID");
+const activities = WebpackModules.getByProps("getSelfEmbeddedActivities");
 
 export default class DiscordActivities extends BasePlugin {
     onStart() {
         this.patchGuildRegion();
-        this.enableExperiment();
+        this.patchEnabledAppIds();
     }
 
     onStop() {
@@ -22,19 +21,35 @@ export default class DiscordActivities extends BasePlugin {
         })
     }
 
-    enableExperiment() {
+    patchEnabledAppIds() {
         const applicationIds = [
-                activities.POKER_NIGHT_APPLICATION_ID,
-                activities.END_GAME_APPLICATION_ID,
-                activities.FISHINGTON_APPLICATION_ID,
-                activities.WATCH_YOUTUBE_PROD_APP_ID,
-                activities.WATCH_YOUTUBE_DEV_APP_ID
+            // Prod
+            "755827207812677713",
+            "832012774040141894",
+            "832013003968348200",
+            "878067389634314250",
+            "879863976006127627",
+            "879863686565621790",
+            "852509694341283871",
+            "880218394199220334",
+            "773336526917861400",
+            "814288819477020702",
+            "879864070101172255",
+            "879863881349087252",
+            "832012854282158180",
+            // Dev
+            "763133495793942528",
+            "880218832743055411",
+            "878067427668275241",
+            "879864010126786570",
+            "879864104980979792",
+            "891001866073296967",
+            "832012586023256104",
+            "832012682520428625",
+            "832013108234289153",
         ];
-        Patcher.instead(activitiesExperiment, "getEnabledAppIds", function (e) {
+        Patcher.instead(activities, "getEnabledAppIds", function() {
             return applicationIds;
-        });
-        Patcher.instead(activitiesExperiment, "isActivitiesEnabled", function (e) {
-            return true;
         });
     }
 }
