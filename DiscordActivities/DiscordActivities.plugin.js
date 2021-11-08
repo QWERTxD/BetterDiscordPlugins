@@ -138,7 +138,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'TransitionGroup', () => BdApi.findModuleByDisplayName('TransitionGroup'))
 				},
 				get 'Button'() {
-					return ___createMemoize___(this, 'Button', () => BdApi.findModuleByProps('DropdownSizes'))
+					return ___createMemoize___(this, 'Button', () => BdApi.findModule(m => 'DropdownSizes' in m && typeof(m) === 'function'))
 				},
 				get 'Popout'() {
 					return ___createMemoize___(this, 'Popout', () => BdApi.findModuleByDisplayName('Popout'))
@@ -208,7 +208,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'Activities', () => BdApi.findModuleByProps('getActivities'))
 				},
 				get 'Games'() {
-					return ___createMemoize___(this, 'Games', () => BdApi.findModuleByProps('getGame'))
+					return ___createMemoize___(this, 'Games', () => BdApi.findModuleByProps('getGame', 'games'))
 				},
 				get 'Auth'() {
 					return ___createMemoize___(this, 'Auth', () => BdApi.findModuleByProps('getId', 'isGuest'))
@@ -318,12 +318,11 @@ function buildPlugin([BasePlugin, PluginApi]) {
 		const external_PluginApi_DiscordModules_namespaceObject = PluginApi.DiscordModules;
 		const external_BasePlugin_namespaceObject = BasePlugin;
 		var external_BasePlugin_default = __webpack_require__.n(external_BasePlugin_namespaceObject);
-		const activitiesExperiment = external_PluginApi_namespaceObject.WebpackModules.getByProps("getEmbeddedActivitiesForUser");
-		const activities = external_PluginApi_namespaceObject.WebpackModules.getByProps("YOUTUBE_APPLICATION_ID");
+		const activities = external_PluginApi_namespaceObject.WebpackModules.getByProps("getSelfEmbeddedActivities");
 		class DiscordActivities extends(external_BasePlugin_default()) {
 			onStart() {
 				this.patchGuildRegion();
-				this.enableExperiment();
+				this.patchEnabledAppIds();
 			}
 			onStop() {
 				external_PluginApi_namespaceObject.Patcher.unpatchAll();
@@ -334,13 +333,10 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					ret.region = "us-west";
 				}));
 			}
-			enableExperiment() {
-				const applicationIds = [activities.POKER_NIGHT_APPLICATION_ID, activities.END_GAME_APPLICATION_ID, activities.FISHINGTON_APPLICATION_ID, activities.WATCH_YOUTUBE_PROD_APP_ID, activities.WATCH_YOUTUBE_DEV_APP_ID];
-				external_PluginApi_namespaceObject.Patcher.instead(activitiesExperiment, "getEnabledAppIds", (function() {
+			patchEnabledAppIds() {
+				const applicationIds = ["755827207812677713", "832012774040141894", "832013003968348200", "878067389634314250", "879863976006127627", "879863686565621790", "852509694341283871", "880218394199220334", "773336526917861400", "814288819477020702", "879864070101172255", "879863881349087252", "832012854282158180", "763133495793942528", "880218832743055411", "878067427668275241", "879864010126786570", "879864104980979792", "891001866073296967", "832012586023256104", "832012682520428625", "832013108234289153"];
+				external_PluginApi_namespaceObject.Patcher.instead(activities, "getEnabledAppIds", (function() {
 					return applicationIds;
-				}));
-				external_PluginApi_namespaceObject.Patcher.instead(activitiesExperiment, "isActivitiesEnabled", (function() {
-					return true;
 				}));
 			}
 		}
