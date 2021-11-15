@@ -268,10 +268,10 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			const {
 				getChannels
 			} = getByProps("getChannels");
-			const GuildPermissions = getByProps("can");
+			const GuildPermissions = getByProps("getChannelPermissions");
 			const {
 				Permissions
-			} = getByProps("Permissions");
+			} = getByProps("API_HOST");
 			class GlobalReplies extends(external_BasePlugin_default()) {
 				onStart() {
 					this.patch();
