@@ -1,9 +1,9 @@
 /**
-* @name InAppNotifications
+* @name AppNotifications
 * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
 * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
 * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
-* @version 0.0.6
+* @version 1.0.1
 */
 
 const request = require("request");
@@ -12,7 +12,7 @@ const path = require("path");
 
 const config = {
     info: {
-        name: "InAppNotifications",
+        name: "AppNotifications",
         authors: [
             {
                 name: "QWERT",
@@ -20,7 +20,7 @@ const config = {
                 github_username: "QWERTxD"
             }
         ],
-        version: "0.0.6",
+        version: "1.0.1",
         description: "Displays notifications such as new messages, friends added in Discord.",
     },
     changelog: [
@@ -28,14 +28,7 @@ const config = {
             title: "Fixed",
             type: "fixed",
             items: [
-                "some bugs."
-            ]
-        },
-        {
-            title: "Added",
-            type: "added",
-            items: [
-                "Keyword notifications."
+                "Temporary fix, thanks Strencher."
             ]
         }
     ],
@@ -70,6 +63,12 @@ const config = {
             note: "Push notifications if certain words were sent in a message. (Separate with a comma)",
             id: "keywords",
             value: ""
+        },
+        {
+            type: "switch",
+            name: "keywords case sensitive",
+            id: "case",
+            value: false
         },
         {
             type: "switch",
@@ -589,7 +588,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             const images = message.attachments.filter(e => typeof e?.content_type === "string" && e?.content_type.startsWith("image"));
             const xChannel = ChannelStore.getChannel(message.channel_id);
             const notiTime = this.settings.notiTime;
-            if(channel.id === SelectedChannelStore.getChannelId()) return false;
+            if(!channel || channel.id === SelectedChannelStore.getChannelId()) return false;
             
             let content;
             const keywordFound = this.checkKeywords(message);
@@ -665,7 +664,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             const time = isNaN(notiTime * 1000) ? 3000 : notiTime * 1000;
             QWERTLib.Toasts.create(children, {
                 icon: React.createElement(Avatar.default, {
-                    src: author.avatarURL,
+                    src: author.getAvatarURL(),
                     status: UserStatusStore.getStatus(author.id),
                     size: Avatar.Sizes.SIZE_32,
                     isMobile: UserStatusStore.isMobileOnline(author.id),
@@ -695,7 +694,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             for(let keyword of keywords) {
                 keyword = this.escapeRegex(keyword);
                 const keywordRegex = new RegExp(`\\b${keyword}\\b`, "g");
-                if(keywordRegex.test(content)) {
+                if(keywordRegex.test(this.settings.case ? content : content.toLowerCase())) {
                     found = true;
                     break;
                 }
@@ -713,7 +712,6 @@ module.exports = !global.ZeresPluginLibrary ? class {
         }
 
         checkSettings(message, channel) {
-            message.content = message.content.toLowerCase();
             let shouldNotify = true;
             const ignoredUsers = this.settings.ignoredUsers.trim().split(",");
             const ignoredServers = this.settings.ignoredServers.trim().split(",");
@@ -748,7 +746,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             user = UserStore.getUser(user.id);
             QWERTLib.Toasts.create([React.createElement(PersonAdd, {style: {height: "16px", width: "16px", color: colors.online, marginRight: "2px"}}), "Accepted your friend request."], {
                 author: user.tag,
-                avatar: user.avatarURL,
+                avatar: user.getAvatarURL(),
                 onClick: () => {
                     UserProfileModals.open(user.id);
                 }

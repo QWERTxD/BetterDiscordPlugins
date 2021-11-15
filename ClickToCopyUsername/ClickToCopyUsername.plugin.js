@@ -3,7 +3,8 @@
     * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/ClickToCopyUsername/ClickToCopyUsername.plugin.js
     * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/ClickToCopyUsername/ClickToCopyUsername.plugin.js
     * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/ClickToCopyUsername
-    */
+    * @version 0.0.2    
+*/
     
     const request = require("request");
     const fs = require("fs");
