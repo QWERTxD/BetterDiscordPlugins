@@ -26,7 +26,7 @@
                 title: 'Fixed',
                 type: 'fixed',
                 items: [
-                    'Fixed default role color (from to #e1e1e1 #b9bbbe)'
+                    'maybe not crashy on contextmenu'
                     ]
             }
         ],
@@ -59,7 +59,7 @@
         stop() { }
     } : (([Plugin, Library]) => {
         const { DiscordModules, WebpackModules, Toasts, Patcher, DiscordContextMenu } = Library;
-        const { Strings, ElectronModule } = DiscordModules;
+        const { ElectronModule } = DiscordModules;
         const MemberRole = WebpackModules.getByProps('MemberRole').MemberRole;
         class plugin extends Plugin {
             constructor() {
@@ -88,7 +88,7 @@
                             type: 'separator'
                         },
                         {
-                            label: Strings.COPY_ID,
+                            label: "Copy ID",
                             action: _ => {
                                 ElectronModule.copy(props.role.id);
                             }
