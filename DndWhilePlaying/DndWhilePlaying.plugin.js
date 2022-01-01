@@ -71,11 +71,13 @@
                  const StatusStore = BdApi.findModuleByProps('getStatus', 'getState');
                  const currentUser = BdApi.findModuleByProps('getCurrentUser').getCurrentUser();
                  const status = StatusStore.getStatus(currentUser.id);
-                 if(status === 'dnd') return;
                  if(status === 'invisible') return;
-                 await BdApi.saveData("DndWhilePlaying", "status", status)
-                 BdApi.findModuleByProps('updateRemoteSettings').updateRemoteSettings({status: "dnd"})
+                 if(BdApi.getData("DndWhilePlaying", "inGame") !== true) await BdApi.saveData("DndWhilePlaying", "status", status);
+                 await BdApi.saveData("DndWhilePlaying", "inGame", true);
+                 if(status !== "dnd") BdApi.findModuleByProps("updateRemoteSettings").updateRemoteSettings({ status: "dnd" });
+                 
              }else if(games.length == 0){
+                 await BdApi.saveData("DndWhilePlaying", "inGame", false);
                  const savedStatus = BdApi.getData("DndWhilePlaying", "status");
                  BdApi.findModuleByProps('updateRemoteSettings').updateRemoteSettings({status: savedStatus})
              }
