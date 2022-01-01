@@ -68,7 +68,7 @@
          async runningGamesChange(event) {
              const { games } = event;
              if(games.length > 0) {
-                 const StatusStore = BdApi.findModuleByProps('getStatus');
+                 const StatusStore = BdApi.findModuleByProps('getStatus', 'getState');
                  const currentUser = BdApi.findModuleByProps('getCurrentUser').getCurrentUser();
                  const status = StatusStore.getStatus(currentUser.id);
                  if(status === 'dnd') return;
