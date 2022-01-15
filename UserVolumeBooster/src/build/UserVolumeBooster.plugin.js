@@ -1,7 +1,7 @@
 /**
  * @name UserVolumeBooster
  * @description Allows you to set a user's volume above the normal 200%
- * @version 1.0.0
+ * @version 1.0.1
  * @author QWERT
  */
 /*@cc_on
@@ -31,7 +31,7 @@ const config = {
 	"info": {
 		"name": "UserVolumeBooster",
 		"description": "Allows you to set a user's volume above the normal 200%",
-		"version": "1.0.0",
+		"version": "1.0.1",
 		"author": "QWERT"
 	},
 	"build": {
@@ -104,7 +104,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				}
 				patch() {
 					Patcher.after("slider", Slider.prototype, "render", ((_this, [props], ret) => {
-						if ("slider-2zxowp" !== _optionalChain([_this, "optionalAccess", _ => _.props, "optionalAccess", _2 => _2.className])) return;
+						if ("slider-BEB8u7" !== _optionalChain([_this, "optionalAccess", _ => _.props, "optionalAccess", _2 => _2.className])) return;
 						_this.props.maxValue = 200 * this.getMultiplier();
 						_this.state.range = 200 * this.getMultiplier();
 						_this.state.max = 200 * this.getMultiplier();
