@@ -170,7 +170,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
     stop() {}
 } : (([Plugin, Library]) => {
     const {DiscordModules, WebpackModules, PluginUtilities, Structs, Settings, Patcher} = Library;
-    const {React, ReactDOM, Dispatcher, UserStore, ChannelStore, NavigationUtils, UserStatusStore, SelectedChannelStore, GuildMemberStore, UserProfileModals, InviteActions} = DiscordModules;
+    const {React, ReactDOM, Dispatcher, UserStore, ChannelStore, NavigationUtils, UserStatusStore, SelectedChannelStore, GuildMemberStore, UserProfileModals, InviteActions, GuildStore} = DiscordModules;
     const MuteStore = WebpackModules.getByProps("isSuppressEveryoneEnabled");
     const isMentioned = WebpackModules.getByProps('isRawMessageMentioned');
     const Markdown = WebpackModules.getByProps("parse", "parseTopic");
@@ -584,18 +584,18 @@ module.exports = !global.ZeresPluginLibrary ? class {
         
         onMessage({message}) {
             const author = UserStore.getUser(message.author.id);
-            const channel = Structs.Channel.fromId(message.channel_id);
             const images = message.attachments.filter(e => typeof e?.content_type === "string" && e?.content_type.startsWith("image"));
             const xChannel = ChannelStore.getChannel(message.channel_id);
             const notiTime = this.settings.notiTime;
-            if(!channel || channel.id === SelectedChannelStore.getChannelId()) return false;
+            if(!xChannel || xChannel.id === SelectedChannelStore.getChannelId()) return false;
             
             let content;
             const keywordFound = this.checkKeywords(message);
             if(!this.supposedToNotify(message, xChannel) && !keywordFound) return;
             let authorString = "";
-            if(channel.guild) {
-                const colorString = GuildMemberStore.getMember(channel.guild.id, author.id)?.colorString;
+            if(xChannel.guild_id) {
+                const guild = GuildStore.getGuild(xChannel.guild_id);
+                const colorString = GuildMemberStore.getMember(xChannel.guild_id, author.id)?.colorString;
                 if(this.settings.roleColor && colorString) {
                     authorString = [
                         React.createElement("div", {
@@ -604,19 +604,19 @@ module.exports = !global.ZeresPluginLibrary ? class {
                                 display: "inline"
                             }
                         }, author.tag),
-                        ` (${channel.guild.name}, #${channel.name})`
+                        ` (${guild.name}, #${xChannel.name})`
                     ];
                 }else{
-                    authorString = `${author.tag} (${channel.guild.name}, #${channel.name})`;
+                    authorString = `${author.tag} (${guild.name}, #${xChannel.name})`;
                 }
             }
-            if(channel.type === "GROUP_DM") {
-                authorString = `${author.tag} (${channel.name})`;
-                if(!channel.name || channel.name === " " || channel.name === "") {
-                    authorString = `${author.tag} (${channel.members.map(e => e.username).join(", ")})`;
+            if(xChannel.type === 3) {
+                authorString = `${author.tag} (${xChannel.name})`;
+                if(!xChannel.name || xChannel.name === " " || xChannel.name === "") {
+                    authorString = `${author.tag} (${xChannel.rawRecipients.map(e => e.username).join(", ")})`;
                 }
             }
-            if(channel.type === "DM") {
+            if(xChannel.type === 1) {
                 authorString = `${author.tag}`;
             }
             
@@ -659,8 +659,8 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 }))
             }
 
-            if(!this.checkSettings(message, channel)) return;
-            const children = content ? content : Markdown.parse(message.content, "div", {channelId: channel.id});
+            if(!this.checkSettings(message, xChannel)) return;
+            const children = content ? content : Markdown.parse(message.content, "div", {channelId: xChannel.id});
             const time = isNaN(notiTime * 1000) ? 3000 : notiTime * 1000;
             QWERTLib.Toasts.create(children, {
                 icon: React.createElement(Avatar.default, {
@@ -727,11 +727,11 @@ module.exports = !global.ZeresPluginLibrary ? class {
             }
 
             if(ignoreDMs) {
-                if(channel.type === "DM") shouldNotify = false;
+                if(channel.type === 1) shouldNotify = false;
             }
 
             if(ignoreDMGroups) {
-                if(channel.type === "GROUP_DM") shouldNotify = false;
+                if(channel.type === 2) shouldNotify = false;
             }
 
             if(ignoredUsers.includes(message.author.id)) shouldNotify = false;
