@@ -4,7 +4,6 @@
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages
  * @invite zMnHFAKsu3
- * @version 1.2.0
  */
 
 const request = require("request");
@@ -20,7 +19,7 @@ const config = {
                 discord_id: "678556376640913408",
             }
         ],
-        version: "1.2.0",
+        version: "1.2.1",
         description: "Save messages to quickly send them later, when you need.",
         github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages",
         github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js",
@@ -79,7 +78,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
 
     stop() { }
 } : (([Plugin, Library]) => {
-    const { DiscordModules, WebpackModules, Patcher, DiscordContextMenu, Settings } = Library;
+    const { DiscordModules, WebpackModules, Patcher, ContextMenu, Settings } = Library;
     const { SettingPanel, SettingGroup } = Settings;
 
     const { React } = DiscordModules;
@@ -121,7 +120,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 collapsible: false
             });
             const div = document.createElement("div");
-            div.innerHTML = '<button class="button-38aScr lookFilled-1Gx00P colorRed-1TFJan sizeMedium-1AC_Sl grow-q77ONN">Delete All Quick Messages</button>'
+            div.innerHTML = '<button class="button-f2h6uQ lookFilled-yCfaCM colorRed-rQXKgM sizeMedium-2bFIHr grow-2sR_-F">Delete All Quick Messages</button>'
             div.onclick = _ => {
                 BdApi.showConfirmationModal('Are you sure?', 'This action is undonable. You will not be able to restore the deleted data.', {
                     confirmText: 'Delete',
@@ -168,7 +167,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
 
             categories.forEach(cat => {
                 saveToCategory.push(
-                    DiscordContextMenu.buildMenuItem({
+                    ContextMenu.buildMenuItem({
                         label: cat.name,
                         action: _ => {
                             const category = categories.filter(e => e.name === cat.name)[0];
@@ -180,7 +179,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 )
                 const catChildren = [];
                 cat.items.forEach(e => {
-                    catChildren.push(DiscordContextMenu.buildMenuItem({
+                    catChildren.push(ContextMenu.buildMenuItem({
                         label: e,
                         action: _ => {
                             if (!shouldPaste) return;
@@ -199,18 +198,18 @@ module.exports = !global.ZeresPluginLibrary ? class {
                         })
                     }))
                 });
-                catChildren.push(DiscordContextMenu.buildMenuItem({
+                catChildren.push(ContextMenu.buildMenuItem({
                     label: "Delete Category", danger: true, action: _ => {
                         BdApi.showConfirmationModal(`Delete '${cat.name}'`, [
                             React.createElement(BdApi.findModuleByDisplayName("Card"), {
                                 children: [
                                     React.createElement(BdApi.findModuleByDisplayName("Text"), {
                                         children: ["Are you sure you want to delete ", React.createElement("strong", {}, cat.name), "? This action cannot be undone."],
-                                        size: "size16-1P40sf"
+                                        size: "size16-rrJ6ag"
                                     })
                                 ],
                                 "type": "cardWarning",
-                                "className": "card-3uOWw3 spacing-ApfUws marginBottom20-32qID7",
+                                "className": "card-1LSSlz spacing-1JirW3 marginBottom20-315RVT",
                             })
                         ], {
                             danger: true,
@@ -222,15 +221,15 @@ module.exports = !global.ZeresPluginLibrary ? class {
                         })
                     }
                 }))
-                children.push(DiscordContextMenu.buildMenuItem({
+                children.push(ContextMenu.buildMenuItem({
                     label: cat.name,
                     children: catChildren
                 }));
             })
 
             messages.forEach(message => {
-                if (messages.indexOf(message) === 0) children.push(DiscordContextMenu.buildMenuItem({ type: 'separator' }))
-                children.push(DiscordContextMenu.buildMenuItem({
+                if (messages.indexOf(message) === 0) children.push(ContextMenu.buildMenuItem({ type: 'separator' }))
+                children.push(ContextMenu.buildMenuItem({
                     label: message,
                     action: _ => {
                         if (!shouldPaste) return;
@@ -256,10 +255,10 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 });
 
                 ret.props.children.push(
-                    DiscordContextMenu.buildMenuItem({
+                    ContextMenu.buildMenuItem({
                         type: "separator"
                     }),
-                    DiscordContextMenu.buildMenuItem({
+                    ContextMenu.buildMenuItem({
                         label: "Save as Quick Message",
                         disabled: props.editor.containerRef.current.textContent.slice(0, -1) == props.editor.props.placeholder,
                         action: _ => {
@@ -269,8 +268,8 @@ module.exports = !global.ZeresPluginLibrary ? class {
                         },
                         children: [
                             saveToCategory,
-                            DiscordContextMenu.buildMenuItem({ type: 'separator' }),
-                            DiscordContextMenu.buildMenuItem({
+                            ContextMenu.buildMenuItem({ type: 'separator' }),
+                            ContextMenu.buildMenuItem({
                                 label: 'Create a category...',
                                 action: _ => {
                                     const FormItem = BdApi.findModuleByDisplayName("FormItem");
@@ -291,9 +290,9 @@ module.exports = !global.ZeresPluginLibrary ? class {
                                                 }),
                                                 React.createElement(Text, {
                                                     children: ["This field is required"],
-                                                    size: "size12-3cLvbJ",
-                                                    color: "colorStatusRed-1YV2rj",
-                                                    className: "error-chiOuv marginTop8-1DLZ1n",
+                                                    size: "size12-oc4dx4",
+                                                    color: "colorStatusRed-3FRrPF",
+                                                    className: "error-fZAH7V marginTop8-24uXGp",
                                                 })
                                             ]
                                         })
@@ -319,9 +318,9 @@ module.exports = !global.ZeresPluginLibrary ? class {
                             })
                         ]
                     }),
-                    DiscordContextMenu.buildMenuItem({
+                    ContextMenu.buildMenuItem({
                         label: "Quick Messages",
-                        children: children.length > 0 ? children : DiscordContextMenu.buildMenuItem({ label: 'None' }),
+                        children: children.length > 0 ? children : ContextMenu.buildMenuItem({ label: 'None' }),
                     }));
             };
             Patcher.after(SlateTextAreaContextMenu, "default", patch);
