@@ -3,7 +3,7 @@
     * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/TypingUsersAvatars/TypingUsersAvatars.plugin.js
     * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/TypingUsersAvatars/TypingUsersAvatars.plugin.js
     * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/TypingUsersAvatars
-    * @version 1.0.2
+    * @version 1.0.3
     * @description Shows avatars of typing users.
     */
     
@@ -19,7 +19,7 @@
                      name: 'QWERT'
                  }
              ],
-             version: '1.0.2',
+             version: '1.0.3',
              description: 'Shows avatars of typing users.',
          },
          changelog: [
@@ -97,17 +97,17 @@
                Utilities.suppressErrors(this.patch.bind(this))();
     
                PluginUtilities.addStyle('TypingUsersAvatars', `
-                .typing-2GQL18 > .text-1y-e8- {
+                .typing-2J1mQU > .text-3S7XCz {
                     margin: 0;
                 }
                   
-                .typing-2GQL18 .wrapper-3t9DeA {
+                .typing-2J1mQU .wrapper-1VLyxH {
                     display: flex;
                     margin: 0 4px;
                 }
     
-                .typing-2GQL18 > .text-1y-e8-,
-                .typing-2GQL18 > .text-1y-e8- > strong {
+                .typing-2J1mQU > .text-3S7XCz,
+                .typing-2J1mQU > .text-3S7XCz > strong {
                     display: contents;
                 }
 
@@ -116,7 +116,7 @@
                     margin-right: 5px;
                 }
 
-                .several-users > .avatarSize-EXG1Is {
+                .several-users > .avatarSize-1KpZ5E {
                     margin: 0;
                 }
                 `)
