@@ -1,6 +1,6 @@
 /**
  * @name GrammarCorrect
- * @version 1.0.0
+ * @version 1.0.1
  * @description Corrects your grammar mistakes just like Grammarly
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/GrammarCorrect
@@ -169,7 +169,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 								duration: 200,
 								intensity: 3
 							});
-							const textArea = document.querySelector(".textArea-12jD-V");
+							const textArea = document.querySelector(".textArea-2CLwUE");
 							const editor = getInternalInstance(textArea).return.stateNode.editorRef;
 							editor.moveToRangeOfDocument();
 							editor.delete();
