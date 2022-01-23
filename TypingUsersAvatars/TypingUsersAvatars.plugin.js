@@ -19,7 +19,7 @@
                      name: 'QWERT'
                  }
              ],
-             version: '1.0.2',
+             version: '1.0.3',
              description: 'Shows avatars of typing users.',
          },
          changelog: [
