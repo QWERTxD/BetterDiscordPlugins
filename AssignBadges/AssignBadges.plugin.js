@@ -1,6 +1,6 @@
 /**
  * @name AssignBadges
- * @version 1.0.21
+ * @version 1.0.22
  * @description Allows you to locally assign badges to users through the user context menu.
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/AssignBadges
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "AssignBadges",
-		"version": "1.0.21",
+		"version": "1.0.22",
 		"description": "Allows you to locally assign badges to users through the user context menu.",
 		"authors": [{
 			"name": "QWERT",
@@ -465,16 +465,16 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				name: "Booster - 2 Years",
 				time: 24
 			}];
-			const UserContextMenus = external_PluginApi_namespaceObject.WebpackModules.findAll((m => m.default?.displayName.endsWith("UserContextMenu")));
+			const ContextMenus = external_PluginApi_namespaceObject.WebpackModules.findAll((m => m.default?.displayName.endsWith("ContextMenu")));
 			const UserGenericContextMenu = external_PluginApi_namespaceObject.WebpackModules.find((m => "UserGenericContextMenu" === m.default?.displayName));
 			const BotTag = external_PluginApi_namespaceObject.WebpackModules.getByDisplayName("BotTag");
 			const MessageAuthor = external_PluginApi_namespaceObject.WebpackModules.find((m => m.default.toString().indexOf("userOverride") > -1));
 			const NameTag = external_PluginApi_namespaceObject.WebpackModules.find((m => "DiscordTag" === m.default.displayName));
 			const MemberListItem = external_PluginApi_namespaceObject.WebpackModules.find((m => "MemberListItem" === m.default.displayName));
-			UserContextMenus.push(UserGenericContextMenu);
+			ContextMenus.push(UserGenericContextMenu);
 			class AssignBadges extends(external_BasePlugin_default()) {
 				onStart() {
-					this.patchUserContextMenus();
+					this.patchContextMenus();
 					this.patchUserFlagGetter();
 					this.patchUserStore();
 					this.patchMessageAuthor();
@@ -544,8 +544,8 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						});
 					}));
 				}
-				patchUserContextMenus() {
-					for (const UserContextMenu of UserContextMenus) external_PluginApi_namespaceObject.Patcher.after(UserContextMenu, "default", ((_this, [props], ret) => {
+				patchContextMenus() {
+					for (const ContextMenu of ContextMenus) external_PluginApi_namespaceObject.Patcher.after(ContextMenu, "default", ((_this, [props], ret) => {
 						const settings = this.getSettings();
 						const tree = external_PluginApi_namespaceObject.Utilities.getNestedProp(ret, "props.children.props.children");
 						const userBadges = getFlags.default({
