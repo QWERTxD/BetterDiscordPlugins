@@ -1,6 +1,6 @@
 /**
  * @name GrammarCorrect
- * @version 1.0.0
+ * @version 1.0.1
  * @description Corrects your grammar mistakes just like Grammarly
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/GrammarCorrect
