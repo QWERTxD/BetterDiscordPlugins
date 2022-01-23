@@ -20,7 +20,7 @@
                  discord_id: "678556376640913408",
              }
          ],
-         version: "0.0.2",
+         version: "0.0.3",
          description: "Automatically updates your status to Do Not Disturb when playing games and resets it back when stopped playing.",
          github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/DndWhilePlaying",
          github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/DndWhilePlaying/DndWhilePlaying.plugin.js",
