@@ -2,11 +2,18 @@ import { Patcher, PluginUtilities, Utilities, WebpackModules, Toasts } from "@zl
 import BasePlugin from "@zlibrary/plugin";
 import { MenuGroup, MenuItem } from "@discord/contextmenu";
 import { UserStore } from "@zlibrary/discord";
+import UserFlags from './modules/UserFlags';
+import { joinClassNames } from '@discord/utils';
 
 const months = function(n) { return n * 2629800000 };
 const day = 86400000;
 const { MenuCheckboxItem, MenuRadioItem } = WebpackModules.getByProps("MenuRadioItem");
-const classes = WebpackModules.getByProps("container", "profileBadge18", "profileBadge22", "profileBadge22")
+const classes = {
+	...WebpackModules.getByProps("executedCommand", "buttonContainer", "applicationName"),
+	...WebpackModules.getByProps("container", "profileBadge18", "profileBadge22", "profileBadge22")
+}
+
+const memberlistClasses = WebpackModules.getByProps("placeholder", "activity", "icon");
 
 const getFlags = WebpackModules.find(m => {
 	let d = m.default.toString();
@@ -15,30 +22,12 @@ const getFlags = WebpackModules.find(m => {
 
 const User = WebpackModules.getByPrototypes("getAvatarURL");
 const BadgeList = WebpackModules.getByProps("BadgeSizes").default;
-const { BadgeKeys } = WebpackModules.getByProps("BadgeKeys");
-const { UserFlags } = WebpackModules.getByProps("UserFlags");
-
-const flags = [
-	{ id: "STAFF", value: UserFlags["STAFF"], name: "Discord Staff", key: BadgeKeys["STAFF"] },
-	{ id: "PARTNER", value: UserFlags["PARTNER"], name: "Partnered Server Owner", key: BadgeKeys["PARTNER"] },
-	{ id: "HYPESQUAD", value: UserFlags["HYPESQUAD"], name: "HypeSquad Events", key: BadgeKeys["HYPESQUAD"] },
-	{ id: "HYPESQUAD_ONLINE_HOUSE_1", value: UserFlags["HYPESQUAD_ONLINE_HOUSE_1"], name: "House Bravery", key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_1"] },
-	{ id: "HYPESQUAD_ONLINE_HOUSE_2", value: UserFlags["HYPESQUAD_ONLINE_HOUSE_2"], name: "House Brilliance", key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_2"] },
-	{ id: "HYPESQUAD_ONLINE_HOUSE_3", value: UserFlags["HYPESQUAD_ONLINE_HOUSE_3"], name: "House Balance", key: BadgeKeys["HYPESQUAD_ONLINE_HOUSE_3"] },
-	{ id: "EARLY_VERIFIED_BOT", value: UserFlags["VERIFIED_BOT"], name: "Verified Bot", key: BadgeKeys["VERIFIED_BOT"] },
-	{ id: "BUG_HUNTER_LEVEL_1", value: UserFlags["BUG_HUNTER_LEVEL_1"], name: "Bug Hunter Level 1", key: BadgeKeys["BUG_HUNTER_LEVEL_1"] },
-	{ id: "BUG_HUNTER_LEVEL_2", value: UserFlags["BUG_HUNTER_LEVEL_2"], name: "Bug Hunter Level 2", key: BadgeKeys["BUG_HUNTER_LEVEL_2"] },
-	{ id: "EARLY_SUPPORTER", value: UserFlags["PREMIUM_EARLY_SUPPORTER"], name: "Early Supporter", key: BadgeKeys["EARLY_SUPPORTER"] },
-	{ id: "EARLY_VERIFIED_DEVELOPER", value: UserFlags["VERIFIED_DEVELOPER"], name: "Early Verified Bot Developer", key: BadgeKeys["EARLY_VERIFIED_DEVELOPER"] },
-	{ id: "CERTIFIED_MODERATOR", value: UserFlags["CERTIFIED_MODERATOR"], name: "Discord Certified Moderator", key: BadgeKeys["CERTIFIED_MODERATOR"] },
-	{ id: "PREMIUM", value: 0, name: "Nitro", key: BadgeKeys["PREMIUM"] }
-]
 
 const boosts = [
 	{ id: "boost1", value: 0 << 0, name: "Booster - 1 Month", time: 1 },
 	{ id: "boost2", value: 0 << 0, name: "Booster - 2 Months", time: 2 },
 	{ id: "boost3", value: 0 << 0, name: "Booster - 3 Months", time: 3 },
-	{ id: "boost4", value: 0 << 0, name: "Booster - 6 Months", time: 4 },
+	{ id: "boost4", value: 0 << 0, name: "Booster - 6 Months", time: 6 },
 	{ id: "boost5", value: 0 << 0, name: "Booster - 9 Months", time: 9 },
 	{ id: "boost6", value: 0 << 0, name: "Booster - 1 Year", time: 12 },
 	{ id: "boost7", value: 0 << 0, name: "Booster - 1 Year and 3 Months", time: 15 },
@@ -49,20 +38,34 @@ const boosts = [
 const UserContextMenus = WebpackModules.findAll(m => m.default?.displayName.endsWith("UserContextMenu"));
 const UserGenericContextMenu = WebpackModules.find(m => m.default?.displayName === "UserGenericContextMenu")
 const BotTag = WebpackModules.getByDisplayName("BotTag");
+const MessageAuthor = WebpackModules.find(m => m.default.toString().indexOf("userOverride") > -1)
+const NameTag = WebpackModules.find(m => m.default.displayName === "DiscordTag");
+const MemberListItem = WebpackModules.find(m => m.default.displayName === "MemberListItem");
+
 UserContextMenus.push(UserGenericContextMenu);
 
 export default class AssignBadges extends BasePlugin {
 	onStart() {
 		this.patchUserContextMenus();
-		this.patchFlagGetter();
+		this.patchUserFlagGetter();
 		this.patchUserStore();
+		this.patchMessageAuthor();
+		this.patchNameTag();
+		this.patchMemberlistItem();
 	}
 
 	onStop() {
 		Patcher.unpatchAll();
 	}
 
-	patchFlagGetter() {
+	isUserVerifiedBot(user) {
+		const settings = this.getSettings();
+		const userSettings = settings?.[user.id];
+		if(userSettings && userSettings?.EARLY_VERIFIED_BOT) return true;
+		return false;
+	}
+
+	patchUserFlagGetter() {
 		Patcher.before(getFlags, "default", (_this, [props], ret) => {
 			const settings = this.getSettings()?.[props.user.id];
 			if(settings) {
@@ -83,22 +86,59 @@ export default class AssignBadges extends BasePlugin {
 			const settings = this.getSettings();
 			const userSettings = settings?.[id];
 			if(userSettings) {
-				const userSettings = settings[id];
-				const newFlags = Object.keys(userSettings).filter(e => userSettings[e]).map(e => flags[flags.findIndex(f => f.id === e)]).filter(e => e).map(e => e.value).reduce((a, b) => a + b, 0);
+				const newFlags = Object.keys(userSettings).filter(e => userSettings[e]).map(e => UserFlags.find(f => f.id === e)).filter(e => e).map(e => e.value).reduce((a, b) => a + b, 0);
 				ret.publicFlags = newFlags;
+			}
+		})
+	}
 
-				if(userSettings?.EARLY_VERIFIED_BOT === true) {
-					ret.bot = true;
-				}
+	patchMessageAuthor() {
+		Patcher.after(MessageAuthor, 'default', (_this, [props], ret) => {
+			const user = props.message.author;
+			if(!user) return;
+
+			if(this.isUserVerifiedBot(user)) {
+				const badgeIndex = props.compact ? 0 : 2;
+				const displayClass = props.compact ? classes.botTagCompact : classes.botTagCozy;
+				ret.props.children[badgeIndex] = (
+					<BotTag
+					verified={true}
+					className={joinClassNames(displayClass, classes.botTag)}
+					/>
+				)
+			}
+		})
+	}
+
+	patchNameTag() {
+		Patcher.after(NameTag, 'default', (_this, [props], ret) => {
+			const user = props.user;
+			if(!user) return;
+
+			if(this.isUserVerifiedBot(user)) {
+				ret.props.botType = 0;
+				ret.props.botVerified = true;
+			}		
+		})
+	}
+
+	patchMemberlistItem() {
+		Patcher.after(MemberListItem.default.prototype, 'renderBot', (_this, [props], ret) => {
+			const user = _this.props.user;
+			if(this.isUserVerifiedBot(user)) {
+				return (
+					<BotTag
+					verified={true}
+					className={memberlistClasses.botTag}
+					/>
+				)
 			}
 		})
 	}
 
 	patchUserContextMenus() {
-		for(var n = 0; n < UserContextMenus.length; n++) {
-			const ContextMenu = UserContextMenus[n];
-
-			Patcher.after(ContextMenu, "default", (_this, [props], ret) => {
+		for(const UserContextMenu of UserContextMenus) {
+			Patcher.after(UserContextMenu, "default", (_this, [props], ret) => {
 				const settings = this.getSettings();
 				const tree = Utilities.getNestedProp(ret, "props.children.props.children");
 				const userBadges = getFlags.default({user: UserStore.getUser(props.user.id)}).map(badge => badge?.key);
@@ -108,7 +148,7 @@ export default class AssignBadges extends BasePlugin {
 					id="assign-badge"
 					label="Manage Badges"
 					children={
-						[flags.map(flag => {
+						[UserFlags.map(flag => {
 							const [state, setState] = React.useState((settings?.[props.user.id]?.hasOwnProperty(flag.id) ? settings?.[props.user.id]?.[flag.id] : ~userBadges.indexOf(flag.key)));
 							return <MenuCheckboxItem
 							id={flag.id}

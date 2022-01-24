@@ -1,7 +1,7 @@
 {
 	"info": {
 		"name": "AssignBadges",
-		"version": "1.0.1",
+		"version": "1.0.21",
 		"description": "Allows you to locally assign badges to users through the user context menu.",
 		"authors": [
 			{
@@ -31,15 +31,7 @@
 			"type": "fixed",
 			"title": "Fixes",
 			"items": [
-				"Nitro will now be added to users when checked",
-				"Verified Bot Badge will now work properly and be shown"
-			]
-		},
-		{
-			"type": "added",
-			"title": "New Stuff",
-			"items": [
-				"Verified Bot Badge can be assigned to users"
+				"Verified Bot Badge will now be shown for users in memberlist as well"
 			]
 		}
 	]

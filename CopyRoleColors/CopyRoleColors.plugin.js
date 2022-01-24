@@ -58,6 +58,7 @@ module.exports = !global.ZeresPluginLibrary
                     body
                   );
                 }
+<<<<<<< HEAD
               );
             },
           }
@@ -75,12 +76,97 @@ module.exports = !global.ZeresPluginLibrary
       const MemberRole = WebpackModules.getByProps("MemberRole").MemberRole;
 
       class plugin extends Plugin {
+=======
+            ],
+            version: '0.0.2',
+            description: 'Adds option to copy role color in the role context menu.',
+        },
+        changelog: [
+            {
+                title: 'Fixed',
+                type: 'fixed',
+                items: [
+                    'maybe not crashy on contextmenu'
+                    ]
+            }
+        ],
+        defaultConfig: [  ]
+    };
+    
+    module.exports = !global.ZeresPluginLibrary ? class {
+>>>>>>> origin/development
         constructor() {
           super();
         }
+<<<<<<< HEAD
 
         onStart() {
           this.patch();
+=======
+    
+        load() {
+            BdApi.showConfirmationModal('Library plugin is needed',
+                `The library plugin needed for AQWERT'sPluginBuilder is missing. Please click Download Now to install it.`, {
+                    confirmText: 'Download',
+                    cancelText: 'Cancel',
+                    onConfirm: () => {
+                        request.get('https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js', (error, response, body) => {
+                            if (error)
+                                return electron.shell.openExternal('https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js');
+    
+                            fs.writeFileSync(path.join(BdApi.Plugins.folder, '0PluginLibrary.plugin.js'), body);
+                        });
+                    }
+                });
+        }
+    
+        start() { }
+    
+        stop() { }
+    } : (([Plugin, Library]) => {
+        const { DiscordModules, WebpackModules, Toasts, Patcher, DiscordContextMenu } = Library;
+        const { ElectronModule } = DiscordModules;
+        const MemberRole = WebpackModules.getByProps('MemberRole').MemberRole;
+        class plugin extends Plugin {
+            constructor() {
+                super();
+            }
+            
+            onStart() { 
+                this.patch();    
+            }
+    
+            onStop() { 
+                Patcher.unpatchAll();
+            }
+
+            patch() {
+                Patcher.after(MemberRole, 'render', (_, [props], ret) => {
+                    const newContextMenu = DiscordContextMenu.buildMenu([
+                        {
+                            label: 'Copy Role Color',
+                            action: _ => {
+                                ElectronModule.copy(props.role.colorString || '#b9bbbe');
+                                Toasts.success(`Successfully copied role color for <strong>${props.role.name}</strong>!`)
+                            }
+                        },
+                        {
+                            type: 'separator'
+                        },
+                        {
+                            label: "Copy ID",
+                            action: _ => {
+                                ElectronModule.copy(props.role.id);
+                            }
+                        }
+                    ]);
+
+                    ret.props.children.props.onContextMenu = e => {
+                        DiscordContextMenu.openContextMenu(e, newContextMenu)
+                    }
+                });
+                }    
+>>>>>>> origin/development
         }
 
         onStop() {
