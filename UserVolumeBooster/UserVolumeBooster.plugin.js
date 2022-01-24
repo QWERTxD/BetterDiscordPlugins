@@ -31,7 +31,7 @@ const config = {
 	"info": {
 		"name": "UserVolumeBooster",
 		"description": "Allows you to set a user's volume above the normal 200%",
-		"version": "1.0.0",
+		"version": "1.0.1",
 		"author": "QWERT"
 	},
 	"build": {
