@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "GlobalReplies",
-		"version": "1.0.0",
+		"version": "1.0.1",
 		"description": "Allows you to reply to messages outside of the channel they were sent in.",
 		"authors": [{
 			"name": "QWERT",
@@ -241,6 +241,12 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					}), React.createElement(Variable, {
 						title: "{{message}}",
 						desc: "Will be replaced with the user message"
+<<<<<<< HEAD
+					}), React.createElement(Variable, {
+						title: "{{newLine}}",
+						desc: "Switching to a new line"
+=======
+>>>>>>> origin/development
 					})]
 				})];
 			}
@@ -265,10 +271,10 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			const {
 				getChannels
 			} = getByProps("getChannels");
-			const GuildPermissions = getByProps("can");
+			const GuildPermissions = getByProps("getChannelPermissions");
 			const {
 				Permissions
-			} = getByProps("Permissions");
+			} = getByProps("API_HOST");
 			class GlobalReplies extends(external_BasePlugin_default()) {
 				onStart() {
 					this.patch();
@@ -299,7 +305,12 @@ function buildPlugin([BasePlugin, PluginApi]) {
 											author: `<@${props.message.author.id}>`,
 											authorTag: props.message.author.tag,
 											message: props.message.content,
+<<<<<<< HEAD
+											channel: `<#${channel.id}>`,
+											newLine: "\n"
+=======
 											channel: `<#${channel.id}>`
+>>>>>>> origin/development
 										})
 									});
 								},

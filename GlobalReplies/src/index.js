@@ -20,8 +20,8 @@ const Menu = getByProps("MenuItem");
 const ChannelText = getByName("ChannelText");
 const { getChannels } = getByProps("getChannels");
 
-const GuildPermissions = getByProps("can");
-const { Permissions } = getByProps("Permissions");
+const GuildPermissions = getByProps("getChannelPermissions");
+const { Permissions } = getByProps("API_HOST");
 
 export default class GlobalReplies extends BasePlugin {
 	onStart() {
