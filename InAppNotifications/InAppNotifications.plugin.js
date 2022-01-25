@@ -1,35 +1,15 @@
 /**
-<<<<<<< HEAD
  * @name AppNotifications
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
- * @version 1.0.2
- */
-=======
-* @name AppNotifications
-* @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
-* @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
-* @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
-* @version 1.0.1
+ * @version 1.0.3
 */
->>>>>>> origin/development
-
 const request = require("request");
 const fs = require("fs");
 const path = require("path");
 
 const config = {
-<<<<<<< HEAD
-  info: {
-    name: "AppNotifications",
-    authors: [
-      {
-        name: "QWERT",
-        discord_id: "678556376640913408",
-        github_username: "QWERTxD",
-      },
-=======
     info: {
         name: "AppNotifications",
         authors: [
@@ -39,31 +19,18 @@ const config = {
                 github_username: "QWERTxD"
             }
         ],
-        version: "1.0.1",
-        description: "Displays notifications such as new messages, friends added in Discord.",
-    },
-    changelog: [
-        {
-            title: "Fixed",
-            type: "fixed",
-            items: [
-                "Temporary fix, thanks Strencher."
-            ]
-        }
->>>>>>> origin/development
-    ],
     github_raw:
       "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js",
-    version: "1.0.2",
+    version: "1.0.3",
     description:
       "Displays notifications such as new messages, friends added in Discord.",
-  },
+	},
   changelog: [
     {
-      title: "Fixed",
-      type: "fixed",
-      items: ["fixed everything stop spamming my dms."],
-    },
+      title: "Fix v2",
+      type: "fix v2",
+      items: ["fixed mess with github headers, etc"],
+    }
   ],
   defaultConfig: [
     {
@@ -88,7 +55,7 @@ const config = {
         { label: "Top Left", value: 1 },
         { label: "Bottom Right", value: 2 },
         { label: "Bottom Left", value: 3 },
-      ],
+      ]
     },
     {
       type: "textbox",
@@ -172,9 +139,9 @@ const config = {
       note: "Do not push notifications if the message was sent from a specific channel.",
       id: "ignoredChannels",
       value: "",
-    },
-  ],
-};
+    }
+  ]
+  };
 
 module.exports = !global.ZeresPluginLibrary
   ? class {
@@ -745,51 +712,7 @@ module.exports = !global.ZeresPluginLibrary
             }`
           );
         }
-<<<<<<< HEAD
-=======
-        
-        onMessage({message}) {
-            const author = UserStore.getUser(message.author.id);
-            const channel = Structs.Channel.fromId(message.channel_id);
-            const images = message.attachments.filter(e => typeof e?.content_type === "string" && e?.content_type.startsWith("image"));
-            const xChannel = ChannelStore.getChannel(message.channel_id);
-            const notiTime = this.settings.notiTime;
-            if(!channel || channel.id === SelectedChannelStore.getChannelId()) return false;
-            
-            let content;
-            const keywordFound = this.checkKeywords(message);
-            if(!this.supposedToNotify(message, xChannel) && !keywordFound) return;
-            let authorString = "";
-            if(channel.guild) {
-                const colorString = GuildMemberStore.getMember(channel.guild.id, author.id)?.colorString;
-                if(this.settings.roleColor && colorString) {
-                    authorString = [
-                        React.createElement("div", {
-                            style: {
-                                color: colorString ?? "white",
-                                display: "inline"
-                            }
-                        }, author.tag),
-                        ` (${channel.guild.name}, #${channel.name})`
-                    ];
-                }else{
-                    authorString = `${author.tag} (${channel.guild.name}, #${channel.name})`;
-                }
-            }
-            if(channel.type === "GROUP_DM") {
-                authorString = `${author.tag} (${channel.name})`;
-                if(!channel.name || channel.name === " " || channel.name === "") {
-                    authorString = `${author.tag} (${channel.members.map(e => e.username).join(", ")})`;
-                }
-            }
-            if(channel.type === "DM") {
-                authorString = `${author.tag}`;
-            }
-            
-            if(message.call) {
-                content = [React.createElement(CallJoin, {style: {height: "16px", width: "16px", color: colors.online, marginRight: "2px"}}), "Started a call"]
-            }
->>>>>>> origin/development
+
 
         onMessage({ message }) {
           const author = UserStore.getUser(message.author.id);
