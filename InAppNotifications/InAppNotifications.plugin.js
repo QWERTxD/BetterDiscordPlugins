@@ -3,9 +3,8 @@
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
- * @version 1.0.3
+ * @version 1.0.2
 */
-  
 const request = require("request");
 const fs = require("fs");
 const path = require("path");
@@ -22,24 +21,16 @@ const config = {
         ],
     github_raw:
       "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js",
-    version: "1.0.3",
+    version: "1.0.2",
     description:
       "Displays notifications such as new messages, friends added in Discord.",
 	},
   changelog: [
     {
-      title: "Fixed v2",
-      type: "fixed v2",
-      items: ["fixed github mess with headers, etc"],
+      title: "Fixed",
+      type: "fixed",
+      items: ["fixed everything stop spamming my dms."],
     }
-	  
-	 
-			  
-	  
-				
-		 
-						   
-						  
   ],
   defaultConfig: [
     {
@@ -151,7 +142,6 @@ const config = {
     }
   ]
   };
-					 
 
 module.exports = !global.ZeresPluginLibrary
   ? class {
@@ -274,15 +264,11 @@ module.exports = !global.ZeresPluginLibrary
         function useState(collector) {
           collector = typeof collector === "function" ? collector : (e) => e;
           const forceUpdate = React.useReducer((e) => e + 1, 0)[1];
-		  
-
-									  
 
           React.useEffect(() => {
             const handler = () => forceUpdate();
 
             listeners.add(handler);
-
 
             return () => listeners.delete(handler);
           }, []);
@@ -421,52 +407,14 @@ module.exports = !global.ZeresPluginLibrary
                       onManualClose ? onManualClose() : () => {};
                       setReadyToClose(true);
                     },
-		   
-			
-				 
-		   
-					  
-							   
-															
-																	
-										  
-						   
-															  
-																	  
-																												
-						   
-																		 
                   },
-												 
-							
-																 
-															
-									  
-													   
-																																			
-										 
-														   
-														 
                   React.createElement(CloseIcon)
                 ),
               ],
             });
-						   
-													
-															
-													   
-												  
-												 
-																		   
           },
-							   
-														   
-					 
-				  
-			  
 
           detroy(id) {
-													
             const state = api.getState().toasts;
             const toast = state.find((e) => e.id === id);
             if (!toast) return false;
@@ -486,15 +434,10 @@ module.exports = !global.ZeresPluginLibrary
 
             return id;
           },
-			  
 
           initialize() {
             const DOMElement = document.createElement("div");
             DOMElement.className = "qwert-toasts";
-													  
-
-										
-														   
 
             function QWERTToasts() {
               const toasts = useStore((s) => s.toasts);
@@ -505,7 +448,6 @@ module.exports = !global.ZeresPluginLibrary
                 })
               );
             }
-						
 
             ReactDOM.render(React.createElement(QWERTToasts, {}), DOMElement);
             if (document.querySelector(".qwert-toasts")) return;
@@ -810,16 +752,6 @@ module.exports = !global.ZeresPluginLibrary
               ];
             } else {
               authorString = `${author.tag} (${guild.name}, #${channel.name})`;
-	  
-																	
-					  
-					  
-																							 
-				 
-			 
-											 
-																 
-																				  
             }
           }
           if (channel.type === ChannelTypes["GROUP_DM"]) {
@@ -893,19 +825,11 @@ module.exports = !global.ZeresPluginLibrary
               }),
               Markdown.parse(message.content, "div", { channelId: channel.id }),
             ];
-												   
-									   
-							
 
-										  
             if (message.content === "") {
               content = [
-			 
                 React.createElement(StickerIcon, {
                   style: { height: "16px", width: "16px", marginRight: "2px" },
-																												 
-																		 
-											  
                 }),
                 "Sticker",
               ];
@@ -966,17 +890,6 @@ module.exports = !global.ZeresPluginLibrary
             .map((e) => e.trim())
             .filter((e) => e !== "");
           if (keywords.length === 0) return false;
-	   
-		
-		 
-		  
-												   
-			
-										  
-													
-																		 
-																							 
-								 
 
           for (let keyword of keywords) {
             keyword = this.escapeRegex(keyword);
