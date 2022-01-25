@@ -3,7 +3,7 @@
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
- * @version 1.0.2
+ * @version 1.0.3
 */
 const request = require("request");
 const fs = require("fs");
@@ -21,15 +21,15 @@ const config = {
         ],
     github_raw:
       "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js",
-    version: "1.0.2",
+    version: "1.0.3",
     description:
       "Displays notifications such as new messages, friends added in Discord.",
 	},
   changelog: [
     {
-      title: "Fixed",
-      type: "fixed",
-      items: ["fixed everything stop spamming my dms."],
+      title: "Fix v2",
+      type: "fix v2",
+      items: ["fixed mess with github headers, etc"],
     }
   ],
   defaultConfig: [
