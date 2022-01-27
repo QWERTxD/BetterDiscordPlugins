@@ -3,7 +3,7 @@
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
- * @version 1.0.3
+ * @version 1.0.4
 */
 const request = require("request");
 const fs = require("fs");
@@ -21,15 +21,15 @@ const config = {
         ],
     github_raw:
       "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js",
-    version: "1.0.3",
+    version: "1.0.4",
     description:
       "Displays notifications such as new messages, friends added in Discord.",
 	},
   changelog: [
     {
-      title: "Fix v2",
-      type: "fix v2",
-      items: ["fixed mess with github headers, etc"],
+      title: "Group DM fix",
+      type: "Group DM fix",
+      items: ["Fixed Group DMs not showing notifications/crashing while there is no group name. They show up properly now (shows usernames of people in group)"],
     }
   ],
   defaultConfig: [
@@ -716,7 +716,7 @@ module.exports = !global.ZeresPluginLibrary
 
         onMessage({ message }) {
           const author = UserStore.getUser(message.author.id);
-          const channel = ChannelStore.getChannel(message.channel_id);
+		  const channel = ChannelStore.getChannel(message.channel_id);
           const images = message.attachments.filter(
             (e) =>
               typeof e?.content_type === "string" &&
@@ -756,10 +756,8 @@ module.exports = !global.ZeresPluginLibrary
           }
           if (channel.type === ChannelTypes["GROUP_DM"]) {
             authorString = `${author.tag} (${channel.name})`;
-            if (!channel.name || channel.name === " " || channel.name === "") {
-              authorString = `${author.tag} (${channel.members
-                .map((e) => e.username)
-                .join(", ")})`;
+			if (!channel.name || channel.name === " " || channel.name === "") {
+              authorString = `${author.tag} (${channel.rawRecipients.map((e) => e.username).join(", ")})`;
             }
           }
           if (channel.type === ChannelTypes["DM"]) {
@@ -884,11 +882,7 @@ module.exports = !global.ZeresPluginLibrary
         checkKeywords(message) {
           let found = false;
           const { content } = message;
-          const keywords = this.settings.keywords
-            .trim()
-            .split(",")
-            .map((e) => e.trim())
-            .filter((e) => e !== "");
+          const keywords = this.settings.keywords.trim().split(",").map((e) => e.trim()).filter((e) => e !== "");
           if (keywords.length === 0) return false;
 
           for (let keyword of keywords) {
