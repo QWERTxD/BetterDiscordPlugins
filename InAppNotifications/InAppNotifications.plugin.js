@@ -3,7 +3,7 @@
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
- * @version 1.0.4
+ * @version 1.0.5
 */
 const request = require("request");
 const fs = require("fs");
@@ -21,15 +21,15 @@ const config = {
         ],
     github_raw:
       "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js",
-    version: "1.0.4",
+    version: "1.0.5",
     description:
       "Displays notifications such as new messages, friends added in Discord.",
 	},
   changelog: [
     {
-      title: "Group DM fix",
-      type: "Group DM fix",
-      items: ["Fixed Group DMs not showing notifications/crashing while there is no group name. They show up properly now (shows usernames of people in group)"],
+      title: "Added notification order",
+      type: "Added notification order",
+      items: ["Added config option to change the notification order, top to bottom or bottom to top"],
     }
   ],
   defaultConfig: [
@@ -55,6 +55,17 @@ const config = {
         { label: "Top Left", value: 1 },
         { label: "Bottom Right", value: 2 },
         { label: "Bottom Left", value: 3 },
+      ]
+    },
+    {
+      type: "dropdown",
+      name: "Notifications Order",
+      note: "Note: a client reload is required for changes to take effect. Change the order in how the notifications appear.",
+      value: 0,
+      id: "notiOrder",
+      options: [
+        { label: "Top to Bottom", value: 0 },
+        { label: "Bottom to Top", value: 1 },
       ]
     },
     {
@@ -618,7 +629,11 @@ module.exports = !global.ZeresPluginLibrary
                     : "flex-start"
                 };
                 display: flex;
-                flex-direction: column;
+                flex-direction: ${
+                  [0].includes(this.settings.notiOrder)
+                   ? "column" 
+                   : "column-reverse"
+                };
                 pointer-events: none;
                 z-index: 9999;
                }
