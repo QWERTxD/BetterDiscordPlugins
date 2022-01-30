@@ -1,6 +1,6 @@
 /**
  * @name GrammarCorrect
- * @version 1.0.2
+ * @version 1.0.3
  * @description Corrects your grammar mistakes just like Grammarly
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/GrammarCorrect
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "GrammarCorrect",
-		"version": "1.0.2",
+		"version": "1.0.3",
 		"description": "Corrects your grammar mistakes just like Grammarly",
 		"authors": [{
 			"name": "QWERT",
@@ -119,17 +119,25 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			ComponentDispatch
 		} = getByProps("ComponentDispatch");
 		const Menu = getByProps("MenuItem");
-		const SlateTextAreaContextMenu = get((m => {
-			var _m$default;
-			return "SlateTextAreaContextMenu" === (null === m || void 0 === m ? void 0 : null === (_m$default = m.default) || void 0 === _m$default ? void 0 : _m$default.displayName);
-		}));
+		async function getSlateTextAreaContextMenu() {
+			let ret = undefined;
+			while(ret == undefined) {
+				ret = get((m => {
+					var _m$default;
+					return "SlateTextAreaContextMenu" === (null === m || void 0 === m ? void 0 : null === (_m$default = m.default) || void 0 === _m$default ? void 0 : _m$default.displayName);
+				}))
+
+				if (ret == undefined) await new Promise(resolve => setTimeout(resolve, 1));
+			}
+			return ret;
+		};
 		const ChannelTextAreaContainer = get((m => {
 			var _m$type, _m$type$render;
 			return "ChannelTextAreaContainer" === (null === m || void 0 === m ? void 0 : null === (_m$type = m.type) || void 0 === _m$type ? void 0 : null === (_m$type$render = _m$type.render) || void 0 === _m$type$render ? void 0 : _m$type$render.displayName);
 		}));
 		const SwitchItem = getByName("SwitchItem");
 		class GrammarCorrect extends(external_BasePlugin_default()) {
-			onStart() {
+			async onStart() {
 				this.patch();
 				this.patchSendMessage();
 				console.log("%cGrammarCorrect", "background: #03C197; color: white; padding: 2px; border-radius: 4px; font-weight: 600;", "Successfully started.");
@@ -150,8 +158,11 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					}));
 				}));
 			}
-			patch() {
+			async patch() {
+				const SlateTextAreaContextMenu = await getSlateTextAreaContextMenu();
+																							
 				Patcher.after("grammar", SlateTextAreaContextMenu, "default", ((_this, [props], ret) => {
+																																				
 					const children = ret.props.children;
 					let text = "";
 					Patcher.after("grammar", ChannelTextAreaContainer.type, "render", ((_, [{
