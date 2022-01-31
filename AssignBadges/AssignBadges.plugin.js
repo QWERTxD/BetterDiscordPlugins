@@ -1,6 +1,6 @@
 /**
  * @name AssignBadges
- * @version 1.0.22
+ * @version 1.0.23
  * @description Allows you to locally assign badges to users through the user context menu.
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/AssignBadges
@@ -32,7 +32,7 @@
 const config = {
   info: {
     name: "AssignBadges",
-    version: "1.0.22",
+    version: "1.0.23",
     description:
       "Allows you to locally assign badges to users through the user context menu.",
     authors: [
@@ -64,7 +64,7 @@ const config = {
     {
       type: "fixed",
       title: "Fixes",
-      items: ["The plugin should work now"],
+      items: ["Fixed wrong Boost icons"],
     },
   ],
 };
@@ -403,7 +403,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
       },
     };
     var __webpack_modules__ = {
-      832: (module) => {
+      113: (module) => {
         module.exports = BdApi.React;
       },
     };
@@ -563,7 +563,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
       ];
       const modules_UserFlags = UserFlagsFormatted;
       const utils_namespaceObject = Modules["@discord/utils"];
-      var React = __webpack_require__(832);
+      var React = __webpack_require__(113);
       const months = function (n) {
         return 26298e5 * n;
       };
@@ -613,55 +613,55 @@ function buildPlugin([BasePlugin, PluginApi]) {
           id: "boost1",
           value: 0 << 0,
           name: "Booster - 1 Month",
-          time: 1,
+          time: 1.04,
         },
         {
           id: "boost2",
           value: 0 << 0,
           name: "Booster - 2 Months",
-          time: 2,
+          time: 2.04,
         },
         {
           id: "boost3",
           value: 0 << 0,
           name: "Booster - 3 Months",
-          time: 3,
+          time: 3.04,
         },
         {
           id: "boost4",
           value: 0 << 0,
           name: "Booster - 6 Months",
-          time: 6,
+          time: 6.04,
         },
         {
           id: "boost5",
           value: 0 << 0,
           name: "Booster - 9 Months",
-          time: 9,
+          time: 9.04,
         },
         {
           id: "boost6",
           value: 0 << 0,
           name: "Booster - 1 Year",
-          time: 12,
+          time: 12.04,
         },
         {
           id: "boost7",
           value: 0 << 0,
           name: "Booster - 1 Year and 3 Months",
-          time: 15,
+          time: 15.04,
         },
         {
           id: "boost8",
           value: 0 << 0,
           name: "Booster - 1 Year and 6 Months",
-          time: 18,
+          time: 18.04,
         },
         {
           id: "boost9",
           value: 0 << 0,
           name: "Booster - 2 Years",
-          time: 24,
+          time: 24.04,
         },
       ];
       const ContextMenus =
