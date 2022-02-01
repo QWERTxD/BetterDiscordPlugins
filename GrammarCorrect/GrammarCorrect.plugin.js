@@ -1,6 +1,6 @@
 /**
  * @name GrammarCorrect
- * @version 1.0.3
+ * @version 1.0.4
  * @description Corrects your grammar mistakes just like Grammarly
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/GrammarCorrect
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "GrammarCorrect",
-		"version": "1.0.3",
+		"version": "1.0.4",
 		"description": "Corrects your grammar mistakes just like Grammarly",
 		"authors": [{
 			"name": "QWERT",
@@ -119,18 +119,6 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			ComponentDispatch
 		} = getByProps("ComponentDispatch");
 		const Menu = getByProps("MenuItem");
-		async function getSlateTextAreaContextMenu() {
-			let ret = undefined;
-			while(ret == undefined) {
-				ret = get((m => {
-					var _m$default;
-					return "SlateTextAreaContextMenu" === (null === m || void 0 === m ? void 0 : null === (_m$default = m.default) || void 0 === _m$default ? void 0 : _m$default.displayName);
-				}))
-
-				if (ret == undefined) await new Promise(resolve => setTimeout(resolve, 1));
-			}
-			return ret;
-		};
 		const ChannelTextAreaContainer = get((m => {
 			var _m$type, _m$type$render;
 			return "ChannelTextAreaContainer" === (null === m || void 0 === m ? void 0 : null === (_m$type = m.type) || void 0 === _m$type ? void 0 : null === (_m$type$render = _m$type.render) || void 0 === _m$type$render ? void 0 : _m$type$render.displayName);
@@ -159,7 +147,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				}));
 			}
 			async patch() {
-				const SlateTextAreaContextMenu = await getSlateTextAreaContextMenu();
+				const SlateTextAreaContextMenu = await Library.DCM.getDiscordMenu("SlateTextAreaContextMenu");
 																							
 				Patcher.after("grammar", SlateTextAreaContextMenu, "default", ((_this, [props], ret) => {
 																																				
