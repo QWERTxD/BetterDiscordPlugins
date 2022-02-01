@@ -1,6 +1,6 @@
 /**
  * @name QuickMessages
- * @version 1.2.2
+ * @version 1.2.3
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/QuickMessages/QuickMessages.plugin.js
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages
@@ -20,7 +20,7 @@ const config = {
                 discord_id: "678556376640913408",
             }
         ],
-        version: "1.2.2",
+        version: "1.2.3",
         description: "Save messages to quickly send them later, when you need.",
         github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages",
         github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js",
@@ -30,7 +30,7 @@ const config = {
             title: "Fixed",
             type: "Fixed",
             items: [
-                "Fixed plugin not working on start.",
+                "Fixed CPU spike on Lake-U laptops",
 				"I still need ideas and suggestions, so if you have some, feel free to send them to me in the support server https://discord.gg/zMnHFAKsu3"
             ],
         }
@@ -111,16 +111,6 @@ module.exports = !global.ZeresPluginLibrary ? class {
         BdApi.setData('QuickMessages', 'categories', categories);
     }
 	
-	async function getSlateTextAreaContextMenu() {
-		let ret = undefined;
-		while(ret == undefined) {
-			ret = WebpackModules.find(m => m.default?.displayName === "SlateTextAreaContextMenu");
-
-			if (ret == undefined) await new Promise(resolve => setTimeout(resolve, 1));
-		}
-		return ret;
-	};
-	
     class QuickMessages extends Plugin {
         constructor() {
             super();
@@ -171,8 +161,8 @@ module.exports = !global.ZeresPluginLibrary ? class {
 
         async patchTextAreaContextMenus() {
             var shouldPaste = true;
-			const SlateTextAreaContextMenu = await getSlateTextAreaContextMenu();
-			const CloseCircle = BdApi.findModuleByDisplayName('CloseCircle');
+	    const SlateTextAreaContextMenu = await Library.DCM.getDiscordMenu("SlateTextAreaContextMenu");
+	    const CloseCircle = BdApi.findModuleByDisplayName('CloseCircle');
             const ComponentDispatch = BdApi.findModuleByProps("ComponentDispatch").ComponentDispatch;
             const ChannelTextAreaContainer = WebpackModules.find(m => m.type && m.type.render && m.type.render.displayName === "ChannelTextAreaContainer").type;
             const children = [];
