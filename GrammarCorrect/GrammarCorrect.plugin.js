@@ -1,6 +1,6 @@
 /**
  * @name GrammarCorrect
- * @version 1.0.4
+ * @version 1.0.5
  * @description Corrects your grammar mistakes just like Grammarly
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/GrammarCorrect
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "GrammarCorrect",
-		"version": "1.0.4",
+		"version": "1.0.5",
 		"description": "Corrects your grammar mistakes just like Grammarly",
 		"authors": [{
 			"name": "QWERT",
@@ -147,7 +147,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				}));
 			}
 			async patch() {
-				const SlateTextAreaContextMenu = await Library.DCM.getDiscordMenu("SlateTextAreaContextMenu");
+				const SlateTextAreaContextMenu = await ZeresPluginLibrary.DCM.getDiscordMenu("SlateTextAreaContextMenu");
 																							
 				Patcher.after("grammar", SlateTextAreaContextMenu, "default", ((_this, [props], ret) => {
 																																				
