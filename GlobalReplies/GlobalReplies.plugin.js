@@ -1,6 +1,6 @@
 /**
  * @name GlobalReplies
- * @version 1.0.2
+ * @version 1.0.3
  * @description Allows you to reply to messages outside of the channel they were sent in.
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/GlobalReplies
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "GlobalReplies",
-		"version": "1.0.2",
+		"version": "1.0.3",
 		"description": "Allows you to reply to messages outside of the channel they were sent in.",
 		"authors": [{
 			"name": "QWERT",
@@ -304,7 +304,6 @@ function buildPlugin([BasePlugin, PluginApi]) {
 											message: props.message.content,
 											channel: `<#${channel.id}>`,
 											newLine: "\n"
-											channel: `<#${channel.id}>`
 										})
 									});
 								},
