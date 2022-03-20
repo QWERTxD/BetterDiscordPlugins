@@ -1,4 +1,4 @@
-import { Patcher, PluginUtilities, Utilities, WebpackModules, Toasts } from "@zlibrary";
+import { Patcher, PluginUtilities, Utilities, WebpackModules, Toasts, DCM} from "@zlibrary";
 import BasePlugin from "@zlibrary/plugin";
 import { MenuGroup, MenuItem } from "@discord/contextmenu";
 import { UserStore } from "@zlibrary/discord";
@@ -24,27 +24,31 @@ const User = WebpackModules.getByPrototypes("getAvatarURL");
 const BadgeList = WebpackModules.getByProps("BadgeSizes").default;
 
 const boosts = [
-	{ id: "boost1", value: 0 << 0, name: "Booster - 1 Month", time: 1 },
-	{ id: "boost2", value: 0 << 0, name: "Booster - 2 Months", time: 2 },
-	{ id: "boost3", value: 0 << 0, name: "Booster - 3 Months", time: 3 },
-	{ id: "boost4", value: 0 << 0, name: "Booster - 6 Months", time: 6 },
-	{ id: "boost5", value: 0 << 0, name: "Booster - 9 Months", time: 9 },
-	{ id: "boost6", value: 0 << 0, name: "Booster - 1 Year", time: 12 },
-	{ id: "boost7", value: 0 << 0, name: "Booster - 1 Year and 3 Months", time: 15 },
-	{ id: "boost8", value: 0 << 0, name: "Booster - 1 Year and 6 Months", time: 18 },
-	{ id: "boost9", value: 0 << 0, name: "Booster - 2 Years", time: 24 }
+	{ id: "boost1", value: 0 << 0, name: "Booster - 1 Month", time: 1.04 },
+	{ id: "boost2", value: 0 << 0, name: "Booster - 2 Months", time: 2.04 },
+	{ id: "boost3", value: 0 << 0, name: "Booster - 3 Months", time: 3.04 },
+	{ id: "boost4", value: 0 << 0, name: "Booster - 6 Months", time: 6.04 },
+	{ id: "boost5", value: 0 << 0, name: "Booster - 9 Months", time: 9.04 },
+	{ id: "boost6", value: 0 << 0, name: "Booster - 1 Year", time: 12.04 },
+	{ id: "boost7", value: 0 << 0, name: "Booster - 1 Year and 3 Months", time: 15.04 },
+	{ id: "boost8", value: 0 << 0, name: "Booster - 1 Year and 6 Months", time: 18.04 },
+	{ id: "boost9", value: 0 << 0, name: "Booster - 2 Years", time: 24.04 }
 ]
 
-const UserContextMenus = WebpackModules.findAll(m => m.default?.displayName.endsWith("UserContextMenu"));
-const UserGenericContextMenu = WebpackModules.find(m => m.default?.displayName === "UserGenericContextMenu")
 const BotTag = WebpackModules.getByDisplayName("BotTag");
 const MessageAuthor = WebpackModules.find(m => m.default.toString().indexOf("userOverride") > -1)
 const NameTag = WebpackModules.find(m => m.default.displayName === "DiscordTag");
 const MemberListItem = WebpackModules.find(m => m.default.displayName === "MemberListItem");
 
-UserContextMenus.push(UserGenericContextMenu);
 
 export default class AssignBadges extends BasePlugin {
+	promises = {
+		cancelled: false,
+		cancel() {
+			this.cancelled = true;
+		},
+	};
+	patches = [];
 	onStart() {
 		this.patchUserContextMenus();
 		this.patchUserFlagGetter();
@@ -136,14 +140,18 @@ export default class AssignBadges extends BasePlugin {
 		})
 	}
 
-	patchUserContextMenus() {
-		for(const UserContextMenu of UserContextMenus) {
-			Patcher.after(UserContextMenu, "default", (_this, [props], ret) => {
-				const settings = this.getSettings();
-				const tree = Utilities.getNestedProp(ret, "props.children.props.children");
-				const userBadges = getFlags.default({user: UserStore.getUser(props.user.id)}).map(badge => badge?.key);
-				tree.splice(7, 0, 
-				<MenuGroup>
+	async patchUserContextMenus() {
+		const patchUserContextMenu = (menu) => {
+			this.patches.push(
+				Patcher.after(menu, "default", (_, [props], ret) => {
+					if (typeof props !== "string") return;
+					const settings = this.getSettings();
+					const propsUser = UserStore.getUser(props);
+					props = {user: propsUser};
+					const userBadges = getFlags
+						.default({ user: propsUser })
+						.map((badge) => badge?.key);
+					const item = 
 					<MenuItem
 					id="assign-badge"
 					label="Manage Badges"
@@ -160,7 +168,7 @@ export default class AssignBadges extends BasePlugin {
 								</div>
 								:
 								<div className={classes?.container}>
-									{<BotTag verified={true}/>, flag.name}
+									{<BotTag verified={true}/>}
 								</div> 
 							}
 							checked={state}
@@ -231,10 +239,27 @@ export default class AssignBadges extends BasePlugin {
 						</MenuGroup>
 						]}
 					/>
-				</MenuGroup>
-				)
-			})
-		}
+					
+
+					return [ret, item];
+				})
+			);
+		};
+
+		//Credits to Strencher for this (https://github.com/Strencher/BetterDiscordStuff/blob/97766c4c86d3ae5d220185bf766f48f36b156a4b/PronounDB/index.js#L189-L197)
+		const patched = new Set();
+		const regex = /user.*contextmenu|useUserRolesItems/i;
+		const search = async () => {
+			const Menu = await DCM.getDiscordMenu(
+				(m) => regex.test(m.displayName) && !patched.has(m.displayName)
+			);
+			if (this.promises.cancelled) return;
+			patched.add(Menu.default.displayName);
+			patchUserContextMenu(Menu);
+			search();
+		};
+
+		search();
 	}
 
 	fakeUser(flags) {
