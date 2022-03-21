@@ -1,6 +1,6 @@
 /**
  * @name AssignBadges
- * @version 1.0.24
+ * @version 1.0.25
  * @description Allows you to locally assign badges to users through the user context menu.
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/AssignBadges
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "AssignBadges",
-		"version": "1.0.24",
+		"version": "1.0.25",
 		"description": "Allows you to locally assign badges to users through the user context menu.",
 		"authors": [{
 			"name": "QWERT",
@@ -59,7 +59,7 @@ const config = {
 		"type": "fixed",
 		"title": "Fixes",
 		"items": [
-			"Assign Badges got temp fix (works only in Guilds, not DMs nor Groups)\nAll credits to AGreenPig"
+			"Fully fixed (works everywhere)/nAll credits again to AGreenPig"
 		]
 	}]
 };
@@ -568,99 +568,134 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					}));
 				}
 				async patchUserContextMenus() {
-					const patchUserContextMenu = menu => {
-						this.patches.push(external_PluginApi_namespaceObject.Patcher.after(menu, "default", ((_, [props], ret) => {
-							if ("string" !== typeof props) return;
-							const settings = this.getSettings();
-							const propsUser = external_PluginApi_DiscordModules_namespaceObject.UserStore.getUser(props);
-							props = {
-								user: propsUser
-							};
-							const userBadges = getFlags.default({
-								user: propsUser
-							}).map((badge => badge?.key));
-							const item = React.createElement(contextmenu_namespaceObject.MenuItem, {
-								id: "assign-badge",
-								label: "Manage Badges",
-								children: [modules_UserFlags.map((flag => {
-									const [state, setState] = React.useState(settings?.[props.user.id]?.hasOwnProperty(flag.id) ? settings?.[props.user.id]?.[flag.id] : ~userBadges.indexOf(flag.key));
-									return React.createElement(MenuCheckboxItem, {
-										id: flag.id,
-										label: "EARLY_VERIFIED_BOT" !== flag.id ? React.createElement("div", {
-											className: classes?.container
-										}, React.createElement(BadgeList, {
-											user: this.fakeUser(flag.value),
-											premiumSince: "PREMIUM" === flag.id ? new Date(0) : null,
-											size: 2
-										}), flag.name) : React.createElement("div", {
-											className: classes?.container
-										}, React.createElement(BotTag, {
-											verified: true
-										})),
-										checked: state,
-										action: () => {
-											const user = settings[props.user.id] || {};
-											user[flag.id] = !state;
-											settings[props.user.id] = user;
-											this.saveSettings(settings);
-											setState(!state);
-										}
-									});
-								})), React.createElement(contextmenu_namespaceObject.MenuItem, {
-									id: "boosts",
-									label: React.createElement("div", {
+					const getMenu = props => {
+						const settings = this.getSettings();
+						const propsUser = external_PluginApi_DiscordModules_namespaceObject.UserStore.getUser(props);
+						props = {
+							user: propsUser
+						};
+						const userBadges = getFlags.default({
+							user: propsUser
+						}).map((badge => badge?.key));
+						const [selectedBoost, setSelectedBoost] = React.useState(settings[props.user.id]?.boost);
+						return React.createElement(contextmenu_namespaceObject.MenuItem, {
+							id: "assign-badge",
+							key: "assign-badge",
+							label: "Manage Badges",
+							children: [modules_UserFlags.map((flag => {
+								const [state, setState] = React.useState(settings?.[props.user.id]?.hasOwnProperty(flag.id) ? settings?.[props.user.id]?.[flag.id] : ~userBadges.indexOf(flag.key));
+								return React.createElement(MenuCheckboxItem, {
+									id: flag.id,
+									label: "EARLY_VERIFIED_BOT" !== flag.id ? React.createElement("div", {
 										className: classes?.container
 									}, React.createElement(BadgeList, {
-										user: this.fakeUser(0),
-										premiumGuildSince: new Date(Date.now() - months(3) - day),
+										user: this.fakeUser(flag.value),
+										premiumSince: "PREMIUM" === flag.id ? new Date(0) : null,
 										size: 2
-									}), "Boosts")
-								}, [boosts.map((boost => React.createElement(MenuRadioItem, {
-									id: boost.id,
-									checked: settings[props.user.id]?.boost === boost.id,
-									label: React.createElement("div", {
+									}), flag.name) : React.createElement("div", {
 										className: classes?.container
-									}, React.createElement(BadgeList, {
-										user: this.fakeUser(0),
-										premiumGuildSince: new Date(Date.now() - months(boost.time) - day),
-										size: 2
-									}), boost.name),
+									}, React.createElement(BotTag, {
+										verified: true
+									})),
+									checked: state,
 									action: () => {
 										const user = settings[props.user.id] || {};
-										user.boost = boost.id;
+										user[flag.id] = !state;
 										settings[props.user.id] = user;
 										this.saveSettings(settings);
+										setState(!state);
 									}
-								}))), React.createElement(contextmenu_namespaceObject.MenuGroup, null, React.createElement(contextmenu_namespaceObject.MenuItem, {
-									label: "Reset Boost Preferences",
-									id: "reset-boosts",
-									color: "colorDanger",
-									action: () => {
-										delete settings[props.user.id]?.boost;
-										this.saveSettings(settings);
-										external_PluginApi_namespaceObject.Toasts.success(`Successfully cleared boost preferences for <strong>${props.user}</strong>!`);
-									}
-								}))]), React.createElement(contextmenu_namespaceObject.MenuGroup, null, React.createElement(contextmenu_namespaceObject.MenuItem, {
-									color: "colorDanger",
-									label: "Reset Preferences",
-									id: "reset",
-									action: () => {
-										delete settings[props.user.id];
-										this.saveSettings(settings);
-										settings[props.user.id] = {};
-										external_PluginApi_namespaceObject.Toasts.success(`Successfully cleared preferences for <strong>${props.user}</strong>!`);
-									}
-								}))]
-							});
-							return [ret, item];
-						})));
+								});
+							})), React.createElement(contextmenu_namespaceObject.MenuItem, {
+								id: "boosts",
+								label: React.createElement("div", {
+									className: classes?.container
+								}, React.createElement(BadgeList, {
+									user: this.fakeUser(0),
+									premiumGuildSince: new Date(Date.now() - months(3) - day),
+									size: 2
+								}), "Boosts")
+							}, [boosts.map((boost => React.createElement(MenuRadioItem, {
+								id: boost.id,
+								checked: selectedBoost === boost.id,
+								label: React.createElement("div", {
+									className: classes?.container
+								}, React.createElement(BadgeList, {
+									user: this.fakeUser(0),
+									premiumGuildSince: new Date(Date.now() - months(boost.time) - day),
+									size: 2
+								}), boost.name),
+								action: () => {
+									const user = settings[props.user.id] || {};
+									user.boost = boost.id;
+									setSelectedBoost(boost.id);
+									settings[props.user.id] = user;
+									this.saveSettings(settings);
+								}
+							}))), React.createElement(contextmenu_namespaceObject.MenuGroup, null, React.createElement(contextmenu_namespaceObject.MenuItem, {
+								label: "Reset Boost Preferences",
+								id: "reset-boosts",
+								color: "colorDanger",
+								action: () => {
+									delete settings[props.user.id]?.boost;
+									this.saveSettings(settings);
+									external_PluginApi_namespaceObject.Toasts.success(`Successfully cleared boost preferences for <strong>${props.user}</strong>!`);
+								}
+							}))]), React.createElement(contextmenu_namespaceObject.MenuGroup, null, React.createElement(contextmenu_namespaceObject.MenuItem, {
+								color: "colorDanger",
+								label: "Reset Preferences",
+								id: "reset",
+								action: () => {
+									delete settings[props.user.id];
+									this.saveSettings(settings);
+									settings[props.user.id] = {};
+									external_PluginApi_namespaceObject.Toasts.success(`Successfully cleared preferences for <strong>${props.user}</strong>!`);
+								}
+							}))]
+						});
 					};
 					const patched = new Set;
+					const REGEX = /user.*contextmenu|useUserRolesItems/i;
+					const filter = function(name) {
+						const shouldInclude = ["page", "section", "objectType"];
+						const notInclude = ["use", "root"];
+						const isRegex = name instanceof RegExp;
+						return module => {
+							const string = module.toString({});
+							const getDisplayName = () => external_PluginApi_namespaceObject.Utilities.getNestedProp(module({}), "props.children.type.displayName");
+							return !~string.indexOf("return function") && shouldInclude.every((s => ~string.indexOf(s))) && !notInclude.every((s => ~string.indexOf(s))) && (isRegex ? name.test(getDisplayName()) : name === getDisplayName());
+						};
+					}(REGEX);
 					const search = async () => {
-						const Menu = await external_PluginApi_namespaceObject.DCM.getDiscordMenu((m => /user.*contextmenu|useUserRolesItems/i.test(m.displayName) && !patched.has(m.displayName)));
+						const Menu = await external_PluginApi_namespaceObject.DCM.getDiscordMenu((m => {
+							if (patched.has(m)) return false;
+							if (null != m.displayName) return REGEX.test(m.displayName);
+							return filter(m);
+						}));
 						if (this.promises.cancelled) return;
-						patched.add(Menu.default.displayName);
-						patchUserContextMenu(Menu);
+						let original = null;
+						function wrapper(props) {
+							const rendered = original.call(this, props);
+							try {
+								const children = external_PluginApi_namespaceObject.Utilities.findInReactTree(rendered, Array.isArray);
+								const user = props.user || external_PluginApi_DiscordModules_namespaceObject.UserStore.getUser(props.channel?.getRecipientId?.());
+								if (!children || !user || children.some((c => c && "assign-badge" === c.key))) return rendered;
+								children.splice(7, 0, getMenu(user.id));
+							} catch (error) {
+								cancel();
+								console.error("Error in context menu patch:", error);
+							}
+							return rendered;
+						}
+						const cancel = external_PluginApi_namespaceObject.Patcher.after(Menu, "default", ((...args) => {
+							const [, , ret] = args;
+							const contextMenu = external_PluginApi_namespaceObject.Utilities.getNestedProp(ret, "props.children");
+							if (!contextMenu || "function" !== typeof contextMenu.type) return;
+							original ??= contextMenu.type;
+							wrapper.displayName ??= original.displayName;
+							contextMenu.type = wrapper;
+						}));
+						patched.add(Menu.default);
 						search();
 					};
 					search();
