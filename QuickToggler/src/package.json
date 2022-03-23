@@ -1,7 +1,7 @@
 {
 	"info": {
 		"name": "QuickToggler",
-		"version": "1.0.1",
+		"version": "1.0.2",
 		"description": "Allows you to open a toggle-able addon search with a keybind (default keybind: CTRL+D)",
 		"authors": [
 			{
@@ -31,7 +31,7 @@
 			"type": "fixed",
 			"title": "Fixes",
 			"items": [
-				"Fixed\nAll credits again to AGreenPig"
+				"Small fix of states\nAgain credits to AGreenPig"
 			]
 		}
 	]
