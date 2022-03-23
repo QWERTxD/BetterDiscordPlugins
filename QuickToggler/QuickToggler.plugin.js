@@ -1,6 +1,6 @@
 /**
  * @name QuickToggler
- * @version 1.0.1
+ * @version 1.0.2
  * @description Allows you to open a toggle-able addon search with a keybind (default keybind: CTRL+D)
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickToggler
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "QuickToggler",
-		"version": "1.0.1",
+		"version": "1.0.2",
 		"description": "Allows you to open a toggle-able addon search with a keybind (default keybind: CTRL+D)",
 		"authors": [{
 			"name": "QWERT",
@@ -59,7 +59,7 @@ const config = {
 		"type": "fixed",
 		"title": "Fixes",
 		"items": [
-			"Fixed\nAll credits again to AGreenPig"
+			"Small fix of states\nAgain credits to AGreenPig"
 		]
 	}]
 };
@@ -494,7 +494,8 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return !addonStore.isEnabled(addon.id);
 				}));
 				return addonsByQuery.map((addon => Results_React.createElement(AddonResult, {
-					addon
+					addon,
+					key: addon.id
 				})));
 			}
 			var QuickToggler_React = __webpack_require__(113);
