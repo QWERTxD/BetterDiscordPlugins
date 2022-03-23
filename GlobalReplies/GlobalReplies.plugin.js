@@ -1,9 +1,9 @@
 /**
  * @name GlobalReplies
- * @version 1.0.3
+ * @version 1.0.5
  * @description Allows you to reply to messages outside of the channel they were sent in.
  * @author QWERT
- * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/GlobalReplies
+ * @source https://github.com/QWERTxD/BetterDiscordPlugins/GlobalReplies
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/GlobalReplies/GlobalReplies.plugin.js
  */
 /*@cc_on
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "GlobalReplies",
-		"version": "1.0.3",
+		"version": "1.0.5",
 		"description": "Allows you to reply to messages outside of the channel they were sent in.",
 		"authors": [{
 			"name": "QWERT",
@@ -54,7 +54,14 @@ const config = {
 			"source": true,
 			"readme": true
 		}
-	}
+	},
+	"changelog": [{
+		"type": "fixed",
+		"title": "Fixes",
+		"items": [
+			"Fixed\nThanks for help in cleaning/optimizing code to AGreenPig"
+		]
+	}]
 };
 function buildPlugin([BasePlugin, PluginApi]) {
 	const module = {
@@ -62,11 +69,214 @@ function buildPlugin([BasePlugin, PluginApi]) {
 	};
 	(() => {
 		"use strict";
-		let __plugin_styles__ = "";
-		let __style_element__ = null;
+		class StyleLoader {
+			static styles = "";
+			static element = null;
+			static append(module, css) {
+				this.styles += `/* ${module} */\n${css}`;
+			}
+			static inject(name = config.info.name) {
+				if (this.element) this.element.remove();
+				this.element = document.head.appendChild(Object.assign(document.createElement("style"), {
+					id: name,
+					textContent: this.styles
+				}));
+			}
+			static remove() {
+				if (this.element) {
+					this.element.remove();
+					this.element = null;
+				}
+			}
+		}
+		function ___createMemoize___(instance, name, value) {
+			value = value();
+			Object.defineProperty(instance, name, {
+				value,
+				configurable: true
+			});
+			return value;
+		};
+		const Modules = {
+			get 'react-spring'() {
+				return ___createMemoize___(this, 'react-spring', () => BdApi.findModuleByProps('useSpring'))
+			},
+			'@discord/utils': {
+				get 'joinClassNames'() {
+					return ___createMemoize___(this, 'joinClassNames', () => BdApi.findModule(e => e.toString().indexOf('return e.join(" ")') > 200))
+				},
+				get 'useForceUpdate'() {
+					return ___createMemoize___(this, 'useForceUpdate', () => BdApi.findModuleByProps('useForceUpdate')?.useForceUpdate)
+				},
+				get 'Logger'() {
+					return ___createMemoize___(this, 'Logger', () => BdApi.findModuleByProps('setLogFn')?.default)
+				},
+				get 'Navigation'() {
+					return ___createMemoize___(this, 'Navigation', () => BdApi.findModuleByProps('replaceWith', 'currentRouteIsPeekView'))
+				}
+			},
+			'@discord/components': {
+				get 'Tooltip'() {
+					return ___createMemoize___(this, 'Tooltip', () => BdApi.findModuleByDisplayName('Tooltip'))
+				},
+				get 'TooltipContainer'() {
+					return ___createMemoize___(this, 'TooltipContainer', () => BdApi.findModuleByProps('TooltipContainer')?.TooltipContainer)
+				},
+				get 'TextInput'() {
+					return ___createMemoize___(this, 'TextInput', () => BdApi.findModuleByDisplayName('TextInput'))
+				},
+				get 'SlideIn'() {
+					return ___createMemoize___(this, 'SlideIn', () => BdApi.findModuleByDisplayName('SlideIn'))
+				},
+				get 'SettingsNotice'() {
+					return ___createMemoize___(this, 'SettingsNotice', () => BdApi.findModuleByDisplayName('SettingsNotice'))
+				},
+				get 'TransitionGroup'() {
+					return ___createMemoize___(this, 'TransitionGroup', () => BdApi.findModuleByDisplayName('TransitionGroup'))
+				},
+				get 'Button'() {
+					return ___createMemoize___(this, 'Button', () => BdApi.findModule(m => 'DropdownSizes' in m && typeof(m) === 'function'))
+				},
+				get 'Popout'() {
+					return ___createMemoize___(this, 'Popout', () => BdApi.findModuleByDisplayName('Popout'))
+				},
+				get 'Flex'() {
+					return ___createMemoize___(this, 'Flex', () => BdApi.findModuleByDisplayName('Flex'))
+				},
+				get 'Text'() {
+					return ___createMemoize___(this, 'Text', () => BdApi.findModuleByDisplayName('Text'))
+				},
+				get 'Card'() {
+					return ___createMemoize___(this, 'Card', () => BdApi.findModuleByDisplayName('Card'))
+				}
+			},
+			'@discord/modules': {
+				get 'Dispatcher'() {
+					return ___createMemoize___(this, 'Dispatcher', () => BdApi.findModuleByProps('dirtyDispatch', 'subscribe'))
+				},
+				get 'ComponentDispatcher'() {
+					return ___createMemoize___(this, 'ComponentDispatcher', () => BdApi.findModuleByProps('ComponentDispatch')?.ComponentDispatch)
+				},
+				get 'EmojiUtils'() {
+					return ___createMemoize___(this, 'EmojiUtils', () => BdApi.findModuleByProps('uploadEmoji'))
+				},
+				get 'PermissionUtils'() {
+					return ___createMemoize___(this, 'PermissionUtils', () => BdApi.findModuleByProps('computePermissions', 'canManageUser'))
+				},
+				get 'DMUtils'() {
+					return ___createMemoize___(this, 'DMUtils', () => BdApi.findModuleByProps('openPrivateChannel'))
+				}
+			},
+			'@discord/stores': {
+				get 'Messages'() {
+					return ___createMemoize___(this, 'Messages', () => BdApi.findModuleByProps('getMessage', 'getMessages'))
+				},
+				get 'Channels'() {
+					return ___createMemoize___(this, 'Channels', () => BdApi.findModuleByProps('getChannel', 'getDMFromUserId'))
+				},
+				get 'Guilds'() {
+					return ___createMemoize___(this, 'Guilds', () => BdApi.findModuleByProps('getGuild'))
+				},
+				get 'SelectedGuilds'() {
+					return ___createMemoize___(this, 'SelectedGuilds', () => BdApi.findModuleByProps('getGuildId', 'getLastSelectedGuildId'))
+				},
+				get 'SelectedChannels'() {
+					return ___createMemoize___(this, 'SelectedChannels', () => BdApi.findModuleByProps('getChannelId', 'getLastSelectedChannelId'))
+				},
+				get 'Info'() {
+					return ___createMemoize___(this, 'Info', () => BdApi.findModuleByProps('getSessionId'))
+				},
+				get 'Status'() {
+					return ___createMemoize___(this, 'Status', () => BdApi.findModuleByProps('getStatus', 'getActivities', 'getState'))
+				},
+				get 'Users'() {
+					return ___createMemoize___(this, 'Users', () => BdApi.findModuleByProps('getUser', 'getCurrentUser'))
+				},
+				get 'SettingsStore'() {
+					return ___createMemoize___(this, 'SettingsStore', () => BdApi.findModuleByProps('afkTimeout', 'status'))
+				},
+				get 'UserProfile'() {
+					return ___createMemoize___(this, 'UserProfile', () => BdApi.findModuleByProps('getUserProfile'))
+				},
+				get 'Members'() {
+					return ___createMemoize___(this, 'Members', () => BdApi.findModuleByProps('getMember'))
+				},
+				get 'Activities'() {
+					return ___createMemoize___(this, 'Activities', () => BdApi.findModuleByProps('getActivities'))
+				},
+				get 'Games'() {
+					return ___createMemoize___(this, 'Games', () => BdApi.findModuleByProps('getGame', 'games'))
+				},
+				get 'Auth'() {
+					return ___createMemoize___(this, 'Auth', () => BdApi.findModuleByProps('getId', 'isGuest'))
+				},
+				get 'TypingUsers'() {
+					return ___createMemoize___(this, 'TypingUsers', () => BdApi.findModuleByProps('isTyping'))
+				}
+			},
+			'@discord/actions': {
+				get 'ProfileActions'() {
+					return ___createMemoize___(this, 'ProfileActions', () => BdApi.findModuleByProps('fetchProfile'))
+				},
+				get 'GuildActions'() {
+					return ___createMemoize___(this, 'GuildActions', () => BdApi.findModuleByProps('requestMembersById'))
+				}
+			},
+			get '@discord/i18n'() {
+				return ___createMemoize___(this, '@discord/i18n', () => BdApi.findModule(m => m.Messages?.CLOSE && typeof(m.getLocale) === 'function'))
+			},
+			get '@discord/constants'() {
+				return ___createMemoize___(this, '@discord/constants', () => BdApi.findModuleByProps('API_HOST'))
+			},
+			get '@discord/contextmenu'() {
+				return ___createMemoize___(this, '@discord/contextmenu', () => {
+					const ctx = Object.assign({}, BdApi.findModuleByProps('openContextMenu'), BdApi.findModuleByProps('MenuItem'));
+					ctx.Menu = ctx.default;
+					return ctx;
+				})
+			},
+			get '@discord/forms'() {
+				return ___createMemoize___(this, '@discord/forms', () => BdApi.findModuleByProps('FormItem'))
+			},
+			get '@discord/scrollbars'() {
+				return ___createMemoize___(this, '@discord/scrollbars', () => BdApi.findModuleByProps('ScrollerAuto'))
+			},
+			get '@discord/native'() {
+				return ___createMemoize___(this, '@discord/native', () => BdApi.findModuleByProps('requireModule'))
+			},
+			get '@discord/flux'() {
+				return ___createMemoize___(this, '@discord/flux', () => Object.assign({}, BdApi.findModuleByProps('useStateFromStores').default, BdApi.findModuleByProps('useStateFromStores')))
+			},
+			get '@discord/modal'() {
+				return ___createMemoize___(this, '@discord/modal', () => Object.assign({}, BdApi.findModuleByProps('ModalRoot'), BdApi.findModuleByProps('openModal', 'closeAllModals')))
+			},
+			get '@discord/connections'() {
+				return ___createMemoize___(this, '@discord/connections', () => BdApi.findModuleByProps('get', 'isSupported', 'map'))
+			},
+			get '@discord/sanitize'() {
+				return ___createMemoize___(this, '@discord/sanitize', () => BdApi.findModuleByProps('stringify', 'parse', 'encode'))
+			},
+			get '@discord/icons'() {
+				return ___createMemoize___(this, '@discord/icons', () => BdApi.findAllModules(m => m.displayName && ~m.toString().indexOf('currentColor')).reduce((icons, icon) => (icons[icon.displayName] = icon, icons), {}))
+			},
+			'@discord/classes': {
+				get 'Timestamp'() {
+					return ___createMemoize___(this, 'Timestamp', () => BdApi.findModuleByPrototypes('toDate', 'month'))
+				},
+				get 'Message'() {
+					return ___createMemoize___(this, 'Message', () => BdApi.findModuleByPrototypes('getReaction', 'isSystemDM'))
+				},
+				get 'User'() {
+					return ___createMemoize___(this, 'User', () => BdApi.findModuleByPrototypes('tag'))
+				},
+				get 'Channel'() {
+					return ___createMemoize___(this, 'Channel', () => BdApi.findModuleByPrototypes('isOwner', 'isCategory'))
+				}
+			}
+		};
 		var __webpack_modules__ = {
-			698: module => {
-				module.exports = global["BdApi"]["React"];
+			113: module => {
+				module.exports = BdApi.React;
 			}
 		};
 		var __webpack_module_cache__ = {};
@@ -120,83 +330,10 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			var external_BasePlugin_default = __webpack_require__.n(external_BasePlugin_namespaceObject);
 			const external_PluginApi_DiscordModules_namespaceObject = PluginApi.DiscordModules;
 			const external_PluginApi_namespaceObject = PluginApi;
-			const external_BdApi_findModuleByProps_FormItem_namespaceObject = BdApi.findModuleByProps("FormItem");
-			const external_get_Tooltip_n_const_value_BdApi_findModuleByDisplayName_Tooltip_n_Object_defineProperty_this_Tooltip_n_value_n_configurable_true_n_n_return_value_n_nget_TooltipContainer_n_const_value_BdApi_findModuleByProps_TooltipContainer_TooltipContainer_n_Object_defineProperty_this_TooltipContainer_n_value_n_configurable_true_n_n_return_value_n_nget_TextInput_n_const_value_BdApi_findModuleByDisplayName_TextInput_n_Object_defineProperty_this_TextInput_n_value_n_configurable_true_n_n_return_value_n_nget_SlideIn_n_const_value_BdApi_findModuleByDisplayName_SlideIn_n_Object_defineProperty_this_SlideIn_n_value_n_configurable_true_n_n_return_value_n_nget_SettingsNotice_n_const_value_BdApi_findModuleByDisplayName_SettingsNotice_n_Object_defineProperty_this_SettingsNotice_n_value_n_configurable_true_n_n_return_value_n_nget_TransitionGroup_n_const_value_BdApi_findModuleByDisplayName_TransitionGroup_n_Object_defineProperty_this_TransitionGroup_n_value_n_configurable_true_n_n_return_value_n_nget_Button_n_const_value_BdApi_findModuleByProps_DropdownSizes_n_Object_defineProperty_this_Button_n_value_n_configurable_true_n_n_return_value_n_nget_Flex_n_const_value_BdApi_findModuleByDisplayName_Flex_n_Object_defineProperty_this_Flex_n_value_n_configurable_true_n_n_return_value_n_nget_Text_n_const_value_BdApi_findModuleByDisplayName_Text_n_Object_defineProperty_this_Text_n_value_n_configurable_true_n_n_return_value_n_namespaceObject = {
-				get Tooltip() {
-					const value = BdApi.findModuleByDisplayName("Tooltip");
-					Object.defineProperty(this, "Tooltip", {
-						value,
-						configurable: true
-					});
-					return value;
-				},
-				get TooltipContainer() {
-					const value = BdApi.findModuleByProps("TooltipContainer")?.TooltipContainer;
-					Object.defineProperty(this, "TooltipContainer", {
-						value,
-						configurable: true
-					});
-					return value;
-				},
-				get TextInput() {
-					const value = BdApi.findModuleByDisplayName("TextInput");
-					Object.defineProperty(this, "TextInput", {
-						value,
-						configurable: true
-					});
-					return value;
-				},
-				get SlideIn() {
-					const value = BdApi.findModuleByDisplayName("SlideIn");
-					Object.defineProperty(this, "SlideIn", {
-						value,
-						configurable: true
-					});
-					return value;
-				},
-				get SettingsNotice() {
-					const value = BdApi.findModuleByDisplayName("SettingsNotice");
-					Object.defineProperty(this, "SettingsNotice", {
-						value,
-						configurable: true
-					});
-					return value;
-				},
-				get TransitionGroup() {
-					const value = BdApi.findModuleByDisplayName("TransitionGroup");
-					Object.defineProperty(this, "TransitionGroup", {
-						value,
-						configurable: true
-					});
-					return value;
-				},
-				get Button() {
-					const value = BdApi.findModuleByProps("DropdownSizes");
-					Object.defineProperty(this, "Button", {
-						value,
-						configurable: true
-					});
-					return value;
-				},
-				get Flex() {
-					const value = BdApi.findModuleByDisplayName("Flex");
-					Object.defineProperty(this, "Flex", {
-						value,
-						configurable: true
-					});
-					return value;
-				},
-				get Text() {
-					const value = BdApi.findModuleByDisplayName("Text");
-					Object.defineProperty(this, "Text", {
-						value,
-						configurable: true
-					});
-					return value;
-				}
-			};
-			var external_BdApi_React_ = __webpack_require__(698);
-			var React = __webpack_require__(698);
+			const forms_namespaceObject = Modules["@discord/forms"];
+			const components_namespaceObject = Modules["@discord/components"];
+			var external_BdApi_React_ = __webpack_require__(113);
+			var React = __webpack_require__(113);
 			const {
 				getData,
 				setData
@@ -209,21 +346,21 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			}
 			function Settings() {
 				const [state, setState] = (0, external_BdApi_React_.useState)(getTemplate());
-				return [React.createElement(external_BdApi_findModuleByProps_FormItem_namespaceObject.FormItem, {
+				return [React.createElement(forms_namespaceObject.FormItem, {
 					title: "Global reply template"
-				}, React.createElement(external_get_Tooltip_n_const_value_BdApi_findModuleByDisplayName_Tooltip_n_Object_defineProperty_this_Tooltip_n_value_n_configurable_true_n_n_return_value_n_nget_TooltipContainer_n_const_value_BdApi_findModuleByProps_TooltipContainer_TooltipContainer_n_Object_defineProperty_this_TooltipContainer_n_value_n_configurable_true_n_n_return_value_n_nget_TextInput_n_const_value_BdApi_findModuleByDisplayName_TextInput_n_Object_defineProperty_this_TextInput_n_value_n_configurable_true_n_n_return_value_n_nget_SlideIn_n_const_value_BdApi_findModuleByDisplayName_SlideIn_n_Object_defineProperty_this_SlideIn_n_value_n_configurable_true_n_n_return_value_n_nget_SettingsNotice_n_const_value_BdApi_findModuleByDisplayName_SettingsNotice_n_Object_defineProperty_this_SettingsNotice_n_value_n_configurable_true_n_n_return_value_n_nget_TransitionGroup_n_const_value_BdApi_findModuleByDisplayName_TransitionGroup_n_Object_defineProperty_this_TransitionGroup_n_value_n_configurable_true_n_n_return_value_n_nget_Button_n_const_value_BdApi_findModuleByProps_DropdownSizes_n_Object_defineProperty_this_Button_n_value_n_configurable_true_n_n_return_value_n_nget_Flex_n_const_value_BdApi_findModuleByDisplayName_Flex_n_Object_defineProperty_this_Flex_n_value_n_configurable_true_n_n_return_value_n_nget_Text_n_const_value_BdApi_findModuleByDisplayName_Text_n_Object_defineProperty_this_Text_n_value_n_configurable_true_n_n_return_value_n_namespaceObject.TextInput, {
+				}, React.createElement(components_namespaceObject.TextInput, {
 					value: state,
 					onChange: e => {
 						setState(e);
 						setData("GlobalReplies", "template", e);
 					}
-				}), React.createElement(external_get_Tooltip_n_const_value_BdApi_findModuleByDisplayName_Tooltip_n_Object_defineProperty_this_Tooltip_n_value_n_configurable_true_n_n_return_value_n_nget_TooltipContainer_n_const_value_BdApi_findModuleByProps_TooltipContainer_TooltipContainer_n_Object_defineProperty_this_TooltipContainer_n_value_n_configurable_true_n_n_return_value_n_nget_TextInput_n_const_value_BdApi_findModuleByDisplayName_TextInput_n_Object_defineProperty_this_TextInput_n_value_n_configurable_true_n_n_return_value_n_nget_SlideIn_n_const_value_BdApi_findModuleByDisplayName_SlideIn_n_Object_defineProperty_this_SlideIn_n_value_n_configurable_true_n_n_return_value_n_nget_SettingsNotice_n_const_value_BdApi_findModuleByDisplayName_SettingsNotice_n_Object_defineProperty_this_SettingsNotice_n_value_n_configurable_true_n_n_return_value_n_nget_TransitionGroup_n_const_value_BdApi_findModuleByDisplayName_TransitionGroup_n_Object_defineProperty_this_TransitionGroup_n_value_n_configurable_true_n_n_return_value_n_nget_Button_n_const_value_BdApi_findModuleByProps_DropdownSizes_n_Object_defineProperty_this_Button_n_value_n_configurable_true_n_n_return_value_n_nget_Flex_n_const_value_BdApi_findModuleByDisplayName_Flex_n_Object_defineProperty_this_Flex_n_value_n_configurable_true_n_n_return_value_n_nget_Text_n_const_value_BdApi_findModuleByDisplayName_Text_n_Object_defineProperty_this_Text_n_value_n_configurable_true_n_n_return_value_n_namespaceObject.Button, {
-					look: "lookLink-9FtZy-",
+				}), React.createElement(components_namespaceObject.Button, {
+					look: "lookLink-15mFoz",
 					onClick: () => {
 						setState(`Replying to {{author}} {{messageLink}} `);
 						setData("GlobalReplies", "template", `Replying to {{author}} {{messageLink}} `);
 					}
-				}, "Reset")), React.createElement(external_BdApi_findModuleByProps_FormItem_namespaceObject.FormNotice, {
+				}, "Reset")), React.createElement(forms_namespaceObject.FormNotice, {
 					title: "Variables",
 					type: "cardWarningOutline",
 					body: [React.createElement("p", null), React.createElement(Variable, {
@@ -247,22 +384,19 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					})]
 				})];
 			}
-			var GlobalReplies_React = __webpack_require__(698);
+			var plugins_GlobalReplies_React = __webpack_require__(113);
 			const {
 				Patcher,
 				findModule: get,
 				findModuleByProps: getByProps,
 				findModuleByDisplayName: getByName,
-				getData: GlobalReplies_getData,
-				setData: GlobalReplies_setData
+				getData: plugins_GlobalReplies_getData,
+				setData: plugins_GlobalReplies_setData
 			} = BdApi;
 			const {
 				ComponentDispatch
 			} = getByProps("ComponentDispatch");
-			const MessageContextMenu = get((m => {
-				var _m$default;
-				return "MessageContextMenu" === (null === m || void 0 === m ? void 0 : null === (_m$default = m.default) || void 0 === _m$default ? void 0 : _m$default.displayName);
-			}));
+			const MessageContextMenu = external_PluginApi_namespaceObject.DCM.getDiscordMenu("MessageContextMenu");
 			const Menu = getByProps("MenuItem");
 			const ChannelText = getByName("ChannelText");
 			const {
@@ -282,44 +416,45 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					Patcher.unpatchAll(this.constructor.name);
 				}
 				patch() {
-					Patcher.after(this.constructor.name, MessageContextMenu, "default", ((_this, [props], ret) => {
-						var _props$message;
-						const channel = external_PluginApi_DiscordModules_namespaceObject.ChannelStore.getChannel(null === props || void 0 === props ? void 0 : null === (_props$message = props.message) || void 0 === _props$message ? void 0 : _props$message.channel_id);
-						const server = external_PluginApi_DiscordModules_namespaceObject.GuildStore.getGuild(null === channel || void 0 === channel ? void 0 : channel.guild_id);
-						const channels = getChannels(null === server || void 0 === server ? void 0 : server.id);
-						if (!server || !(null !== server && void 0 !== server && server.id)) return;
-						const tree = ret.props.children[2].props.children;
-						tree.splice(6, 0, GlobalReplies_React.createElement(Menu.MenuItem, {
-							id: "gloabl-reply",
-							label: "Global Reply",
-							children: channels.SELECTABLE.filter((e => GuildPermissions.can(Permissions.SEND_MESSAGES, e.channel))).map((e => GlobalReplies_React.createElement(Menu.MenuItem, {
-								id: `${e.channel.name}-${e.comparator}`,
-								action: () => {
-									external_PluginApi_DiscordModules_namespaceObject.NavigationUtils.replaceWith(`/channels/${server.id}/${e.channel.id}`);
-									ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
-										content: external_PluginApi_namespaceObject.Utilities.formatString(this.getTemplate(), {
-											messageLink: `https://discord.com/channels/${server.id}/${channel.id}/${props.message.id}`,
-											author: `<@${props.message.author.id}>`,
-											authorTag: props.message.author.tag,
-											message: props.message.content,
-											channel: `<#${channel.id}>`,
-											newLine: "\n"
-										})
-									});
-								},
-								label: [GlobalReplies_React.createElement(ChannelText, {
-									width: "10",
-									height: "10"
-								}), `    ${e.channel.name}`]
-							})))
+					MessageContextMenu.then((module => {
+						Patcher.after(this.constructor.name, module, "default", ((_this, [props], ret) => {
+							const channel = external_PluginApi_DiscordModules_namespaceObject.ChannelStore.getChannel(props?.message?.channel_id);
+							const server = external_PluginApi_DiscordModules_namespaceObject.GuildStore.getGuild(channel?.guild_id);
+							const channels = getChannels(server?.id);
+							if (!server || !server?.id) return;
+							const tree = ret.props.children[2].props.children;
+							tree.splice(6, 0, plugins_GlobalReplies_React.createElement(Menu.MenuItem, {
+								id: "gloabl-reply",
+								label: "Global Reply",
+								children: channels.SELECTABLE.filter((e => GuildPermissions.can(Permissions.SEND_MESSAGES, e.channel))).map((e => plugins_GlobalReplies_React.createElement(Menu.MenuItem, {
+									id: `${e.channel.name}-${e.comparator}`,
+									action: () => {
+										external_PluginApi_DiscordModules_namespaceObject.NavigationUtils.replaceWith(`/channels/${server.id}/${e.channel.id}`);
+										ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
+											content: external_PluginApi_namespaceObject.Utilities.formatString(this.getTemplate(), {
+												messageLink: `https://discord.com/channels/${server.id}/${channel.id}/${props.message.id}`,
+												author: `<@${props.message.author.id}>`,
+												authorTag: props.message.author.tag,
+												message: props.message.content,
+												channel: `<#${channel.id}>`,
+												newLine: "\n"
+											})
+										});
+									},
+									label: [plugins_GlobalReplies_React.createElement(ChannelText, {
+										width: "10",
+										height: "10"
+									}), `    ${e.channel.name}`]
+								})))
+							}));
 						}));
 					}));
 				}
 				getTemplate() {
-					return GlobalReplies_getData(this.constructor.name, "template") ?? `Replying to {{author}} {{messageLink}} `;
+					return plugins_GlobalReplies_getData(this.constructor.name, "template") ?? `Replying to {{author}} {{messageLink}} `;
 				}
 				getSettingsPanel() {
-					return GlobalReplies_React.createElement(Settings, null);
+					return plugins_GlobalReplies_React.createElement(Settings, null);
 				}
 			}
 		})();
@@ -351,7 +486,7 @@ module.exports = window.hasOwnProperty("ZeresPluginLibrary") ?
 					cancelText: "Cancel",
 					onConfirm: () => {
 						require("request").get("https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js", async (error, response, body) => {
-							if (error) return require("electron").shell.openExternal("https://betterdiscord.app/plugin/ZeresPluginLibrary");
+							if (error) return require("electron").shell.openExternal("https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js");
 							await new Promise(r => require("fs").writeFile(require("path").join(BdApi.Plugins.folder, "0PluginLibrary.plugin.js"), body, r));
 						});
 					}
