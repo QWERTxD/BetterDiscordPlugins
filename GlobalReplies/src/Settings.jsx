@@ -31,7 +31,7 @@ export default function Settings() {
                 setState(e);
 				setData("GlobalReplies", "template", e)
 			}}/>
-        <Button look="lookLink-9FtZy-" onClick={() => {
+        <Button look="lookLink-15mFoz" onClick={() => {
             setState(`Replying to {{author}} {{messageLink}} `);
             setData("GlobalReplies", "template", `Replying to {{author}} {{messageLink}} `)
         }}>
@@ -46,7 +46,9 @@ export default function Settings() {
             <Variable title="{{author}}" desc="Being replaced with the author mention"/>,
             <Variable title="{{authorTag}}" desc="Being replaced with the author tag (User#0000)"/>,
             <Variable title="{{messageLink}}" desc="Being replaced with the replied message link"/>,
-            <Variable title="{{channel}}" desc="Being replaced with the channel of the replied message"/>
+            <Variable title="{{channel}}" desc="Being replaced with the channel of the replied message"/>,
+            <Variable title="{{message}}" desc="Will be replaced with the user message"/>,
+            <Variable title="{{newLine}}" desc="Switching to a new line"/>
         ]}>
 
         </FormNotice>
