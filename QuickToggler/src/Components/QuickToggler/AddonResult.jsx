@@ -1,5 +1,6 @@
 import fs from 'fs';
-import { DiscordContextMenu, Modals, Toasts, WebpackModules } from '@zlibrary';
+import { DCM, Modals, Toasts, WebpackModules } from '@zlibrary';
+import { useState } from 'react'
 import PluginIcon from './PluginIcon';
 import ThemeIcon from './ThemeIcon';
 import Result from './Result';
@@ -12,9 +13,9 @@ const { TooltipContainer: Tooltip } = WebpackModules.getByProps('TooltipContaine
 export default function AddonResult({addon}) {
     const type = addon.filename.toLowerCase().endsWith('js') ? 'Plugin' : 'Theme';
     const AddonActions = type === 'Plugin' ? BdApi.Plugins : BdApi.Themes;
-    const isEnabled = AddonActions.isEnabled(addon.id);
+    const [isEnabled, setIsEnabled] = useState(AddonActions.isEnabled(addon.id));
     const color = isEnabled ? Colors.STATUS_GREEN : Colors.STATUS_RED;
-    const ContextMenu = DiscordContextMenu.buildMenu([
+    const ContextMenu = DCM.buildMenu([
         {
             label: 'Reload',
             action: () => {
@@ -41,8 +42,11 @@ export default function AddonResult({addon}) {
 
     return (
         <Result
-        onClick={() => AddonActions.toggle(addon.id)}
-        onContextMenu={e => DiscordContextMenu.openContextMenu(e, ContextMenu)}
+        onClick={() => {
+            setIsEnabled(!isEnabled);
+            AddonActions.toggle(addon.id);
+        }}
+        onContextMenu={e => DCM.openContextMenu(e, ContextMenu)}
         name={addon.name}
         info={`v${addon.version} by ${addon.author}`}
         desc={<OverflowTooltip children={addon.description}/>}
