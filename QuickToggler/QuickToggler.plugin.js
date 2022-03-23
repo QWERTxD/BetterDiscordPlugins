@@ -1,6 +1,6 @@
 /**
  * @name QuickToggler
- * @version 1.0.0
+ * @version 1.0.1
  * @description Allows you to open a toggle-able addon search with a keybind (default keybind: CTRL+D)
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickToggler
@@ -12,16 +12,14 @@
     // Offer to self-install for clueless users that try to run this directly.
     var shell = WScript.CreateObject("WScript.Shell");
     var fs = new ActiveXObject("Scripting.FileSystemObject");
-    var pathPlugins = shell.ExpandEnvironmentStrings("%APPDATA%BetterDiscordplugins");
+    var pathPlugins = shell.ExpandEnvironmentStrings("%APPDATA%\BetterDiscord\plugins");
     var pathSelf = WScript.ScriptFullName;
     // Put the user at ease by addressing them in the first person
-    shell.Popup("It looks like you've mistakenly tried to run me directly. 
-(Don't do that!)", 0, "I'm a plugin for BetterDiscord", 0x30);
+    shell.Popup("It looks like you've mistakenly tried to run me directly. \n(Don't do that!)", 0, "I'm a plugin for BetterDiscord", 0x30);
     if (fs.GetParentFolderName(pathSelf) === fs.GetAbsolutePathName(pathPlugins)) {
         shell.Popup("I'm in the correct folder already.", 0, "I'm already installed", 0x40);
     } else if (!fs.FolderExists(pathPlugins)) {
-        shell.Popup("I can't find the BetterDiscord plugins folder.
-Are you sure it's even installed?", 0, "Can't install myself", 0x10);
+        shell.Popup("I can't find the BetterDiscord plugins folder.\nAre you sure it's even installed?", 0, "Can't install myself", 0x10);
     } else if (shell.Popup("Should I copy myself to BetterDiscord's plugins folder for you?", 0, "Do you need some help?", 0x34) === 6) {
         fs.CopyFile(pathSelf, fs.BuildPath(pathPlugins, fs.GetFileName(pathSelf)), true);
         // Show the user where to put plugins in the future
@@ -34,15 +32,15 @@ Are you sure it's even installed?", 0, "Can't install myself", 0x10);
 const config = {
 	"info": {
 		"name": "QuickToggler",
-		"version": "1.0.0",
+		"version": "1.0.1",
 		"description": "Allows you to open a toggle-able addon search with a keybind (default keybind: CTRL+D)",
 		"authors": [{
 			"name": "QWERT",
 			"discord_id": "678556376640913408",
 			"github_username": "QWERTxD"
 		}],
-		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/tree/undefined/QuickToggler",
-		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/QuickToggler/QuickToggler.plugin.js"
+		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickToggler",
+		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickToggler/QuickToggler.plugin.js"
 	},
 	"build": {
 		"zlibrary": true,
@@ -56,7 +54,14 @@ const config = {
 			"source": true,
 			"readme": true
 		}
-	}
+	},
+	"changelog": [{
+		"type": "fixed",
+		"title": "Fixes",
+		"items": [
+			"Fixed\nAll credits again to AGreenPig"
+		]
+	}]
 };
 function buildPlugin([BasePlugin, PluginApi]) {
 	const module = {
@@ -98,7 +103,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			},
 			'@discord/utils': {
 				get 'joinClassNames'() {
-					return ___createMemoize___(this, 'joinClassNames', () => BdApi.findModule(m => typeof m?.default?.default === 'function')?.default)
+					return ___createMemoize___(this, 'joinClassNames', () => BdApi.findModule(e => e.toString().indexOf('return e.join(" ")') > 200))
 				},
 				get 'useForceUpdate'() {
 					return ___createMemoize___(this, 'useForceUpdate', () => BdApi.findModuleByProps('useForceUpdate')?.useForceUpdate)
@@ -107,7 +112,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'Logger', () => BdApi.findModuleByProps('setLogFn')?.default)
 				},
 				get 'Navigation'() {
-					return ___createMemoize___(this, 'Navigation', () => BdApi.findModuleByProps('replaceWith'))
+					return ___createMemoize___(this, 'Navigation', () => BdApi.findModuleByProps('replaceWith', 'currentRouteIsPeekView'))
 				}
 			},
 			'@discord/components': {
@@ -130,7 +135,10 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'TransitionGroup', () => BdApi.findModuleByDisplayName('TransitionGroup'))
 				},
 				get 'Button'() {
-					return ___createMemoize___(this, 'Button', () => BdApi.findModuleByProps('DropdownSizes'))
+					return ___createMemoize___(this, 'Button', () => BdApi.findModule(m => 'DropdownSizes' in m && typeof(m) === 'function'))
+				},
+				get 'Popout'() {
+					return ___createMemoize___(this, 'Popout', () => BdApi.findModuleByDisplayName('Popout'))
 				},
 				get 'Flex'() {
 					return ___createMemoize___(this, 'Flex', () => BdApi.findModuleByDisplayName('Flex'))
@@ -146,11 +154,14 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				get 'Dispatcher'() {
 					return ___createMemoize___(this, 'Dispatcher', () => BdApi.findModuleByProps('dirtyDispatch', 'subscribe'))
 				},
+				get 'ComponentDispatcher'() {
+					return ___createMemoize___(this, 'ComponentDispatcher', () => BdApi.findModuleByProps('ComponentDispatch')?.ComponentDispatch)
+				},
 				get 'EmojiUtils'() {
 					return ___createMemoize___(this, 'EmojiUtils', () => BdApi.findModuleByProps('uploadEmoji'))
 				},
 				get 'PermissionUtils'() {
-					return ___createMemoize___(this, 'PermissionUtils', () => BdApi.findModuleByProps('computePermissions'))
+					return ___createMemoize___(this, 'PermissionUtils', () => BdApi.findModuleByProps('computePermissions', 'canManageUser'))
 				},
 				get 'DMUtils'() {
 					return ___createMemoize___(this, 'DMUtils', () => BdApi.findModuleByProps('openPrivateChannel'))
@@ -161,7 +172,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'Messages', () => BdApi.findModuleByProps('getMessage', 'getMessages'))
 				},
 				get 'Channels'() {
-					return ___createMemoize___(this, 'Channels', () => BdApi.findModuleByProps('getChannel'))
+					return ___createMemoize___(this, 'Channels', () => BdApi.findModuleByProps('getChannel', 'getDMFromUserId'))
 				},
 				get 'Guilds'() {
 					return ___createMemoize___(this, 'Guilds', () => BdApi.findModuleByProps('getGuild'))
@@ -176,10 +187,10 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'Info', () => BdApi.findModuleByProps('getSessionId'))
 				},
 				get 'Status'() {
-					return ___createMemoize___(this, 'Status', () => BdApi.findModuleByProps('getStatus'))
+					return ___createMemoize___(this, 'Status', () => BdApi.findModuleByProps('getStatus', 'getActivities', 'getState'))
 				},
 				get 'Users'() {
-					return ___createMemoize___(this, 'Users', () => BdApi.findModuleByProps('getUser'))
+					return ___createMemoize___(this, 'Users', () => BdApi.findModuleByProps('getUser', 'getCurrentUser'))
 				},
 				get 'SettingsStore'() {
 					return ___createMemoize___(this, 'SettingsStore', () => BdApi.findModuleByProps('afkTimeout', 'status'))
@@ -194,7 +205,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'Activities', () => BdApi.findModuleByProps('getActivities'))
 				},
 				get 'Games'() {
-					return ___createMemoize___(this, 'Games', () => BdApi.findModuleByProps('getGame'))
+					return ___createMemoize___(this, 'Games', () => BdApi.findModuleByProps('getGame', 'games'))
 				},
 				get 'Auth'() {
 					return ___createMemoize___(this, 'Auth', () => BdApi.findModuleByProps('getId', 'isGuest'))
@@ -206,10 +217,13 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			'@discord/actions': {
 				get 'ProfileActions'() {
 					return ___createMemoize___(this, 'ProfileActions', () => BdApi.findModuleByProps('fetchProfile'))
+				},
+				get 'GuildActions'() {
+					return ___createMemoize___(this, 'GuildActions', () => BdApi.findModuleByProps('requestMembersById'))
 				}
 			},
 			get '@discord/i18n'() {
-				return ___createMemoize___(this, '@discord/i18n', () => BdApi.findModuleByProps('getLocale'))
+				return ___createMemoize___(this, '@discord/i18n', () => BdApi.findModule(m => m.Messages?.CLOSE && typeof(m.getLocale) === 'function'))
 			},
 			get '@discord/constants'() {
 				return ___createMemoize___(this, '@discord/constants', () => BdApi.findModuleByProps('API_HOST'))
@@ -234,7 +248,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				return ___createMemoize___(this, '@discord/flux', () => Object.assign({}, BdApi.findModuleByProps('useStateFromStores').default, BdApi.findModuleByProps('useStateFromStores')))
 			},
 			get '@discord/modal'() {
-				return ___createMemoize___(this, '@discord/modal', () => Object.assign({}, BdApi.findModuleByProps('ModalRoot'), BdApi.findModuleByProps('openModal')))
+				return ___createMemoize___(this, '@discord/modal', () => Object.assign({}, BdApi.findModuleByProps('ModalRoot'), BdApi.findModuleByProps('openModal', 'closeAllModals')))
 			},
 			get '@discord/connections'() {
 				return ___createMemoize___(this, '@discord/connections', () => BdApi.findModuleByProps('get', 'isSupported', 'map'))
@@ -261,7 +275,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			}
 		};
 		var __webpack_modules__ = {
-			832: module => {
+			113: module => {
 				module.exports = BdApi.React;
 			}
 		};
@@ -318,10 +332,10 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			var external_BasePlugin_default = __webpack_require__.n(external_BasePlugin_namespaceObject);
 			const scrollbars_namespaceObject = Modules["@discord/scrollbars"];
 			var scrollbars_default = __webpack_require__.n(scrollbars_namespaceObject);
-			var external_BdApi_React_ = __webpack_require__(832);
+			var external_BdApi_React_ = __webpack_require__(113);
 			const external_fs_namespaceObject = require("fs");
 			var external_fs_default = __webpack_require__.n(external_fs_namespaceObject);
-			var React = __webpack_require__(832);
+			var React = __webpack_require__(113);
 			function PluginIcon({
 				fill,
 				marginTop = 0
@@ -339,7 +353,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					d: "M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7 1.49 0 2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5S21.88 11 20.5 11z"
 				}));
 			}
-			var ThemeIcon_React = __webpack_require__(832);
+			var ThemeIcon_React = __webpack_require__(113);
 			function ThemeIcon_PluginIcon({
 				fill,
 				marginTop = 0
@@ -358,7 +372,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				}));
 			}
 			const utils_namespaceObject = Modules["@discord/utils"];
-			var Result_React = __webpack_require__(832);
+			var Result_React = __webpack_require__(113);
 			function _extends() {
 				_extends = Object.assign || function(target) {
 					for (var i = 1; i < arguments.length; i++) {
@@ -402,7 +416,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			}
 			const external_path_namespaceObject = require("path");
 			var external_path_default = __webpack_require__.n(external_path_namespaceObject);
-			var AddonResult_React = __webpack_require__(832);
+			var AddonResult_React = __webpack_require__(113);
 			const OverflowTooltip = external_PluginApi_namespaceObject.WebpackModules.getByDisplayName("OverflowTooltip");
 			const {
 				Colors
@@ -415,9 +429,9 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			}) {
 				const type = addon.filename.toLowerCase().endsWith("js") ? "Plugin" : "Theme";
 				const AddonActions = "Plugin" === type ? BdApi.Plugins : BdApi.Themes;
-				const isEnabled = AddonActions.isEnabled(addon.id);
+				const [isEnabled, setIsEnabled] = (0, external_BdApi_React_.useState)(AddonActions.isEnabled(addon.id));
 				const color = isEnabled ? Colors.STATUS_GREEN : Colors.STATUS_RED;
-				const ContextMenu = external_PluginApi_namespaceObject.DiscordContextMenu.buildMenu([{
+				const ContextMenu = external_PluginApi_namespaceObject.DCM.buildMenu([{
 					label: "Reload",
 					action: () => {
 						AddonActions.reload(addon.id);
@@ -439,8 +453,11 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					color: "colorDanger"
 				}]);
 				return AddonResult_React.createElement(Result, {
-					onClick: () => AddonActions.toggle(addon.id),
-					onContextMenu: e => external_PluginApi_namespaceObject.DiscordContextMenu.openContextMenu(e, ContextMenu),
+					onClick: () => {
+						setIsEnabled(!isEnabled);
+						AddonActions.toggle(addon.id);
+					},
+					onContextMenu: e => external_PluginApi_namespaceObject.DCM.openContextMenu(e, ContextMenu),
 					name: addon.name,
 					info: `v${addon.version} by ${addon.author}`,
 					desc: AddonResult_React.createElement(OverflowTooltip, {
@@ -457,7 +474,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					}))
 				});
 			}
-			var Results_React = __webpack_require__(832);
+			var Results_React = __webpack_require__(113);
 			function Results({
 				query
 			}) {
@@ -480,7 +497,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					addon
 				})));
 			}
-			var QuickToggler_React = __webpack_require__(832);
+			var QuickToggler_React = __webpack_require__(113);
 			const QuickToggler_classes = {
 				...external_PluginApi_namespaceObject.WebpackModules.getByProps("quickswitcher", "miscContainer", "scroller"),
 				...external_PluginApi_namespaceObject.WebpackModules.getByProps("input", "container", "emptyStateCTA", "protip"),
@@ -504,7 +521,9 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					};
 				}
 				render() {
-					return QuickToggler_React.createElement("div", {
+					return QuickToggler_React.createElement(Modal.ModalRoot, {
+						transitionState: this.props.transitionState
+					}, QuickToggler_React.createElement("div", {
 						className: QuickToggler_classes.quickswitcher
 					}, QuickToggler_React.createElement("input", {
 						className: QuickToggler_classes.input,
@@ -523,7 +542,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						}),
 						onClick: () => {
 							QuickToggler_open("plugins");
-							external_PluginApi_DiscordModules_namespaceObject.ModalStack.pop();
+							external_PluginApi_DiscordModules_namespaceObject.ModalActions.closeAllModals();
 						}
 					}), QuickToggler_React.createElement(Result, {
 						name: "Themes",
@@ -532,7 +551,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						}),
 						onClick: () => {
 							QuickToggler_open("themes");
-							external_PluginApi_DiscordModules_namespaceObject.ModalStack.pop();
+							external_PluginApi_DiscordModules_namespaceObject.ModalActions.closeAllModals();
 						}
 					}), QuickToggler_React.createElement("div", {
 						style: {
@@ -553,11 +572,11 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						className: QuickToggler_classes.autocompleteQuerySymbol
 					}, "$plugin"), ", and ", QuickToggler_React.createElement("span", {
 						className: QuickToggler_classes.autocompleteQuerySymbol
-					}, "$theme"), " to filter results.")));
+					}, "$theme"), " to filter results."))));
 				}
 			}
 			const forms_namespaceObject = Modules["@discord/forms"];
-			var Settings_React = __webpack_require__(832);
+			var Settings_React = __webpack_require__(113);
 			const KeybindRecorder = external_PluginApi_namespaceObject.WebpackModules.getByDisplayName("KeybindRecorder");
 			function Settings({
 				settings,
@@ -575,7 +594,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					})
 				}));
 			}
-			var plugins_QuickToggler_React = __webpack_require__(832);
+			var plugins_QuickToggler_React = __webpack_require__(113);
 			let keys = {};
 			let settings = {};
 			class QuickToggler extends(external_BasePlugin_default()) {
@@ -594,7 +613,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					]).map((e => 162 === e[1] ? 17 : 160 === e[1] ? 16 : 164 === e[1] ? 18 : e[1]));
 					if (keybinds.every((key => true === keys[key]))) {
 						keys = {};
-						external_PluginApi_DiscordModules_namespaceObject.ModalStack.push((() => plugins_QuickToggler_React.createElement(QuickToggler_QuickToggler, null)));
+						external_PluginApi_DiscordModules_namespaceObject.ModalActions.openModal((props => plugins_QuickToggler_React.createElement(QuickToggler_QuickToggler, props)));
 					} else setTimeout((() => keys = {}), 300);
 					keys[e.key] = false;
 				}
