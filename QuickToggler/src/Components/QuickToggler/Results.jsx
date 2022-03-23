@@ -38,6 +38,7 @@ export default function Results({query}) {
             return (
                 <AddonResult
                 addon={addon}
+                key={addon.id}
                 />
             )
         })
