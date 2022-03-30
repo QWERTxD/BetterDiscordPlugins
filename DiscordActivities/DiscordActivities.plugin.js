@@ -1,6 +1,6 @@
 /**
  * @name DiscordActivities
- * @version 1.1.4
+ * @version 1.1.5
  * @description Allows you to play Discord's Activity Games (Such as watching YouTube together and Chess) with friends in voice chats.
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/DiscordActivities
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "DiscordActivities",
-		"version": "1.1.4",
+		"version": "1.1.5",
 		"description": "Allows you to play Discord's Activity Games (Such as watching YouTube together and Chess) with friends in voice chats.",
 		"authors": [{
 			"name": "QWERT",
@@ -334,7 +334,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				}));
 			}
 			patchEnabledAppIds() {
-				const applicationIds = ["755827207812677713", "832012774040141894", "832013003968348200", "902271654783242291", "879863976006127627", "832025144389533716", "879863686565621790", "852509694341283871", "880218394199220334", "773336526917861400", "814288819477020702", "879864070101172255", "879863881349087252"];
+				const applicationIds = ['879863686565621790', '773336526917861400', '755827207812677713', '879864070101172255', '832013003968348200', '902271654783242291', '814288819477020702', '880218394199220334', '879863881349087252', '945737671223947305', '879863976006127627', '903769130790969345', '832025144389533716', '832012774040141894', '852509694341283871'];
 				external_PluginApi_namespaceObject.Patcher.instead(activities, "getEnabledAppIds", (function() {
 					return applicationIds;
 				}));
