@@ -1,6 +1,6 @@
 /**
  * @name AssignBadges
- * @version 1.0.25
+ * @version 1.0.27
  * @description Allows you to locally assign badges to users through the user context menu.
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/AssignBadges
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "AssignBadges",
-		"version": "1.0.25",
+		"version": "1.0.27",
 		"description": "Allows you to locally assign badges to users through the user context menu.",
 		"authors": [{
 			"name": "QWERT",
@@ -59,7 +59,7 @@ const config = {
 		"type": "fixed",
 		"title": "Fixes",
 		"items": [
-			"Fully fixed (works everywhere)/nAll credits again to AGreenPig"
+			"Fixed bot tag crashing discord\nThanks to AGreenPig for debugging and fix"
 		]
 	}]
 };
@@ -481,7 +481,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				name: "Booster - 2 Years",
 				time: 24.04
 			}];
-			const BotTag = external_PluginApi_namespaceObject.WebpackModules.getByDisplayName("BotTag");
+			const BotTag = external_PluginApi_namespaceObject.WebpackModules.getByProps("BotTagTypes").default;
 			const MessageAuthor = external_PluginApi_namespaceObject.WebpackModules.find((m => m.default.toString().indexOf("userOverride") > -1));
 			const NameTag = external_PluginApi_namespaceObject.WebpackModules.find((m => "DiscordTag" === m.default.displayName));
 			const MemberListItem = external_PluginApi_namespaceObject.WebpackModules.find((m => "MemberListItem" === m.default.displayName));
@@ -691,8 +691,8 @@ function buildPlugin([BasePlugin, PluginApi]) {
 							const [, , ret] = args;
 							const contextMenu = external_PluginApi_namespaceObject.Utilities.getNestedProp(ret, "props.children");
 							if (!contextMenu || "function" !== typeof contextMenu.type) return;
-							original ??= contextMenu.type;
-							wrapper.displayName ??= original.displayName;
+							original ?? = contextMenu.type;
+							wrapper.displayName ?? = original.displayName;
 							contextMenu.type = wrapper;
 						}));
 						patched.add(Menu.default);
