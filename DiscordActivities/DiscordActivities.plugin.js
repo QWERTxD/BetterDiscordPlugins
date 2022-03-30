@@ -1,6 +1,6 @@
 /**
  * @name DiscordActivities
- * @version 1.1.4
+ * @version 1.1.5
  * @description Allows you to play Discord's Activity Games (Such as watching YouTube together and Chess) with friends in voice chats.
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/DiscordActivities
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "DiscordActivities",
-		"version": "1.1.4",
+		"version": "1.1.5",
 		"description": "Allows you to play Discord's Activity Games (Such as watching YouTube together and Chess) with friends in voice chats.",
 		"authors": [{
 			"name": "QWERT",
