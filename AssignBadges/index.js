@@ -35,7 +35,7 @@ const boosts = [
 	{ id: "boost9", value: 0 << 0, name: "Booster - 2 Years", time: 24.04 }
 ]
 
-const BotTag = WebpackModules.getByDisplayName("BotTag");
+const BotTag = WebpackModules.getByProps("BotTagTypes").default;
 const MessageAuthor = WebpackModules.find(m => m.default.toString().indexOf("userOverride") > -1)
 const NameTag = WebpackModules.find(m => m.default.displayName === "DiscordTag");
 const MemberListItem = WebpackModules.find(m => m.default.displayName === "MemberListItem");
