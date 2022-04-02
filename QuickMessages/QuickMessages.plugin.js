@@ -1,6 +1,6 @@
 /**
  * @name QuickMessages
- * @version 1.2.3
+ * @version 1.2.4
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/QuickMessages/QuickMessages.plugin.js
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages
@@ -20,7 +20,7 @@ const config = {
                 discord_id: "678556376640913408",
             }
         ],
-        version: "1.2.3",
+        version: "1.2.4",
         description: "Save messages to quickly send them later, when you need.",
         github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages",
         github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js",
@@ -30,8 +30,9 @@ const config = {
             title: "Fixed",
             type: "Fixed",
             items: [
-                "Fixed CPU spike on Lake-U laptops",
-				"I still need ideas and suggestions, so if you have some, feel free to send them to me in the support server https://discord.gg/zMnHFAKsu3"
+                "Fix inserting text.",
+                "Let the delete Button use the trashcan icon.",
+                "Add some checks for duplicate messages and empty messages.",
             ],
         }
     ]
@@ -86,9 +87,13 @@ module.exports = !global.ZeresPluginLibrary ? class {
     const { React } = DiscordModules;
     function configArrayPush(name, key, data) {
         const config = BdApi.getData(name, key) || [];
-        if (config.includes(data)) return;
+        if (config.includes(data)) {
+            BdApi.showToast(`Already added "${data}"!`, { type: 'success' });
+            return;
+        }
         config.push(data);
         BdApi.setData(name, key, config);
+        BdApi.showToast(`Successfully created new Quick Message!`, { type: 'success' });
     }
 
     const configArrayRemove = function (name, key, value) {
@@ -162,9 +167,10 @@ module.exports = !global.ZeresPluginLibrary ? class {
         async patchTextAreaContextMenus() {
             var shouldPaste = true;
 	    const SlateTextAreaContextMenu = await Library.DCM.getDiscordMenu("SlateTextAreaContextMenu");
-	    const CloseCircle = BdApi.findModuleByDisplayName('CloseCircle');
+	    const TrashIcon = BdApi.findModuleByDisplayName('Trash');
             const ComponentDispatch = BdApi.findModuleByProps("ComponentDispatch").ComponentDispatch;
             const ChannelTextAreaContainer = WebpackModules.find(m => m.type && m.type.render && m.type.render.displayName === "ChannelTextAreaContainer").type;
+            const TooltipContainer = WebpackModules.getByProps('TooltipContainer').TooltipContainer; 
             const children = [];
             const saveToCategory = [];
             var text = "";
@@ -174,10 +180,18 @@ module.exports = !global.ZeresPluginLibrary ? class {
                     ContextMenu.buildMenuItem({
                         label: cat.name,
                         action: _ => {
-                            const category = categories.filter(e => e.name === cat.name)[0];
-                            categories[categories.indexOf(category)].items.push(text);
-                            this.forceUpdate();
-                            BdApi.showToast(`Successfully created new Quick Message!`, { type: 'success' });
+                            if(text !== "") {
+                                const category = categories.filter(e => e.name === cat.name)[0];
+                                if(categories[categories.indexOf(category)].items.includes(text)) {
+                                    BdApi.showToast(`Already added "${text}"!`, { type: 'success' });
+                                    return;
+                                }
+                                categories[categories.indexOf(category)].items.push(text);
+                                this.forceUpdate();
+                                BdApi.showToast(`Successfully created new Quick Message!`, { type: 'success' });
+                            } else {
+                                BdApi.showToast(`You cannot save an empty message!`, { type: 'error' });
+                            }
                         }
                     })
                 )
@@ -187,19 +201,26 @@ module.exports = !global.ZeresPluginLibrary ? class {
                         label: e,
                         action: _ => {
                             if (!shouldPaste) return;
-                            ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", { content: e })
+                            ComponentDispatch.dispatch("INSERT_TEXT", { content: e, plainText: e })
                         },
-                        hint: React.createElement(CloseCircle, {
-                            onClick: _ => {
-                                shouldPaste = false;
-                                const category = categories.filter(e => e.name === cat.name)[0];
-                                categories[categories.indexOf(category)].items = Library.Utilities.removeFromArray(categories[categories.indexOf(category)].items, e);
-                                this.forceUpdate();
-                                BdApi.showToast(`Successfully removed Quick Message!`, { type: 'success' });
-                            },
-                            width: '15px',
-                            height: '15px'
-                        })
+                        hint: React.createElement(TooltipContainer,
+                            {
+                                text: "Delete"
+                            }, 
+                            React.createElement(TrashIcon, {
+                                    style: {color: "var(--status-danger)"},
+                                    onClick: _ => {
+                                        shouldPaste = false;
+                                        const category = categories.filter(e => e.name === cat.name)[0];
+                                        categories[categories.indexOf(category)].items = Library.Utilities.removeFromArray(categories[categories.indexOf(category)].items, e);
+                                        this.forceUpdate();
+                                        BdApi.showToast(`Successfully removed Quick Message!`, { type: 'success' });
+                                    },
+                                    width: '15px',
+                                    height: '15px'
+                                }
+                            )
+                        )
                     }))
                 });
                 catChildren.push(ContextMenu.buildMenuItem({
@@ -237,18 +258,24 @@ module.exports = !global.ZeresPluginLibrary ? class {
                     label: message,
                     action: _ => {
                         if (!shouldPaste) return;
-                        ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", { content: message })
+                        ComponentDispatch.dispatch("INSERT_TEXT", { content: message, plainText: message })
                     },
-                    hint: React.createElement(CloseCircle, {
-                        onClick: _ => {
-                            shouldPaste = false;
-                            configArrayRemove("QuickMessages", 'messages', message);
-                            this.forceUpdate();
-                            BdApi.showToast(`Successfully removed Quick Message!`, { type: 'success' });
-                        },
-                        width: '15px',
-                        height: '15px'
-                    })
+                    hint: React.createElement(TooltipContainer,
+                        {
+                            text: "Delete"
+                        }, 
+                        React.createElement(TrashIcon, {
+                            style: {color: "var(--status-danger)"},
+                            onClick: _ => {
+                                shouldPaste = false;
+                                configArrayRemove("QuickMessages", 'messages', message);
+                                this.forceUpdate();
+                                BdApi.showToast(`Successfully removed Quick Message!`, { type: 'success' });
+                            },
+                            width: '15px',
+                            height: '15px'
+                        })
+                    )
                 }));
             })
 
@@ -264,11 +291,14 @@ module.exports = !global.ZeresPluginLibrary ? class {
                     }),
                     ContextMenu.buildMenuItem({
                         label: "Save as Quick Message",
-                        disabled: props.editor.containerRef.current.textContent.slice(0, -1) == props.editor.props.placeholder,
+                        // disabled: props.editor.containerRef.current.textContent.slice(0, -1) == props.editor.props.placeholder,
                         action: _ => {
-                            configArrayPush("QuickMessages", "messages", text);
-                            this.forceUpdate();
-                            BdApi.showToast(`Successfully created new Quick Message!`, { type: 'success' });
+                            if(text !== "") {
+                                configArrayPush("QuickMessages", "messages", text);
+                                this.forceUpdate();
+                            } else {
+                                BdApi.showToast(`You cannot save an empty message!`, { type: 'error' });
+                            }
                         },
                         children: [
                             saveToCategory,
