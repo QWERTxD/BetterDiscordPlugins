@@ -21,15 +21,15 @@ const config = {
         ],
     github_raw:
       "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js",
-    version: "1.0.4",
+    version: "1.0.6",
     description:
       "Displays notifications such as new messages, friends added in Discord.",
 	},
   changelog: [
     {
-      title: "Group DM fix",
-      type: "Group DM fix",
-      items: ["Fixed Group DMs not showing notifications/crashing while there is no group name. They show up properly now (shows usernames of people in group)"],
+      title: "Fix error spam",
+      type: "Fix error spam",
+      items: ["Updated version of SmolAlli's fix to the constant spam of error messages (Credits to her). Should work for both the people that were previously having the issue and the the people that weren't."],
     }
   ],
   defaultConfig: [
@@ -909,12 +909,24 @@ module.exports = !global.ZeresPluginLibrary
             message.guild_id || "@me"
           );
           if (MuteStore.allowAllMessages(channel)) return true;
-          return isMentioned.isRawMessageMentioned(
-            message,
-            UserStore.getCurrentUser().id,
-            isSuppressEveryone,
-            isSuppressRoles
-          );
+          try {
+            return isMentioned.isRawMessageMentioned(
+              message,
+              UserStore.getCurrentUser().id,
+              isSuppressEveryone,
+              isSuppressRoles
+            );
+          } catch (error) {
+	    //Hot fix by SmolAlli for canary users having issues with the plugin (https://github.com/QWERTxD/BetterDiscordPlugins/pull/204/commits/1b8464c490588db23d7924bf4e3a9cfc2e7ca2ee#diff-9176dc22b269e906a02f59133fd3d4ce5a2fe9e4ac8daf7a97c68eeb39559ea4R919-R924)
+            return isMentioned.isRawMessageMentioned(
+              {
+                rawMessage: message,
+                userId: UserStore.getCurrentUser().id,
+                suppressEveryone: isSuppressEveryone,
+                suppressRoles: isSuppressRoles
+              }
+            );
+          }
         }
 
         checkSettings(message, channel) {
