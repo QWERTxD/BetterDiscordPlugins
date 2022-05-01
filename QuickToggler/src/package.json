@@ -1,7 +1,7 @@
 {
 	"info": {
 		"name": "QuickToggler",
-		"version": "1.0.0",
+		"version": "1.0.3",
 		"description": "Allows you to open a toggle-able addon search with a keybind (default keybind: CTRL+D)",
 		"authors": [
 			{
@@ -25,5 +25,14 @@
 			"source": true,
 			"readme": true
 		}
-	}
+	},
+	"changelog": [
+		{
+			"type": "added",
+			"title": "Added",
+			"items": [
+				"Added Fuzzy Search"
+			]
+		}
+	]
 }
