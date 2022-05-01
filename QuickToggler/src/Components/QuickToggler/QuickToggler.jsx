@@ -39,7 +39,7 @@ export default class QuickToggler extends Component {
                     icon={<PluginIcon fill='var(--interactive-normal)'/>}
                     onClick={() => {
                         open('plugins');
-                        ModalStack.pop();
+                        ModalActions.closeAllModals();
                     }}
                 />
                 <Result
@@ -47,7 +47,7 @@ export default class QuickToggler extends Component {
                     icon={<ThemeIcon fill='var(--interactive-normal)'/>}
                     onClick={() => {
                         open('themes');
-                        ModalStack.pop();
+                        ModalActions.closeAllModals();
                     }}
                 />
                 <div style={{height: 10}}/>
