@@ -22,7 +22,7 @@ export default class QuickToggler extends BasePlugin {
 		const keybinds = (settings?.keybind || [[0, 162], [0, 68]]).map(e => e[1] === 162 ? 17 : (e[1] === 160 ? 16 : (e[1] === 164 ? 18 : e[1])));
 		if (keybinds.every(key => keys[key] === true)) {
 			keys = {};
-			ModalStack.push(() => <QuickTogglerComponent/>);
+			ModalActions.openModal(props => <QuickTogglerComponent {...props}/>)
 		} else {
 		  setTimeout(() => keys = {}, 300)
 		}

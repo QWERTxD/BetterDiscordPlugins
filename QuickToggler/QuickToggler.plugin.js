@@ -1076,7 +1076,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			}) {
 				const type = addon.filename.toLowerCase().endsWith("js") ? "Plugin" : "Theme";
 				const AddonActions = "Plugin" === type ? BdApi.Plugins : BdApi.Themes;
-				const [isEnabled, setIsEnabled] = (0, external_BdApi_React_.useState)(AddonActions.isEnabled(addon.id));
+				const isEnabled = AddonActions.isEnabled(addon.id);
 				const color = isEnabled ? Colors.STATUS_GREEN : Colors.STATUS_RED;
 				const ContextMenu = external_PluginApi_namespaceObject.DCM.buildMenu([{
 					label: "Reload",
@@ -1100,10 +1100,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					color: "colorDanger"
 				}]);
 				return AddonResult_React.createElement(Result, {
-					onClick: () => {
-						setIsEnabled(!isEnabled);
-						AddonActions.toggle(addon.id);
-					},
+					onClick: () => AddonActions.toggle(addon.id),
 					onContextMenu: e => external_PluginApi_namespaceObject.DCM.openContextMenu(e, ContextMenu),
 					name: addon.name,
 					info: `v${addon.version} by ${addon.author}`,
