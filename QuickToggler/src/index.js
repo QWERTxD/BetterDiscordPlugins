@@ -1,5 +1,5 @@
 import { PluginUtilities } from '@zlibrary';
-import { ModalActions } from '@zlibrary/discord';
+import { ModalStack } from '@zlibrary/discord';
 import BasePlugin from '@zlibrary/plugin';
 import QuickTogglerComponent from './Components/QuickToggler/QuickToggler';
 import Settings from './Components/Settings';
@@ -22,7 +22,7 @@ export default class QuickToggler extends BasePlugin {
 		const keybinds = (settings?.keybind || [[0, 162], [0, 68]]).map(e => e[1] === 162 ? 17 : (e[1] === 160 ? 16 : (e[1] === 164 ? 18 : e[1])));
 		if (keybinds.every(key => keys[key] === true)) {
 			keys = {};
-			ModalActions.openModal(props => <QuickTogglerComponent {...props}/>)
+			ModalStack.push(() => <QuickTogglerComponent/>);
 		} else {
 		  setTimeout(() => keys = {}, 300)
 		}
