@@ -1,6 +1,6 @@
 /**
  * @name QuickToggler
- * @version 1.0.2
+ * @version 1.0.3
  * @description Allows you to open a toggle-able addon search with a keybind (default keybind: CTRL+D)
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickToggler
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "QuickToggler",
-		"version": "1.0.2",
+		"version": "1.0.3",
 		"description": "Allows you to open a toggle-able addon search with a keybind (default keybind: CTRL+D)",
 		"authors": [{
 			"name": "QWERT",
@@ -56,10 +56,10 @@ const config = {
 		}
 	},
 	"changelog": [{
-		"type": "fixed",
-		"title": "Fixes",
+		"type": "added",
+		"title": "Added",
 		"items": [
-			"Small fix of states\nAgain credits to AGreenPig"
+			"Added Fuzzy Search"
 		]
 	}]
 };
@@ -68,214 +68,860 @@ function buildPlugin([BasePlugin, PluginApi]) {
 		exports: {}
 	};
 	(() => {
-		"use strict";
-		class StyleLoader {
-			static styles = "";
-			static element = null;
-			static append(module, css) {
-				this.styles += `/* ${module} */\n${css}`;
-			}
-			static inject(name = config.info.name) {
-				if (this.element) this.element.remove();
-				this.element = document.head.appendChild(Object.assign(document.createElement("style"), {
-					id: name,
-					textContent: this.styles
-				}));
-			}
-			static remove() {
-				if (this.element) {
-					this.element.remove();
-					this.element = null;
-				}
-			}
-		}
-		function ___createMemoize___(instance, name, value) {
-			value = value();
-			Object.defineProperty(instance, name, {
-				value,
-				configurable: true
-			});
-			return value;
-		};
-		const Modules = {
-			get 'react-spring'() {
-				return ___createMemoize___(this, 'react-spring', () => BdApi.findModuleByProps('useSpring'))
-			},
-			'@discord/utils': {
-				get 'joinClassNames'() {
-					return ___createMemoize___(this, 'joinClassNames', () => BdApi.findModule(e => e.toString().indexOf('return e.join(" ")') > 200))
-				},
-				get 'useForceUpdate'() {
-					return ___createMemoize___(this, 'useForceUpdate', () => BdApi.findModuleByProps('useForceUpdate')?.useForceUpdate)
-				},
-				get 'Logger'() {
-					return ___createMemoize___(this, 'Logger', () => BdApi.findModuleByProps('setLogFn')?.default)
-				},
-				get 'Navigation'() {
-					return ___createMemoize___(this, 'Navigation', () => BdApi.findModuleByProps('replaceWith', 'currentRouteIsPeekView'))
-				}
-			},
-			'@discord/components': {
-				get 'Tooltip'() {
-					return ___createMemoize___(this, 'Tooltip', () => BdApi.findModuleByDisplayName('Tooltip'))
-				},
-				get 'TooltipContainer'() {
-					return ___createMemoize___(this, 'TooltipContainer', () => BdApi.findModuleByProps('TooltipContainer')?.TooltipContainer)
-				},
-				get 'TextInput'() {
-					return ___createMemoize___(this, 'TextInput', () => BdApi.findModuleByDisplayName('TextInput'))
-				},
-				get 'SlideIn'() {
-					return ___createMemoize___(this, 'SlideIn', () => BdApi.findModuleByDisplayName('SlideIn'))
-				},
-				get 'SettingsNotice'() {
-					return ___createMemoize___(this, 'SettingsNotice', () => BdApi.findModuleByDisplayName('SettingsNotice'))
-				},
-				get 'TransitionGroup'() {
-					return ___createMemoize___(this, 'TransitionGroup', () => BdApi.findModuleByDisplayName('TransitionGroup'))
-				},
-				get 'Button'() {
-					return ___createMemoize___(this, 'Button', () => BdApi.findModule(m => 'DropdownSizes' in m && typeof(m) === 'function'))
-				},
-				get 'Popout'() {
-					return ___createMemoize___(this, 'Popout', () => BdApi.findModuleByDisplayName('Popout'))
-				},
-				get 'Flex'() {
-					return ___createMemoize___(this, 'Flex', () => BdApi.findModuleByDisplayName('Flex'))
-				},
-				get 'Text'() {
-					return ___createMemoize___(this, 'Text', () => BdApi.findModuleByDisplayName('Text'))
-				},
-				get 'Card'() {
-					return ___createMemoize___(this, 'Card', () => BdApi.findModuleByDisplayName('Card'))
-				}
-			},
-			'@discord/modules': {
-				get 'Dispatcher'() {
-					return ___createMemoize___(this, 'Dispatcher', () => BdApi.findModuleByProps('dirtyDispatch', 'subscribe'))
-				},
-				get 'ComponentDispatcher'() {
-					return ___createMemoize___(this, 'ComponentDispatcher', () => BdApi.findModuleByProps('ComponentDispatch')?.ComponentDispatch)
-				},
-				get 'EmojiUtils'() {
-					return ___createMemoize___(this, 'EmojiUtils', () => BdApi.findModuleByProps('uploadEmoji'))
-				},
-				get 'PermissionUtils'() {
-					return ___createMemoize___(this, 'PermissionUtils', () => BdApi.findModuleByProps('computePermissions', 'canManageUser'))
-				},
-				get 'DMUtils'() {
-					return ___createMemoize___(this, 'DMUtils', () => BdApi.findModuleByProps('openPrivateChannel'))
-				}
-			},
-			'@discord/stores': {
-				get 'Messages'() {
-					return ___createMemoize___(this, 'Messages', () => BdApi.findModuleByProps('getMessage', 'getMessages'))
-				},
-				get 'Channels'() {
-					return ___createMemoize___(this, 'Channels', () => BdApi.findModuleByProps('getChannel', 'getDMFromUserId'))
-				},
-				get 'Guilds'() {
-					return ___createMemoize___(this, 'Guilds', () => BdApi.findModuleByProps('getGuild'))
-				},
-				get 'SelectedGuilds'() {
-					return ___createMemoize___(this, 'SelectedGuilds', () => BdApi.findModuleByProps('getGuildId', 'getLastSelectedGuildId'))
-				},
-				get 'SelectedChannels'() {
-					return ___createMemoize___(this, 'SelectedChannels', () => BdApi.findModuleByProps('getChannelId', 'getLastSelectedChannelId'))
-				},
-				get 'Info'() {
-					return ___createMemoize___(this, 'Info', () => BdApi.findModuleByProps('getSessionId'))
-				},
-				get 'Status'() {
-					return ___createMemoize___(this, 'Status', () => BdApi.findModuleByProps('getStatus', 'getActivities', 'getState'))
-				},
-				get 'Users'() {
-					return ___createMemoize___(this, 'Users', () => BdApi.findModuleByProps('getUser', 'getCurrentUser'))
-				},
-				get 'SettingsStore'() {
-					return ___createMemoize___(this, 'SettingsStore', () => BdApi.findModuleByProps('afkTimeout', 'status'))
-				},
-				get 'UserProfile'() {
-					return ___createMemoize___(this, 'UserProfile', () => BdApi.findModuleByProps('getUserProfile'))
-				},
-				get 'Members'() {
-					return ___createMemoize___(this, 'Members', () => BdApi.findModuleByProps('getMember'))
-				},
-				get 'Activities'() {
-					return ___createMemoize___(this, 'Activities', () => BdApi.findModuleByProps('getActivities'))
-				},
-				get 'Games'() {
-					return ___createMemoize___(this, 'Games', () => BdApi.findModuleByProps('getGame', 'games'))
-				},
-				get 'Auth'() {
-					return ___createMemoize___(this, 'Auth', () => BdApi.findModuleByProps('getId', 'isGuest'))
-				},
-				get 'TypingUsers'() {
-					return ___createMemoize___(this, 'TypingUsers', () => BdApi.findModuleByProps('isTyping'))
-				}
-			},
-			'@discord/actions': {
-				get 'ProfileActions'() {
-					return ___createMemoize___(this, 'ProfileActions', () => BdApi.findModuleByProps('fetchProfile'))
-				},
-				get 'GuildActions'() {
-					return ___createMemoize___(this, 'GuildActions', () => BdApi.findModuleByProps('requestMembersById'))
-				}
-			},
-			get '@discord/i18n'() {
-				return ___createMemoize___(this, '@discord/i18n', () => BdApi.findModule(m => m.Messages?.CLOSE && typeof(m.getLocale) === 'function'))
-			},
-			get '@discord/constants'() {
-				return ___createMemoize___(this, '@discord/constants', () => BdApi.findModuleByProps('API_HOST'))
-			},
-			get '@discord/contextmenu'() {
-				return ___createMemoize___(this, '@discord/contextmenu', () => {
-					const ctx = Object.assign({}, BdApi.findModuleByProps('openContextMenu'), BdApi.findModuleByProps('MenuItem'));
-					ctx.Menu = ctx.default;
-					return ctx;
-				})
-			},
-			get '@discord/forms'() {
-				return ___createMemoize___(this, '@discord/forms', () => BdApi.findModuleByProps('FormItem'))
-			},
-			get '@discord/scrollbars'() {
-				return ___createMemoize___(this, '@discord/scrollbars', () => BdApi.findModuleByProps('ScrollerAuto'))
-			},
-			get '@discord/native'() {
-				return ___createMemoize___(this, '@discord/native', () => BdApi.findModuleByProps('requireModule'))
-			},
-			get '@discord/flux'() {
-				return ___createMemoize___(this, '@discord/flux', () => Object.assign({}, BdApi.findModuleByProps('useStateFromStores').default, BdApi.findModuleByProps('useStateFromStores')))
-			},
-			get '@discord/modal'() {
-				return ___createMemoize___(this, '@discord/modal', () => Object.assign({}, BdApi.findModuleByProps('ModalRoot'), BdApi.findModuleByProps('openModal', 'closeAllModals')))
-			},
-			get '@discord/connections'() {
-				return ___createMemoize___(this, '@discord/connections', () => BdApi.findModuleByProps('get', 'isSupported', 'map'))
-			},
-			get '@discord/sanitize'() {
-				return ___createMemoize___(this, '@discord/sanitize', () => BdApi.findModuleByProps('stringify', 'parse', 'encode'))
-			},
-			get '@discord/icons'() {
-				return ___createMemoize___(this, '@discord/icons', () => BdApi.findAllModules(m => m.displayName && ~m.toString().indexOf('currentColor')).reduce((icons, icon) => (icons[icon.displayName] = icon, icons), {}))
-			},
-			'@discord/classes': {
-				get 'Timestamp'() {
-					return ___createMemoize___(this, 'Timestamp', () => BdApi.findModuleByPrototypes('toDate', 'month'))
-				},
-				get 'Message'() {
-					return ___createMemoize___(this, 'Message', () => BdApi.findModuleByPrototypes('getReaction', 'isSystemDM'))
-				},
-				get 'User'() {
-					return ___createMemoize___(this, 'User', () => BdApi.findModuleByPrototypes('tag'))
-				},
-				get 'Channel'() {
-					return ___createMemoize___(this, 'Channel', () => BdApi.findModuleByPrototypes('isOwner', 'isCategory'))
-				}
-			}
-		};
 		var __webpack_modules__ = {
+			class StyleLoader {
+				static styles = "";
+				static element = null;
+				static append(module, css) {
+					this.styles += `/* ${module} */\n${css}`;
+				}
+				static inject(name = config.info.name) {
+					if (this.element) this.element.remove();
+					this.element = document.head.appendChild(Object.assign(document.createElement("style"), {
+						id: name,
+						textContent: this.styles
+					}));
+				}
+				static remove() {
+					if (this.element) {
+						this.element.remove();
+						this.element = null;
+					}
+				}
+			}
+			function ___createMemoize___(instance, name, value) {
+				value = value();
+				Object.defineProperty(instance, name, {
+					value,
+					configurable: true
+				});
+				return value;
+			};
+			const Modules = {
+				get 'react-spring'() {
+					return ___createMemoize___(this, 'react-spring', () => BdApi.findModuleByProps('useSpring'))
+				},
+				'@discord/utils': {
+					get 'joinClassNames'() {
+						return ___createMemoize___(this, 'joinClassNames', () => BdApi.findModule(e => e.toString().indexOf('return e.join(" ")') > 200))
+					},
+					get 'useForceUpdate'() {
+						return ___createMemoize___(this, 'useForceUpdate', () => BdApi.findModuleByProps('useForceUpdate')?.useForceUpdate)
+					},
+					get 'Logger'() {
+						return ___createMemoize___(this, 'Logger', () => BdApi.findModuleByProps('setLogFn')?.default)
+					},
+					get 'Navigation'() {
+						return ___createMemoize___(this, 'Navigation', () => BdApi.findModuleByProps('replaceWith', 'currentRouteIsPeekView'))
+					}
+				},
+				'@discord/components': {
+					get 'Tooltip'() {
+						return ___createMemoize___(this, 'Tooltip', () => BdApi.findModuleByDisplayName('Tooltip'))
+					},
+					get 'TooltipContainer'() {
+						return ___createMemoize___(this, 'TooltipContainer', () => BdApi.findModuleByProps('TooltipContainer')?.TooltipContainer)
+					},
+					get 'TextInput'() {
+						return ___createMemoize___(this, 'TextInput', () => BdApi.findModuleByDisplayName('TextInput'))
+					},
+					get 'SlideIn'() {
+						return ___createMemoize___(this, 'SlideIn', () => BdApi.findModuleByDisplayName('SlideIn'))
+					},
+					get 'SettingsNotice'() {
+						return ___createMemoize___(this, 'SettingsNotice', () => BdApi.findModuleByDisplayName('SettingsNotice'))
+					},
+					get 'TransitionGroup'() {
+						return ___createMemoize___(this, 'TransitionGroup', () => BdApi.findModuleByDisplayName('TransitionGroup'))
+					},
+					get 'Button'() {
+						return ___createMemoize___(this, 'Button', () => BdApi.findModule(m => 'DropdownSizes' in m && typeof(m) === 'function'))
+					},
+					get 'Popout'() {
+						return ___createMemoize___(this, 'Popout', () => BdApi.findModuleByDisplayName('Popout'))
+					},
+					get 'Flex'() {
+						return ___createMemoize___(this, 'Flex', () => BdApi.findModuleByDisplayName('Flex'))
+					},
+					get 'Text'() {
+						return ___createMemoize___(this, 'Text', () => BdApi.findModuleByDisplayName('Text'))
+					},
+					get 'Card'() {
+						return ___createMemoize___(this, 'Card', () => BdApi.findModuleByDisplayName('Card'))
+					}
+				},
+				'@discord/modules': {
+					get 'Dispatcher'() {
+						return ___createMemoize___(this, 'Dispatcher', () => BdApi.findModuleByProps('dirtyDispatch', 'subscribe'))
+					},
+					get 'ComponentDispatcher'() {
+						return ___createMemoize___(this, 'ComponentDispatcher', () => BdApi.findModuleByProps('ComponentDispatch')?.ComponentDispatch)
+					},
+					get 'EmojiUtils'() {
+						return ___createMemoize___(this, 'EmojiUtils', () => BdApi.findModuleByProps('uploadEmoji'))
+					},
+					get 'PermissionUtils'() {
+						return ___createMemoize___(this, 'PermissionUtils', () => BdApi.findModuleByProps('computePermissions', 'canManageUser'))
+					},
+					get 'DMUtils'() {
+						return ___createMemoize___(this, 'DMUtils', () => BdApi.findModuleByProps('openPrivateChannel'))
+					}
+				},
+				'@discord/stores': {
+					get 'Messages'() {
+						return ___createMemoize___(this, 'Messages', () => BdApi.findModuleByProps('getMessage', 'getMessages'))
+					},
+					get 'Channels'() {
+						return ___createMemoize___(this, 'Channels', () => BdApi.findModuleByProps('getChannel', 'getDMFromUserId'))
+					},
+					get 'Guilds'() {
+						return ___createMemoize___(this, 'Guilds', () => BdApi.findModuleByProps('getGuild'))
+					},
+					get 'SelectedGuilds'() {
+						return ___createMemoize___(this, 'SelectedGuilds', () => BdApi.findModuleByProps('getGuildId', 'getLastSelectedGuildId'))
+					},
+					get 'SelectedChannels'() {
+						return ___createMemoize___(this, 'SelectedChannels', () => BdApi.findModuleByProps('getChannelId', 'getLastSelectedChannelId'))
+					},
+					get 'Info'() {
+						return ___createMemoize___(this, 'Info', () => BdApi.findModuleByProps('getSessionId'))
+					},
+					get 'Status'() {
+						return ___createMemoize___(this, 'Status', () => BdApi.findModuleByProps('getStatus', 'getActivities', 'getState'))
+					},
+					get 'Users'() {
+						return ___createMemoize___(this, 'Users', () => BdApi.findModuleByProps('getUser', 'getCurrentUser'))
+					},
+					get 'SettingsStore'() {
+						return ___createMemoize___(this, 'SettingsStore', () => BdApi.findModuleByProps('afkTimeout', 'status'))
+					},
+					get 'UserProfile'() {
+						return ___createMemoize___(this, 'UserProfile', () => BdApi.findModuleByProps('getUserProfile'))
+					},
+					get 'Members'() {
+						return ___createMemoize___(this, 'Members', () => BdApi.findModuleByProps('getMember'))
+					},
+					get 'Activities'() {
+						return ___createMemoize___(this, 'Activities', () => BdApi.findModuleByProps('getActivities'))
+					},
+					get 'Games'() {
+						return ___createMemoize___(this, 'Games', () => BdApi.findModuleByProps('getGame', 'games'))
+					},
+					get 'Auth'() {
+						return ___createMemoize___(this, 'Auth', () => BdApi.findModuleByProps('getId', 'isGuest'))
+					},
+					get 'TypingUsers'() {
+						return ___createMemoize___(this, 'TypingUsers', () => BdApi.findModuleByProps('isTyping'))
+					}
+				},
+				'@discord/actions': {
+					get 'ProfileActions'() {
+						return ___createMemoize___(this, 'ProfileActions', () => BdApi.findModuleByProps('fetchProfile'))
+					},
+					get 'GuildActions'() {
+						return ___createMemoize___(this, 'GuildActions', () => BdApi.findModuleByProps('requestMembersById'))
+					}
+				},
+				get '@discord/i18n'() {
+					return ___createMemoize___(this, '@discord/i18n', () => BdApi.findModule(m => m.Messages?.CLOSE && typeof(m.getLocale) === 'function'))
+				},
+				get '@discord/constants'() {
+					return ___createMemoize___(this, '@discord/constants', () => BdApi.findModuleByProps('API_HOST'))
+				},
+				get '@discord/contextmenu'() {
+					return ___createMemoize___(this, '@discord/contextmenu', () => {
+						const ctx = Object.assign({}, BdApi.findModuleByProps('openContextMenu'), BdApi.findModuleByProps('MenuItem'));
+						ctx.Menu = ctx.default;
+						return ctx;
+					})
+				},
+				get '@discord/forms'() {
+					return ___createMemoize___(this, '@discord/forms', () => BdApi.findModuleByProps('FormItem'))
+				},
+				get '@discord/scrollbars'() {
+					return ___createMemoize___(this, '@discord/scrollbars', () => BdApi.findModuleByProps('ScrollerAuto'))
+				},
+				get '@discord/native'() {
+					return ___createMemoize___(this, '@discord/native', () => BdApi.findModuleByProps('requireModule'))
+				},
+				get '@discord/flux'() {
+					return ___createMemoize___(this, '@discord/flux', () => Object.assign({}, BdApi.findModuleByProps('useStateFromStores').default, BdApi.findModuleByProps('useStateFromStores')))
+				},
+				get '@discord/modal'() {
+					return ___createMemoize___(this, '@discord/modal', () => Object.assign({}, BdApi.findModuleByProps('ModalRoot'), BdApi.findModuleByProps('openModal', 'closeAllModals')))
+				},
+				get '@discord/connections'() {
+					return ___createMemoize___(this, '@discord/connections', () => BdApi.findModuleByProps('get', 'isSupported', 'map'))
+				},
+				get '@discord/sanitize'() {
+					return ___createMemoize___(this, '@discord/sanitize', () => BdApi.findModuleByProps('stringify', 'parse', 'encode'))
+				},
+				get '@discord/icons'() {
+					return ___createMemoize___(this, '@discord/icons', () => BdApi.findAllModules(m => m.displayName && ~m.toString().indexOf('currentColor')).reduce((icons, icon) => (icons[icon.displayName] = icon, icons), {}))
+				},
+				'@discord/classes': {
+					get 'Timestamp'() {
+						return ___createMemoize___(this, 'Timestamp', () => BdApi.findModuleByPrototypes('toDate', 'month'))
+					},
+					get 'Message'() {
+						return ___createMemoize___(this, 'Message', () => BdApi.findModuleByPrototypes('getReaction', 'isSystemDM'))
+					},
+					get 'User'() {
+						return ___createMemoize___(this, 'User', () => BdApi.findModuleByPrototypes('tag'))
+					},
+					get 'Channel'() {
+						return ___createMemoize___(this, 'Channel', () => BdApi.findModuleByPrototypes('isOwner', 'isCategory'))
+					}
+				}
+			};
+			486: function(module, exports) {
+				var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
+				(function(root, UMD) {
+					if (true) !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = UMD,
+						__WEBPACK_AMD_DEFINE_RESULT__ = "function" === typeof __WEBPACK_AMD_DEFINE_FACTORY__ ? __WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__) : __WEBPACK_AMD_DEFINE_FACTORY__,
+						void 0 !== __WEBPACK_AMD_DEFINE_RESULT__ && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+				})(this, (function() {
+					function fuzzysortNew(instanceOptions) {
+						var fuzzysort = {
+							single: function(search, target, options) {
+								if ("farzher" == search) return {
+									target: "farzher was here (^-^*)/",
+									score: 0,
+									indexes: [0, 1, 2, 3, 4, 5, 6]
+								};
+								if (!search) return null;
+								if (!isObj(search)) search = fuzzysort.getPreparedSearch(search);
+								if (!target) return null;
+								if (!isObj(target)) target = fuzzysort.getPrepared(target);
+								var allowTypo = options && void 0 !== options.allowTypo ? options.allowTypo : instanceOptions && void 0 !== instanceOptions.allowTypo ? instanceOptions.allowTypo : true;
+								var algorithm = allowTypo ? fuzzysort.algorithm : fuzzysort.algorithmNoTypo;
+								return algorithm(search, target, search[0]);
+							},
+							go: function(search, targets, options) {
+								if ("farzher" == search) return [{
+									target: "farzher was here (^-^*)/",
+									score: 0,
+									indexes: [0, 1, 2, 3, 4, 5, 6],
+									obj: targets ? targets[0] : null
+								}];
+								if (!search) return noResults;
+								search = fuzzysort.prepareSearch(search);
+								var searchLowerCode = search[0];
+								var threshold = options && options.threshold || instanceOptions && instanceOptions.threshold || -9007199254740991;
+								var limit = options && options.limit || instanceOptions && instanceOptions.limit || 9007199254740991;
+								var allowTypo = options && void 0 !== options.allowTypo ? options.allowTypo : instanceOptions && void 0 !== instanceOptions.allowTypo ? instanceOptions.allowTypo : true;
+								var algorithm = allowTypo ? fuzzysort.algorithm : fuzzysort.algorithmNoTypo;
+								var resultsLen = 0;
+								var limitedCount = 0;
+								var targetsLen = targets.length;
+								if (options && options.keys) {
+									var scoreFn = options.scoreFn || defaultScoreFn;
+									var keys = options.keys;
+									var keysLen = keys.length;
+									for (var i = targetsLen - 1; i >= 0; --i) {
+										var obj = targets[i];
+										var objResults = new Array(keysLen);
+										for (var keyI = keysLen - 1; keyI >= 0; --keyI) {
+											var key = keys[keyI];
+											var target = getValue(obj, key);
+											if (!target) {
+												objResults[keyI] = null;
+												continue;
+											}
+											if (!isObj(target)) target = fuzzysort.getPrepared(target);
+											objResults[keyI] = algorithm(search, target, searchLowerCode);
+										}
+										objResults.obj = obj;
+										var score = scoreFn(objResults);
+										if (null === score) continue;
+										if (score < threshold) continue;
+										objResults.score = score;
+										if (resultsLen < limit) {
+											q.add(objResults);
+											++resultsLen;
+										} else {
+											++limitedCount;
+											if (score > q.peek().score) q.replaceTop(objResults);
+										}
+									}
+								} else if (options && options.key) {
+									var key = options.key;
+									for (var i = targetsLen - 1; i >= 0; --i) {
+										var obj = targets[i];
+										var target = getValue(obj, key);
+										if (!target) continue;
+										if (!isObj(target)) target = fuzzysort.getPrepared(target);
+										var result = algorithm(search, target, searchLowerCode);
+										if (null === result) continue;
+										if (result.score < threshold) continue;
+										result = {
+											target: result.target,
+											_targetLowerCodes: null,
+											_nextBeginningIndexes: null,
+											score: result.score,
+											indexes: result.indexes,
+											obj
+										};
+										if (resultsLen < limit) {
+											q.add(result);
+											++resultsLen;
+										} else {
+											++limitedCount;
+											if (result.score > q.peek().score) q.replaceTop(result);
+										}
+									}
+								} else
+									for (var i = targetsLen - 1; i >= 0; --i) {
+										var target = targets[i];
+										if (!target) continue;
+										if (!isObj(target)) target = fuzzysort.getPrepared(target);
+										var result = algorithm(search, target, searchLowerCode);
+										if (null === result) continue;
+										if (result.score < threshold) continue;
+										if (resultsLen < limit) {
+											q.add(result);
+											++resultsLen;
+										} else {
+											++limitedCount;
+											if (result.score > q.peek().score) q.replaceTop(result);
+										}
+									}
+								if (0 === resultsLen) return noResults;
+								var results = new Array(resultsLen);
+								for (var i = resultsLen - 1; i >= 0; --i) results[i] = q.poll();
+								results.total = resultsLen + limitedCount;
+								return results;
+							},
+							goAsync: function(search, targets, options) {
+								var canceled = false;
+								var p = new Promise((function(resolve, reject) {
+									if ("farzher" == search) return resolve([{
+										target: "farzher was here (^-^*)/",
+										score: 0,
+										indexes: [0, 1, 2, 3, 4, 5, 6],
+										obj: targets ? targets[0] : null
+									}]);
+									if (!search) return resolve(noResults);
+									search = fuzzysort.prepareSearch(search);
+									var searchLowerCode = search[0];
+									var q = fastpriorityqueue();
+									var iCurrent = targets.length - 1;
+									var threshold = options && options.threshold || instanceOptions && instanceOptions.threshold || -9007199254740991;
+									var limit = options && options.limit || instanceOptions && instanceOptions.limit || 9007199254740991;
+									var allowTypo = options && void 0 !== options.allowTypo ? options.allowTypo : instanceOptions && void 0 !== instanceOptions.allowTypo ? instanceOptions.allowTypo : true;
+									var algorithm = allowTypo ? fuzzysort.algorithm : fuzzysort.algorithmNoTypo;
+									var resultsLen = 0;
+									var limitedCount = 0;
+									function step() {
+										if (canceled) return reject("canceled");
+										var startMs = Date.now();
+										if (options && options.keys) {
+											var scoreFn = options.scoreFn || defaultScoreFn;
+											var keys = options.keys;
+											var keysLen = keys.length;
+											for (; iCurrent >= 0; --iCurrent) {
+												if (iCurrent % 1e3 === 0)
+													if (Date.now() - startMs >= 10) {
+														isNode ? setImmediate(step) : setTimeout(step);
+														return;
+													}
+												var obj = targets[iCurrent];
+												var objResults = new Array(keysLen);
+												for (var keyI = keysLen - 1; keyI >= 0; --keyI) {
+													var key = keys[keyI];
+													var target = getValue(obj, key);
+													if (!target) {
+														objResults[keyI] = null;
+														continue;
+													}
+													if (!isObj(target)) target = fuzzysort.getPrepared(target);
+													objResults[keyI] = algorithm(search, target, searchLowerCode);
+												}
+												objResults.obj = obj;
+												var score = scoreFn(objResults);
+												if (null === score) continue;
+												if (score < threshold) continue;
+												objResults.score = score;
+												if (resultsLen < limit) {
+													q.add(objResults);
+													++resultsLen;
+												} else {
+													++limitedCount;
+													if (score > q.peek().score) q.replaceTop(objResults);
+												}
+											}
+										} else if (options && options.key) {
+											var key = options.key;
+											for (; iCurrent >= 0; --iCurrent) {
+												if (iCurrent % 1e3 === 0)
+													if (Date.now() - startMs >= 10) {
+														isNode ? setImmediate(step) : setTimeout(step);
+														return;
+													}
+												var obj = targets[iCurrent];
+												var target = getValue(obj, key);
+												if (!target) continue;
+												if (!isObj(target)) target = fuzzysort.getPrepared(target);
+												var result = algorithm(search, target, searchLowerCode);
+												if (null === result) continue;
+												if (result.score < threshold) continue;
+												result = {
+													target: result.target,
+													_targetLowerCodes: null,
+													_nextBeginningIndexes: null,
+													score: result.score,
+													indexes: result.indexes,
+													obj
+												};
+												if (resultsLen < limit) {
+													q.add(result);
+													++resultsLen;
+												} else {
+													++limitedCount;
+													if (result.score > q.peek().score) q.replaceTop(result);
+												}
+											}
+										} else
+											for (; iCurrent >= 0; --iCurrent) {
+												if (iCurrent % 1e3 === 0)
+													if (Date.now() - startMs >= 10) {
+														isNode ? setImmediate(step) : setTimeout(step);
+														return;
+													}
+												var target = targets[iCurrent];
+												if (!target) continue;
+												if (!isObj(target)) target = fuzzysort.getPrepared(target);
+												var result = algorithm(search, target, searchLowerCode);
+												if (null === result) continue;
+												if (result.score < threshold) continue;
+												if (resultsLen < limit) {
+													q.add(result);
+													++resultsLen;
+												} else {
+													++limitedCount;
+													if (result.score > q.peek().score) q.replaceTop(result);
+												}
+											}
+										if (0 === resultsLen) return resolve(noResults);
+										var results = new Array(resultsLen);
+										for (var i = resultsLen - 1; i >= 0; --i) results[i] = q.poll();
+										results.total = resultsLen + limitedCount;
+										resolve(results);
+									}
+									isNode ? setImmediate(step) : step();
+								}));
+								p.cancel = function() {
+									canceled = true;
+								};
+								return p;
+							},
+							highlight: function(result, hOpen, hClose) {
+								if ("function" == typeof hOpen) return fuzzysort.highlightCallback(result, hOpen);
+								if (null === result) return null;
+								if (void 0 === hOpen) hOpen = "<b>";
+								if (void 0 === hClose) hClose = "</b>";
+								var highlighted = "";
+								var matchesIndex = 0;
+								var opened = false;
+								var target = result.target;
+								var targetLen = target.length;
+								var matchesBest = result.indexes;
+								for (var i = 0; i < targetLen; ++i) {
+									var char = target[i];
+									if (matchesBest[matchesIndex] === i) {
+										++matchesIndex;
+										if (!opened) {
+											opened = true;
+											highlighted += hOpen;
+										}
+										if (matchesIndex === matchesBest.length) {
+											highlighted += char + hClose + target.substr(i + 1);
+											break;
+										}
+									} else if (opened) {
+										opened = false;
+										highlighted += hClose;
+									}
+									highlighted += char;
+								}
+								return highlighted;
+							},
+							highlightCallback: function(result, cb) {
+								if (null === result) return null;
+								var target = result.target;
+								var targetLen = target.length;
+								var indexes = result.indexes;
+								var highlighted = "";
+								var matchI = 0;
+								var indexesI = 0;
+								var opened = false;
+								var result = [];
+								for (var i = 0; i < targetLen; ++i) {
+									var char = target[i];
+									if (indexes[indexesI] === i) {
+										++indexesI;
+										if (!opened) {
+											opened = true;
+											result.push(highlighted);
+											highlighted = "";
+										}
+										if (indexesI === indexes.length) {
+											highlighted += char;
+											result.push(cb(highlighted, matchI++));
+											highlighted = "";
+											result.push(target.substr(i + 1));
+											break;
+										}
+									} else if (opened) {
+										opened = false;
+										result.push(cb(highlighted, matchI++));
+										highlighted = "";
+									}
+									highlighted += char;
+								}
+								return result;
+							},
+							prepare: function(target) {
+								if (!target) return {
+									target: "",
+									_targetLowerCodes: [0],
+									_nextBeginningIndexes: null,
+									score: null,
+									indexes: null,
+									obj: null
+								};
+								return {
+									target,
+									_targetLowerCodes: fuzzysort.prepareLowerCodes(target),
+									_nextBeginningIndexes: null,
+									score: null,
+									indexes: null,
+									obj: null
+								};
+							},
+							prepareSlow: function(target) {
+								if (!target) return {
+									target: "",
+									_targetLowerCodes: [0],
+									_nextBeginningIndexes: null,
+									score: null,
+									indexes: null,
+									obj: null
+								};
+								return {
+									target,
+									_targetLowerCodes: fuzzysort.prepareLowerCodes(target),
+									_nextBeginningIndexes: fuzzysort.prepareNextBeginningIndexes(target),
+									score: null,
+									indexes: null,
+									obj: null
+								};
+							},
+							prepareSearch: function(search) {
+								if (!search) search = "";
+								return fuzzysort.prepareLowerCodes(search);
+							},
+							getPrepared: function(target) {
+								if (target.length > 999) return fuzzysort.prepare(target);
+								var targetPrepared = preparedCache.get(target);
+								if (void 0 !== targetPrepared) return targetPrepared;
+								targetPrepared = fuzzysort.prepare(target);
+								preparedCache.set(target, targetPrepared);
+								return targetPrepared;
+							},
+							getPreparedSearch: function(search) {
+								if (search.length > 999) return fuzzysort.prepareSearch(search);
+								var searchPrepared = preparedSearchCache.get(search);
+								if (void 0 !== searchPrepared) return searchPrepared;
+								searchPrepared = fuzzysort.prepareSearch(search);
+								preparedSearchCache.set(search, searchPrepared);
+								return searchPrepared;
+							},
+							algorithm: function(searchLowerCodes, prepared, searchLowerCode) {
+								var targetLowerCodes = prepared._targetLowerCodes;
+								var searchLen = searchLowerCodes.length;
+								var targetLen = targetLowerCodes.length;
+								var searchI = 0;
+								var targetI = 0;
+								var typoSimpleI = 0;
+								var matchesSimpleLen = 0;
+								for (;;) {
+									var isMatch = searchLowerCode === targetLowerCodes[targetI];
+									if (isMatch) {
+										matchesSimple[matchesSimpleLen++] = targetI;
+										++searchI;
+										if (searchI === searchLen) break;
+										searchLowerCode = searchLowerCodes[0 === typoSimpleI ? searchI : typoSimpleI === searchI ? searchI + 1 : typoSimpleI === searchI - 1 ? searchI - 1 : searchI];
+									}
+									++targetI;
+									if (targetI >= targetLen)
+										for (;;) {
+											if (searchI <= 1) return null;
+											if (0 === typoSimpleI) {
+												--searchI;
+												var searchLowerCodeNew = searchLowerCodes[searchI];
+												if (searchLowerCode === searchLowerCodeNew) continue;
+												typoSimpleI = searchI;
+											} else {
+												if (1 === typoSimpleI) return null;
+												--typoSimpleI;
+												searchI = typoSimpleI;
+												searchLowerCode = searchLowerCodes[searchI + 1];
+												var searchLowerCodeNew = searchLowerCodes[searchI];
+												if (searchLowerCode === searchLowerCodeNew) continue;
+											}
+											matchesSimpleLen = searchI;
+											targetI = matchesSimple[matchesSimpleLen - 1] + 1;
+											break;
+										}
+								}
+								var searchI = 0;
+								var typoStrictI = 0;
+								var successStrict = false;
+								var matchesStrictLen = 0;
+								var nextBeginningIndexes = prepared._nextBeginningIndexes;
+								if (null === nextBeginningIndexes) nextBeginningIndexes = prepared._nextBeginningIndexes = fuzzysort.prepareNextBeginningIndexes(prepared.target);
+								var firstPossibleI = targetI = 0 === matchesSimple[0] ? 0 : nextBeginningIndexes[matchesSimple[0] - 1];
+								if (targetI !== targetLen)
+									for (;;)
+										if (targetI >= targetLen) {
+											if (searchI <= 0) {
+												++typoStrictI;
+												if (typoStrictI > searchLen - 2) break;
+												if (searchLowerCodes[typoStrictI] === searchLowerCodes[typoStrictI + 1]) continue;
+												targetI = firstPossibleI;
+												continue;
+											}
+											--searchI;
+											var lastMatch = matchesStrict[--matchesStrictLen];
+											targetI = nextBeginningIndexes[lastMatch];
+										} else {
+											var isMatch = searchLowerCodes[0 === typoStrictI ? searchI : typoStrictI === searchI ? searchI + 1 : typoStrictI === searchI - 1 ? searchI - 1 : searchI] === targetLowerCodes[targetI];
+											if (isMatch) {
+												matchesStrict[matchesStrictLen++] = targetI;
+												++searchI;
+												if (searchI === searchLen) {
+													successStrict = true;
+													break;
+												}
+												++targetI;
+											} else targetI = nextBeginningIndexes[targetI];
+										}
+								if (successStrict) {
+									var matchesBest = matchesStrict;
+									var matchesBestLen = matchesStrictLen;
+								} else {
+									var matchesBest = matchesSimple;
+									var matchesBestLen = matchesSimpleLen;
+								}
+								var score = 0;
+								var lastTargetI = -1;
+								for (var i = 0; i < searchLen; ++i) {
+									var targetI = matchesBest[i];
+									if (lastTargetI !== targetI - 1) score -= targetI;
+									lastTargetI = targetI;
+								}
+								if (!successStrict) {
+									score *= 1e3;
+									if (0 !== typoSimpleI) score += -20;
+								} else if (0 !== typoStrictI) score += -20;
+								score -= targetLen - searchLen;
+								prepared.score = score;
+								prepared.indexes = new Array(matchesBestLen);
+								for (var i = matchesBestLen - 1; i >= 0; --i) prepared.indexes[i] = matchesBest[i];
+								return prepared;
+							},
+							algorithmNoTypo: function(searchLowerCodes, prepared, searchLowerCode) {
+								var targetLowerCodes = prepared._targetLowerCodes;
+								var searchLen = searchLowerCodes.length;
+								var targetLen = targetLowerCodes.length;
+								var searchI = 0;
+								var targetI = 0;
+								var matchesSimpleLen = 0;
+								for (;;) {
+									var isMatch = searchLowerCode === targetLowerCodes[targetI];
+									if (isMatch) {
+										matchesSimple[matchesSimpleLen++] = targetI;
+										++searchI;
+										if (searchI === searchLen) break;
+										searchLowerCode = searchLowerCodes[searchI];
+									}
+									++targetI;
+									if (targetI >= targetLen) return null;
+								}
+								var searchI = 0;
+								var successStrict = false;
+								var matchesStrictLen = 0;
+								var nextBeginningIndexes = prepared._nextBeginningIndexes;
+								if (null === nextBeginningIndexes) nextBeginningIndexes = prepared._nextBeginningIndexes = fuzzysort.prepareNextBeginningIndexes(prepared.target);
+								targetI = 0 === matchesSimple[0] ? 0 : nextBeginningIndexes[matchesSimple[0] - 1];
+								if (targetI !== targetLen)
+									for (;;)
+										if (targetI >= targetLen) {
+											if (searchI <= 0) break;
+											--searchI;
+											var lastMatch = matchesStrict[--matchesStrictLen];
+											targetI = nextBeginningIndexes[lastMatch];
+										} else {
+											var isMatch = searchLowerCodes[searchI] === targetLowerCodes[targetI];
+											if (isMatch) {
+												matchesStrict[matchesStrictLen++] = targetI;
+												++searchI;
+												if (searchI === searchLen) {
+													successStrict = true;
+													break;
+												}
+												++targetI;
+											} else targetI = nextBeginningIndexes[targetI];
+										}
+								if (successStrict) {
+									var matchesBest = matchesStrict;
+									var matchesBestLen = matchesStrictLen;
+								} else {
+									var matchesBest = matchesSimple;
+									var matchesBestLen = matchesSimpleLen;
+								}
+								var score = 0;
+								var lastTargetI = -1;
+								for (var i = 0; i < searchLen; ++i) {
+									var targetI = matchesBest[i];
+									if (lastTargetI !== targetI - 1) score -= targetI;
+									lastTargetI = targetI;
+								}
+								if (!successStrict) score *= 1e3;
+								score -= targetLen - searchLen;
+								prepared.score = score;
+								prepared.indexes = new Array(matchesBestLen);
+								for (var i = matchesBestLen - 1; i >= 0; --i) prepared.indexes[i] = matchesBest[i];
+								return prepared;
+							},
+							prepareLowerCodes: function(str) {
+								var strLen = str.length;
+								var lowerCodes = [];
+								var lower = str.toLowerCase();
+								for (var i = 0; i < strLen; ++i) lowerCodes[i] = lower.charCodeAt(i);
+								return lowerCodes;
+							},
+							prepareBeginningIndexes: function(target) {
+								var targetLen = target.length;
+								var beginningIndexes = [];
+								var beginningIndexesLen = 0;
+								var wasUpper = false;
+								var wasAlphanum = false;
+								for (var i = 0; i < targetLen; ++i) {
+									var targetCode = target.charCodeAt(i);
+									var isUpper = targetCode >= 65 && targetCode <= 90;
+									var isAlphanum = isUpper || targetCode >= 97 && targetCode <= 122 || targetCode >= 48 && targetCode <= 57;
+									var isBeginning = isUpper && !wasUpper || !wasAlphanum || !isAlphanum;
+									wasUpper = isUpper;
+									wasAlphanum = isAlphanum;
+									if (isBeginning) beginningIndexes[beginningIndexesLen++] = i;
+								}
+								return beginningIndexes;
+							},
+							prepareNextBeginningIndexes: function(target) {
+								var targetLen = target.length;
+								var beginningIndexes = fuzzysort.prepareBeginningIndexes(target);
+								var nextBeginningIndexes = [];
+								var lastIsBeginning = beginningIndexes[0];
+								var lastIsBeginningI = 0;
+								for (var i = 0; i < targetLen; ++i)
+									if (lastIsBeginning > i) nextBeginningIndexes[i] = lastIsBeginning;
+									else {
+										lastIsBeginning = beginningIndexes[++lastIsBeginningI];
+										nextBeginningIndexes[i] = void 0 === lastIsBeginning ? targetLen : lastIsBeginning;
+									}
+								return nextBeginningIndexes;
+							},
+							cleanup,
+							new: fuzzysortNew
+						};
+						return fuzzysort;
+					}
+					var isNode = true && "undefined" === typeof window;
+					var MyMap = "function" === typeof Map ? Map : function() {
+						var s = Object.create(null);
+						this.get = function(k) {
+							return s[k];
+						};
+						this.set = function(k, val) {
+							s[k] = val;
+							return this;
+						};
+						this.clear = function() {
+							s = Object.create(null);
+						};
+					};
+					var preparedCache = new MyMap;
+					var preparedSearchCache = new MyMap;
+					var noResults = [];
+					noResults.total = 0;
+					var matchesSimple = [];
+					var matchesStrict = [];
+					function cleanup() {
+						preparedCache.clear();
+						preparedSearchCache.clear();
+						matchesSimple = [];
+						matchesStrict = [];
+					}
+					function defaultScoreFn(a) {
+						var max = -9007199254740991;
+						for (var i = a.length - 1; i >= 0; --i) {
+							var result = a[i];
+							if (null === result) continue;
+							var score = result.score;
+							if (score > max) max = score;
+						}
+						if (-9007199254740991 === max) return null;
+						return max;
+					}
+					function getValue(obj, prop) {
+						var tmp = obj[prop];
+						if (void 0 !== tmp) return tmp;
+						var segs = prop;
+						if (!Array.isArray(prop)) segs = prop.split(".");
+						var len = segs.length;
+						var i = -1;
+						while (obj && ++i < len) obj = obj[segs[i]];
+						return obj;
+					}
+					function isObj(x) {
+						return "object" === typeof x;
+					}
+					var fastpriorityqueue = function() {
+						var r = [],
+							o = 0,
+							e = {};
+						function n() {
+							for (var e = 0, n = r[e], c = 1; c < o;) {
+								var f = c + 1;
+								e = c, f < o && r[f].score < r[c].score && (e = f), r[e - 1 >> 1] = r[e], c = 1 + (e << 1);
+							}
+							for (var a = e - 1 >> 1; e > 0 && n.score < r[a].score; a = (e = a) - 1 >> 1) r[e] = r[a];
+							r[e] = n;
+						}
+						return e.add = function(e) {
+							var n = o;
+							r[o++] = e;
+							for (var c = n - 1 >> 1; n > 0 && e.score < r[c].score; c = (n = c) - 1 >> 1) r[n] = r[c];
+							r[n] = e;
+						}, e.poll = function() {
+							if (0 !== o) {
+								var e = r[0];
+								return r[0] = r[--o], n(), e;
+							}
+						}, e.peek = function() {
+							if (0 !== o) return r[0];
+						}, e.replaceTop = function(o) {
+							r[0] = o, n();
+						}, e;
+					};
+					var q = fastpriorityqueue();
+					return fuzzysortNew();
+				}));
+			},
 			113: module => {
+				"use strict";
 				module.exports = BdApi.React;
 			}
 		};
@@ -286,7 +932,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			var module = __webpack_module_cache__[moduleId] = {
 				exports: {}
 			};
-			__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+			__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
 			return module.exports;
 		}
 		(() => {
@@ -322,6 +968,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 		})();
 		var __webpack_exports__ = {};
 		(() => {
+			"use strict";
 			__webpack_require__.r(__webpack_exports__);
 			__webpack_require__.d(__webpack_exports__, {
 				default: () => QuickToggler
@@ -429,9 +1076,9 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			}) {
 				const type = addon.filename.toLowerCase().endsWith("js") ? "Plugin" : "Theme";
 				const AddonActions = "Plugin" === type ? BdApi.Plugins : BdApi.Themes;
-				const [isEnabled, setIsEnabled] = (0, external_BdApi_React_.useState)(AddonActions.isEnabled(addon.id));
+				const isEnabled = AddonActions.isEnabled(addon.id);
 				const color = isEnabled ? Colors.STATUS_GREEN : Colors.STATUS_RED;
-				const ContextMenu = external_PluginApi_namespaceObject.DCM.buildMenu([{
+				const ContextMenu = external_PluginApi_namespaceObject.DiscordContextMenu.buildMenu([{
 					label: "Reload",
 					action: () => {
 						AddonActions.reload(addon.id);
@@ -453,11 +1100,8 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					color: "colorDanger"
 				}]);
 				return AddonResult_React.createElement(Result, {
-					onClick: () => {
-						setIsEnabled(!isEnabled);
-						AddonActions.toggle(addon.id);
-					},
-					onContextMenu: e => external_PluginApi_namespaceObject.DCM.openContextMenu(e, ContextMenu),
+					onClick: () => AddonActions.toggle(addon.id),
+					onContextMenu: e => external_PluginApi_namespaceObject.DiscordContextMenu.openContextMenu(e, ContextMenu),
 					name: addon.name,
 					info: `v${addon.version} by ${addon.author}`,
 					desc: AddonResult_React.createElement(OverflowTooltip, {
@@ -474,7 +1118,31 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					}))
 				});
 			}
+			var fuzzysort = __webpack_require__(486);
+			var fuzzysort_default = __webpack_require__.n(fuzzysort);
 			var Results_React = __webpack_require__(113);
+			const biases = {
+				name: "0",
+				author: "5",
+				description: "10",
+				version: "10"
+			};
+			function sortByBestResults(addons, query) {
+				if (!query) return addons;
+				query = query.toLowerCase().trim();
+				let results = fuzzysort_default().go(query, addons, {
+					keys: Object.keys(biases),
+					allowTypo: true,
+					scoreFn: a => Math.max(...Object.values(biases).map(((bias, i) => a[i] ? a[i].score - bias : -1e3)))
+				});
+				results.forEach((result => {
+					if (result[1]?.target.includes(", ")) {
+						const fuzzy = fuzzysort_default().go(query, result[1].target.split(", "));
+						result.score = Math.max(result.score, fuzzy[0]?.score - biases.author);
+					}
+				}));
+				return results.sort(((a, b) => a.score !== b.score ? b.score - a.score : a.obj.name.localeCompare(b.obj.name))).map((r => r.obj));
+			}
 			function Results({
 				query
 			}) {
@@ -482,7 +1150,6 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				const themes = BdApi.Themes.getAll();
 				let addonsByQuery;
 				const addons = [...plugins, ...themes];
-				addonsByQuery = addons.filter((addon => Object.values(addon).toString().toLowerCase().includes(query.toLowerCase().replace(/\$(plugin|theme|enabled|disabled)/g, "").trim())));
 				if (query.includes("$plugin")) addonsByQuery = addonsByQuery.filter((addon => addon.filename.endsWith("js")));
 				if (query.includes("$theme")) addonsByQuery = addonsByQuery.filter((addon => addon.filename.endsWith("css")));
 				if (query.includes("$enabled")) addonsByQuery = addonsByQuery.filter((addon => {
@@ -493,6 +1160,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					const addonStore = addon.filename.endsWith("js") ? BdApi.Plugins : BdApi.Themes;
 					return !addonStore.isEnabled(addon.id);
 				}));
+				addonsByQuery = sortByBestResults(addons, query);
 				return addonsByQuery.map((addon => Results_React.createElement(AddonResult, {
 					addon,
 					key: addon.id
@@ -522,9 +1190,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					};
 				}
 				render() {
-					return QuickToggler_React.createElement(Modal.ModalRoot, {
-						transitionState: this.props.transitionState
-					}, QuickToggler_React.createElement("div", {
+					return QuickToggler_React.createElement("div", {
 						className: QuickToggler_classes.quickswitcher
 					}, QuickToggler_React.createElement("input", {
 						className: QuickToggler_classes.input,
@@ -543,7 +1209,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						}),
 						onClick: () => {
 							QuickToggler_open("plugins");
-							external_PluginApi_DiscordModules_namespaceObject.ModalActions.closeAllModals();
+							external_PluginApi_DiscordModules_namespaceObject.ModalStack.pop();
 						}
 					}), QuickToggler_React.createElement(Result, {
 						name: "Themes",
@@ -552,7 +1218,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						}),
 						onClick: () => {
 							QuickToggler_open("themes");
-							external_PluginApi_DiscordModules_namespaceObject.ModalActions.closeAllModals();
+							external_PluginApi_DiscordModules_namespaceObject.ModalStack.pop();
 						}
 					}), QuickToggler_React.createElement("div", {
 						style: {
@@ -573,7 +1239,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						className: QuickToggler_classes.autocompleteQuerySymbol
 					}, "$plugin"), ", and ", QuickToggler_React.createElement("span", {
 						className: QuickToggler_classes.autocompleteQuerySymbol
-					}, "$theme"), " to filter results."))));
+					}, "$theme"), " to filter results.")));
 				}
 			}
 			const forms_namespaceObject = Modules["@discord/forms"];
@@ -614,7 +1280,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					]).map((e => 162 === e[1] ? 17 : 160 === e[1] ? 16 : 164 === e[1] ? 18 : e[1]));
 					if (keybinds.every((key => true === keys[key]))) {
 						keys = {};
-						external_PluginApi_DiscordModules_namespaceObject.ModalActions.openModal((props => plugins_QuickToggler_React.createElement(QuickToggler_QuickToggler, props)));
+						external_PluginApi_DiscordModules_namespaceObject.ModalStack.push((() => plugins_QuickToggler_React.createElement(QuickToggler_QuickToggler, null)));
 					} else setTimeout((() => keys = {}), 300);
 					keys[e.key] = false;
 				}
