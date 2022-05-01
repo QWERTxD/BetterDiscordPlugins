@@ -1,6 +1,6 @@
 /**
  * @name QuickToggler
- * @version 1.0.4
+ * @version 1.0.5
  * @description Allows you to open a toggle-able addon search with a keybind (default keybind: CTRL+D)
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickToggler
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "QuickToggler",
-		"version": "1.0.3",
+		"version": "1.0.5",
 		"description": "Allows you to open a toggle-able addon search with a keybind (default keybind: CTRL+D)",
 		"authors": [{
 			"name": "QWERT",
@@ -68,6 +68,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 		exports: {}
 	};
 	(() => {
+		"use strict";
 			class StyleLoader {
 				static styles = "";
 				static element = null;
@@ -922,7 +923,6 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				}));
 			},
 			113: module => {
-				"use strict";
 				module.exports = BdApi.React;
 			}
 		};
@@ -933,7 +933,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			var module = __webpack_module_cache__[moduleId] = {
 				exports: {}
 			};
-			__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+			__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
 			return module.exports;
 		}
 		(() => {
@@ -969,7 +969,6 @@ function buildPlugin([BasePlugin, PluginApi]) {
 		})();
 		var __webpack_exports__ = {};
 		(() => {
-			"use strict";
 			__webpack_require__.r(__webpack_exports__);
 			__webpack_require__.d(__webpack_exports__, {
 				default: () => QuickToggler
@@ -1077,9 +1076,9 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			}) {
 				const type = addon.filename.toLowerCase().endsWith("js") ? "Plugin" : "Theme";
 				const AddonActions = "Plugin" === type ? BdApi.Plugins : BdApi.Themes;
-				const isEnabled = AddonActions.isEnabled(addon.id);
+				const [isEnabled, setIsEnabled] = (0, external_BdApi_React_.useState)(AddonActions.isEnabled(addon.id));
 				const color = isEnabled ? Colors.STATUS_GREEN : Colors.STATUS_RED;
-				const ContextMenu = external_PluginApi_namespaceObject.DiscordContextMenu.buildMenu([{
+				const ContextMenu = external_PluginApi_namespaceObject.DCM.buildMenu([{
 					label: "Reload",
 					action: () => {
 						AddonActions.reload(addon.id);
@@ -1101,8 +1100,11 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					color: "colorDanger"
 				}]);
 				return AddonResult_React.createElement(Result, {
-					onClick: () => AddonActions.toggle(addon.id),
-					onContextMenu: e => external_PluginApi_namespaceObject.DiscordContextMenu.openContextMenu(e, ContextMenu),
+					onClick: () => {
+						setIsEnabled(!isEnabled);
+						AddonActions.toggle(addon.id);
+					},
+					onContextMenu: e => external_PluginApi_namespaceObject.DCM.openContextMenu(e, ContextMenu),
 					name: addon.name,
 					info: `v${addon.version} by ${addon.author}`,
 					desc: AddonResult_React.createElement(OverflowTooltip, {
@@ -1151,6 +1153,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				const themes = BdApi.Themes.getAll();
 				let addonsByQuery;
 				const addons = [...plugins, ...themes];
+				addonsByQuery = sortByBestResults(addons, query);
 				if (query.includes("$plugin")) addonsByQuery = addonsByQuery.filter((addon => addon.filename.endsWith("js")));
 				if (query.includes("$theme")) addonsByQuery = addonsByQuery.filter((addon => addon.filename.endsWith("css")));
 				if (query.includes("$enabled")) addonsByQuery = addonsByQuery.filter((addon => {
@@ -1161,7 +1164,6 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					const addonStore = addon.filename.endsWith("js") ? BdApi.Plugins : BdApi.Themes;
 					return !addonStore.isEnabled(addon.id);
 				}));
-				addonsByQuery = sortByBestResults(addons, query);
 				return addonsByQuery.map((addon => Results_React.createElement(AddonResult, {
 					addon,
 					key: addon.id
@@ -1191,7 +1193,9 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					};
 				}
 				render() {
-					return QuickToggler_React.createElement("div", {
+					return QuickToggler_React.createElement(Modal.ModalRoot, {
+						transitionState: this.props.transitionState
+					}, QuickToggler_React.createElement("div", {
 						className: QuickToggler_classes.quickswitcher
 					}, QuickToggler_React.createElement("input", {
 						className: QuickToggler_classes.input,
@@ -1210,7 +1214,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						}),
 						onClick: () => {
 							QuickToggler_open("plugins");
-							external_PluginApi_DiscordModules_namespaceObject.ModalStack.pop();
+							external_PluginApi_DiscordModules_namespaceObject.ModalActions.closeAllModals();
 						}
 					}), QuickToggler_React.createElement(Result, {
 						name: "Themes",
@@ -1219,7 +1223,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						}),
 						onClick: () => {
 							QuickToggler_open("themes");
-							external_PluginApi_DiscordModules_namespaceObject.ModalStack.pop();
+							external_PluginApi_DiscordModules_namespaceObject.ModalActions.closeAllModals();
 						}
 					}), QuickToggler_React.createElement("div", {
 						style: {
@@ -1240,7 +1244,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						className: QuickToggler_classes.autocompleteQuerySymbol
 					}, "$plugin"), ", and ", QuickToggler_React.createElement("span", {
 						className: QuickToggler_classes.autocompleteQuerySymbol
-					}, "$theme"), " to filter results.")));
+					}, "$theme"), " to filter results."))));
 				}
 			}
 			const forms_namespaceObject = Modules["@discord/forms"];
@@ -1281,7 +1285,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					]).map((e => 162 === e[1] ? 17 : 160 === e[1] ? 16 : 164 === e[1] ? 18 : e[1]));
 					if (keybinds.every((key => true === keys[key]))) {
 						keys = {};
-						external_PluginApi_DiscordModules_namespaceObject.ModalStack.push((() => plugins_QuickToggler_React.createElement(QuickToggler_QuickToggler, null)));
+						external_PluginApi_DiscordModules_namespaceObject.ModalActions.openModal((props => plugins_QuickToggler_React.createElement(QuickToggler_QuickToggler, props)));
 					} else setTimeout((() => keys = {}), 300);
 					keys[e.key] = false;
 				}
