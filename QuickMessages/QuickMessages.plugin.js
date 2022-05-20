@@ -1,6 +1,6 @@
 /**
  * @name QuickMessages
- * @version 1.2.4
+ * @version 1.2.5
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/QuickMessages/QuickMessages.plugin.js
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages
@@ -20,7 +20,7 @@ const config = {
                 discord_id: "678556376640913408",
             }
         ],
-        version: "1.2.4",
+        version: "1.2.5",
         description: "Save messages to quickly send them later, when you need.",
         github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickMessages",
         github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/QuickMessages/QuickMessages.plugin.js",
@@ -30,9 +30,8 @@ const config = {
             title: "Fixed",
             type: "Fixed",
             items: [
-                "Fix inserting text.",
-                "Let the delete Button use the trashcan icon.",
-                "Add some checks for duplicate messages and empty messages.",
+                "Fix crash when creating a new Category",
+                "Fix crash when deleting a Category",
             ],
         }
     ]
@@ -82,7 +81,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
 } : (([Plugin, Library]) => {
     const { DiscordModules, WebpackModules, Patcher, ContextMenu, Settings } = Library;
     const { SettingPanel, SettingGroup } = Settings;
-	const { findModule: get } = BdApi;
+    const { findModule: get } = BdApi;
 
     const { React } = DiscordModules;
     function configArrayPush(name, key, data) {
@@ -115,7 +114,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
     function saveCategories() {
         BdApi.setData('QuickMessages', 'categories', categories);
     }
-	
+
     class QuickMessages extends Plugin {
         constructor() {
             super();
@@ -162,15 +161,15 @@ module.exports = !global.ZeresPluginLibrary ? class {
             Patcher.unpatchAll();
             this.patchTextAreaContextMenus();
         }
-		
+
 
         async patchTextAreaContextMenus() {
             var shouldPaste = true;
-	    const SlateTextAreaContextMenu = await Library.DCM.getDiscordMenu("SlateTextAreaContextMenu");
-	    const TrashIcon = BdApi.findModuleByDisplayName('Trash');
+            const SlateTextAreaContextMenu = await Library.DCM.getDiscordMenu("SlateTextAreaContextMenu");
+            const TrashIcon = BdApi.findModuleByDisplayName('Trash');
             const ComponentDispatch = BdApi.findModuleByProps("ComponentDispatch").ComponentDispatch;
             const ChannelTextAreaContainer = WebpackModules.find(m => m.type && m.type.render && m.type.render.displayName === "ChannelTextAreaContainer").type;
-            const TooltipContainer = WebpackModules.getByProps('TooltipContainer').TooltipContainer; 
+            const TooltipContainer = WebpackModules.getByProps('TooltipContainer').TooltipContainer;
             const children = [];
             const saveToCategory = [];
             var text = "";
@@ -180,9 +179,9 @@ module.exports = !global.ZeresPluginLibrary ? class {
                     ContextMenu.buildMenuItem({
                         label: cat.name,
                         action: _ => {
-                            if(text !== "") {
+                            if (text !== "") {
                                 const category = categories.filter(e => e.name === cat.name)[0];
-                                if(categories[categories.indexOf(category)].items.includes(text)) {
+                                if (categories[categories.indexOf(category)].items.includes(text)) {
                                     BdApi.showToast(`Already added "${text}"!`, { type: 'success' });
                                     return;
                                 }
@@ -206,19 +205,19 @@ module.exports = !global.ZeresPluginLibrary ? class {
                         hint: React.createElement(TooltipContainer,
                             {
                                 text: "Delete"
-                            }, 
+                            },
                             React.createElement(TrashIcon, {
-                                    style: {color: "var(--status-danger)"},
-                                    onClick: _ => {
-                                        shouldPaste = false;
-                                        const category = categories.filter(e => e.name === cat.name)[0];
-                                        categories[categories.indexOf(category)].items = Library.Utilities.removeFromArray(categories[categories.indexOf(category)].items, e);
-                                        this.forceUpdate();
-                                        BdApi.showToast(`Successfully removed Quick Message!`, { type: 'success' });
-                                    },
-                                    width: '15px',
-                                    height: '15px'
-                                }
+                                style: { color: "var(--status-danger)" },
+                                onClick: _ => {
+                                    shouldPaste = false;
+                                    const category = categories.filter(e => e.name === cat.name)[0];
+                                    categories[categories.indexOf(category)].items = Library.Utilities.removeFromArray(categories[categories.indexOf(category)].items, e);
+                                    this.forceUpdate();
+                                    BdApi.showToast(`Successfully removed Quick Message!`, { type: 'success' });
+                                },
+                                width: '15px',
+                                height: '15px'
+                            }
                             )
                         )
                     }))
@@ -228,7 +227,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                         BdApi.showConfirmationModal(`Delete '${cat.name}'`, [
                             React.createElement(BdApi.findModuleByDisplayName("Card"), {
                                 children: [
-                                    React.createElement(BdApi.findModuleByDisplayName("Text"), {
+                                    React.createElement(BdApi.findModuleByDisplayName("LegacyText"), {
                                         children: ["Are you sure you want to delete ", React.createElement("strong", {}, cat.name), "? This action cannot be undone."],
                                         size: "size16-rrJ6ag"
                                     })
@@ -263,9 +262,9 @@ module.exports = !global.ZeresPluginLibrary ? class {
                     hint: React.createElement(TooltipContainer,
                         {
                             text: "Delete"
-                        }, 
+                        },
                         React.createElement(TrashIcon, {
-                            style: {color: "var(--status-danger)"},
+                            style: { color: "var(--status-danger)" },
                             onClick: _ => {
                                 shouldPaste = false;
                                 configArrayRemove("QuickMessages", 'messages', message);
@@ -293,7 +292,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                         label: "Save as Quick Message",
                         // disabled: props.editor.containerRef.current.textContent.slice(0, -1) == props.editor.props.placeholder,
                         action: _ => {
-                            if(text !== "") {
+                            if (text !== "") {
                                 configArrayPush("QuickMessages", "messages", text);
                                 this.forceUpdate();
                             } else {
@@ -308,7 +307,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                                 action: _ => {
                                     const FormItem = BdApi.findModuleByDisplayName("FormItem");
                                     const TextInput = BdApi.findModuleByDisplayName("TextInput");
-                                    const Text = BdApi.findModuleByDisplayName("Text");
+                                    const Text = BdApi.findModuleByDisplayName("LegacyText");
                                     let categoryName = "";
 
                                     Library.Modals.showModal("Create Category", [
@@ -324,9 +323,8 @@ module.exports = !global.ZeresPluginLibrary ? class {
                                                 }),
                                                 React.createElement(Text, {
                                                     children: ["This field is required"],
-                                                    size: "size12-oc4dx4",
-                                                    color: "colorStatusRed-3FRrPF",
-                                                    className: "error-fZAH7V marginTop8-24uXGp",
+                                                    className: "marginTop8-24uXGp",
+                                                    style: { color: "var(--text-danger)" },
                                                 })
                                             ]
                                         })
@@ -363,4 +361,4 @@ module.exports = !global.ZeresPluginLibrary ? class {
     }
 
     return QuickMessages;
-})(global.ZeresPluginLibrary.buildPlugin(config));
+})(global.ZeresPluginLibrary.buildPlugin(config)); 
