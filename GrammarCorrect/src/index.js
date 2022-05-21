@@ -1,15 +1,13 @@
 import BasePlugin from "@zlibrary/plugin";
-import { DiscordModules, Utilities } from "@zlibrary";
+import { DiscordModules } from "@zlibrary";
 const {
 	React,
-	ReactDOM,
 	Patcher,
 	findModule: get,
 	findModuleByProps: getByProps,
 	findModuleByDisplayName: getByName,
 	getData,
-	setData,
-	getInternalInstance
+	setData
 } = BdApi;
 
 const { ComponentDispatch } = getByProps("ComponentDispatch")
@@ -36,12 +34,12 @@ export default class GrammarCorrect extends BasePlugin {
 
 
 	patchSendMessage() {
-		if(!this.isAuto()) return;
+		if (!this.isAuto()) return;
 		/* https://github.com/Strencher/BetterDiscordStuff/blob/master/AutoCorrectV2/AutoCorrectV2.plugin.js#L101 */
-		Patcher.instead("grammar", DiscordModules.MessageActions, "sendMessage", (_this, [channelId,message,,reply], ret) => {
+		Patcher.instead("grammar", DiscordModules.MessageActions, "sendMessage", (_this, [channelId, message, , reply], ret) => {
 			const correct = this.correct(message.content).then(e => {
 				message.content = e;
-				ret(channelId, message,null,reply)
+				ret(channelId, message, null, reply)
 			});
 		})
 
@@ -58,31 +56,28 @@ export default class GrammarCorrect extends BasePlugin {
 				text = textValue;
 			})
 
+
 			children.splice(children.length - 1, 0,
 				<Menu.MenuGroup>
 					<Menu.MenuItem
-					id="correct"
-                    key="correct" 
-                    label="Correct"
-                    action={async() => {
-						const correction = await this.correct(text);
-						if(!correction) return ComponentDispatch.dispatch("SHAKE_APP", {duration: 200, intensity: 3});
+						id="correct"
+						key="correct"
+						label="Correct"
+						action={async () => {
+							const correction = await this.correct(text);
+							if (!correction) return ComponentDispatch.dispatch("SHAKE_APP", { duration: 200, intensity: 3 });
 
-						const textArea = document.querySelector(".textArea-12jD-V");
-						const editor = getInternalInstance(textArea).return.stateNode.editorRef;
-						
-						editor.moveToRangeOfDocument();
-						editor.delete();
-						editor.insertText(correction);
-					}}/>
+							ComponentDispatch.dispatch("CLEAR_TEXT")
+							ComponentDispatch.dispatch("INSERT_TEXT", { plainText: correction })
+						}} />
 				</Menu.MenuGroup>
 			)
-		})  
+		})
 	}
 
 	async correct(text) {
-		if(text.trim() === "") return null;
-  		const body = {
+		if (text.trim() === "") return null;
+		const body = {
 			autoReplace: true,
 			generateRecommendations: false,
 			generateSynonyms: false,
@@ -94,11 +89,11 @@ export default class GrammarCorrect extends BasePlugin {
 			text,
 		}
 		const resp = await fetch("https://orthographe.reverso.net/api/v1/Spelling", {
-		  headers: {
-		    "content-type": "application/json",
-		  },
-		  body: JSON.stringify(body),
-		  method: "POST",
+			headers: {
+				"content-type": "application/json",
+			},
+			body: JSON.stringify(body),
+			method: "POST",
 		}).then(r => r.json());
 
 		return resp.text || null;
@@ -106,7 +101,7 @@ export default class GrammarCorrect extends BasePlugin {
 
 	getSettingsPanel() {
 		const that = this;
-		return function() {
+		return function () {
 			const [state, setState] = React.useState(that.isAuto());
 			return (
 				<SwitchItem value={state} onChange={e => {
