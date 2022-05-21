@@ -1,7 +1,7 @@
 {
 	"info": {
 		"name": "GrammarCorrect",
-		"version": "1.0.0",
+		"version": "1.0.6",
 		"description": "Corrects your grammar mistakes just like Grammarly",
 		"authors": [
 			{
@@ -13,6 +13,15 @@
 		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/GrammarCorrect",
 		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/GrammarCorrect/GrammarCorrect.plugin.js"
 	},
+	"changelog": [
+		{
+			"type": "fixed",
+			"title": "Fixed",
+			"items": [
+				"Correcting works now"
+			]
+		}
+	],
 	"build": {
 		"zlibrary": true,
 		"copy": true,
