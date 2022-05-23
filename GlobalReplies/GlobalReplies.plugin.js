@@ -1,6 +1,6 @@
 /**
  * @name GlobalReplies
- * @version 1.0.5
+ * @version 1.0.6
  * @description Allows you to reply to messages outside of the channel they were sent in.
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/GlobalReplies
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "GlobalReplies",
-		"version": "1.0.5",
+		"version": "1.0.6",
 		"description": "Allows you to reply to messages outside of the channel they were sent in.",
 		"authors": [{
 			"name": "QWERT",
@@ -59,7 +59,7 @@ const config = {
 		"type": "fixed",
 		"title": "Fixes",
 		"items": [
-			"Fixed\nThanks for help in cleaning/optimizing code to AGreenPig"
+			"Fixed"
 		]
 	}]
 };
@@ -384,14 +384,14 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					})]
 				})];
 			}
-			var plugins_GlobalReplies_React = __webpack_require__(113);
+			var GlobalReplies_React = __webpack_require__(113);
 			const {
 				Patcher,
 				findModule: get,
 				findModuleByProps: getByProps,
 				findModuleByDisplayName: getByName,
-				getData: plugins_GlobalReplies_getData,
-				setData: plugins_GlobalReplies_setData
+				getData: GlobalReplies_getData,
+				setData: GlobalReplies_setData
 			} = BdApi;
 			const {
 				ComponentDispatch
@@ -423,15 +423,15 @@ function buildPlugin([BasePlugin, PluginApi]) {
 							const channels = getChannels(server?.id);
 							if (!server || !server?.id) return;
 							const tree = ret.props.children[2].props.children;
-							tree.splice(6, 0, plugins_GlobalReplies_React.createElement(Menu.MenuItem, {
+							tree.splice(6, 0, GlobalReplies_React.createElement(Menu.MenuItem, {
 								id: "gloabl-reply",
 								label: "Global Reply",
-								children: channels.SELECTABLE.filter((e => GuildPermissions.can(Permissions.SEND_MESSAGES, e.channel))).map((e => plugins_GlobalReplies_React.createElement(Menu.MenuItem, {
+								children: channels.SELECTABLE.filter((e => GuildPermissions.can(Permissions.SEND_MESSAGES, e.channel))).map((e => GlobalReplies_React.createElement(Menu.MenuItem, {
 									id: `${e.channel.name}-${e.comparator}`,
 									action: () => {
 										external_PluginApi_DiscordModules_namespaceObject.NavigationUtils.replaceWith(`/channels/${server.id}/${e.channel.id}`);
 										ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {
-											content: external_PluginApi_namespaceObject.Utilities.formatString(this.getTemplate(), {
+											plainText: external_PluginApi_namespaceObject.Utilities.formatString(this.getTemplate(), {
 												messageLink: `https://discord.com/channels/${server.id}/${channel.id}/${props.message.id}`,
 												author: `<@${props.message.author.id}>`,
 												authorTag: props.message.author.tag,
@@ -441,7 +441,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 											})
 										});
 									},
-									label: [plugins_GlobalReplies_React.createElement(ChannelText, {
+									label: [GlobalReplies_React.createElement(ChannelText, {
 										width: "10",
 										height: "10"
 									}), `    ${e.channel.name}`]
@@ -451,10 +451,10 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					}));
 				}
 				getTemplate() {
-					return plugins_GlobalReplies_getData(this.constructor.name, "template") ?? `Replying to {{author}} {{messageLink}} `;
+					return GlobalReplies_getData(this.constructor.name, "template") ?? `Replying to {{author}} {{messageLink}} `;
 				}
 				getSettingsPanel() {
-					return plugins_GlobalReplies_React.createElement(Settings, null);
+					return GlobalReplies_React.createElement(Settings, null);
 				}
 			}
 		})();
