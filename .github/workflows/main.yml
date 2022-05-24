@@ -1,11 +1,9 @@
 name: Autobuild Plugins
 
-# Controls when the action will run.
 on:
   push:
     branches:
       - development
-      - feature/*
   workflow_dispatch:
     inputs:
       plugin:
@@ -18,42 +16,46 @@ concurrency:
 
 jobs:
   build:
-    name: compile plugins
+    name: Compile Plugins
     runs-on: ubuntu-latest
 
     steps:
-      - name: clean working directory
+      - name: Clean working directory
         run: rm -rf /home/runner/work/${{ github.repository }}
 
-      - name: checkout code
+      - name: Checkout code
         uses: actions/checkout@v2
         with:
           submodules: recursive
           fetch-depth: 0
-
-      - name: install dependencies
-        run: |
-          echo '//npm.pkg.github.com/:_authToken=${{ secrets.GH_NPM_TOKEN }}' >> .npmrc
-          npm i
-
-      - name: setup nodejs
+          
+      - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
           node-version: 16.x
 
-      - name: detect changed files
+      - name: Setup env
+        run: |
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_NPM_TOKEN }}" >> .npmrc
+          echo '@betterdiscordbuilder:registry=https://npm.pkg.github.com' >> .npmrc
+
+      - name: Install latest BDBuilder version
+        run: |
+          npm i -D @betterdiscordbuilder/bdbuilder@latest
+
+      - name: Detect changed files
         id: files
         uses: jitterbit/get-changed-files@v1
-        continue-on-error: true # needed for force-push support
+        continue-on-error: true
 
-      - name: build plugins
+      - name: Build plugins
         run: >-
           .github/workflows/run-bdbuilder
           "--trigger=${{ github.event_name }}"
           "--plugin=${{ github.event.inputs.plugin }}"
           ${{ steps.files.outputs.all }}
 
-      - name: stage build
+      - name: Stage build
         uses: actions/upload-artifact@v2
         with:
           name: build-artifact
@@ -61,34 +63,32 @@ jobs:
           retention-days: 1
 
   publish:
-    name: publish plugins
+    name: Publish plugins
     runs-on: ubuntu-latest
     needs: build
-    if: ${{ 'refs/heads/development' == github.ref }}
 
     steps:
-      - name: restore repo
+      - name: Restore repo
         uses: actions/checkout@v2
         with:
           ref: main
 
-      - name: apply build
+      - name: Apply build
         uses: actions/download-artifact@v2
         with:
           name: build-artifact
-          path: .
+          path: Plugins
 
-      - name: commit
+      - name: Commit
         run: |
-          MSG="${{github.event.head_commit.message}}"
           git config advice.addIgnoredFile false
           git add --no-all ./**
           git config --local user.email "actions@github.com"
           git config --local user.name "PluginBuilder"
-          git commit -m "(build): $MSG" || true
+          git commit -m "Publish build" || true
 
-      - name: push
+      - name: Push
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ github.token }}
-          branch: main # *release* branch
+          branch: main
