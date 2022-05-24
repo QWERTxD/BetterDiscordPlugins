@@ -1,7 +1,7 @@
 {
 	"info": {
 		"name": "AssignBadges",
-		"version": "1.0.21",
+		"version": "1.0.27",
 		"description": "Allows you to locally assign badges to users through the user context menu.",
 		"authors": [
 			{
@@ -31,7 +31,7 @@
 			"type": "fixed",
 			"title": "Fixes",
 			"items": [
-				"Verified Bot Badge will now be shown for users in memberlist as well"
+				"Fixed bot tag crashing discord\nThanks to AGreenPig for debugging and fix"
 			]
 		}
 	]
