@@ -1,7 +1,7 @@
 {
 	"info": {
 		"name": "GlobalReplies",
-		"version": "1.0.0",
+		"version": "1.0.6",
 		"description": "Allows you to reply to messages outside of the channel they were sent in.",
 		"authors": [
 			{
@@ -25,5 +25,14 @@
 			"source": true,
 			"readme": true
 		}
-	}
+	},
+	"changelog": [
+		{
+			"type": "fixed",
+			"title": "Fixes",
+			"items": [
+				"Fixed"
+			]
+		}
+	]
 }

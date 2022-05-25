@@ -1,1 +1,4 @@
-previews/
+package-lock.json
+node_modules
+builds
+*.plugin.js

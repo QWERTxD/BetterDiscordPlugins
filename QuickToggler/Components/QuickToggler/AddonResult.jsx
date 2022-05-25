@@ -1,5 +1,5 @@
 import fs from 'fs';
-import { DiscordContextMenu, Modals, Toasts, WebpackModules } from '@zlibrary';
+import { DCM, Modals, Toasts, WebpackModules } from '@zlibrary';
 import PluginIcon from './PluginIcon';
 import ThemeIcon from './ThemeIcon';
 import Result from './Result';
@@ -14,7 +14,7 @@ export default function AddonResult({addon}) {
     const AddonActions = type === 'Plugin' ? BdApi.Plugins : BdApi.Themes;
     const isEnabled = AddonActions.isEnabled(addon.id);
     const color = isEnabled ? Colors.STATUS_GREEN : Colors.STATUS_RED;
-    const ContextMenu = DiscordContextMenu.buildMenu([
+    const ContextMenu = DCM.buildMenu([
         {
             label: 'Reload',
             action: () => {
@@ -42,7 +42,7 @@ export default function AddonResult({addon}) {
     return (
         <Result
         onClick={() => AddonActions.toggle(addon.id)}
-        onContextMenu={e => DiscordContextMenu.openContextMenu(e, ContextMenu)}
+        onContextMenu={e => DCM.openContextMenu(e, ContextMenu)}
         name={addon.name}
         info={`v${addon.version} by ${addon.author}`}
         desc={<OverflowTooltip children={addon.description}/>}
