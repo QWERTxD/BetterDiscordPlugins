@@ -691,8 +691,8 @@ function buildPlugin([BasePlugin, PluginApi]) {
 							const [, , ret] = args;
 							const contextMenu = external_PluginApi_namespaceObject.Utilities.getNestedProp(ret, "props.children");
 							if (!contextMenu || "function" !== typeof contextMenu.type) return;
-							original ??=contextMenu.type;
-							wrapper.displayName ??=original.displayName;
+							original ??= contextMenu.type;
+							wrapper.displayName ??= original.displayName;
 							contextMenu.type = wrapper;
 						}));
 						patched.add(Menu.default);

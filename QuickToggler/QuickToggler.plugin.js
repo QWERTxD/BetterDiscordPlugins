@@ -68,7 +68,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 		exports: {}
 	};
 	(() => {
-		"use strict";
+		var __webpack_modules__ = {
 			class StyleLoader {
 				static styles = "";
 				static element = null;
@@ -274,9 +274,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					}
 				}
 			};
-			
-		var __webpack_modules__ = {
-			486: function(module, exports) {
+			141: function(module, exports) {
 				var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;
 				(function(root, UMD) {
 					if (true) !(__WEBPACK_AMD_DEFINE_ARRAY__ = [], __WEBPACK_AMD_DEFINE_FACTORY__ = UMD,
@@ -923,6 +921,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				}));
 			},
 			113: module => {
+				"use strict";
 				module.exports = BdApi.React;
 			}
 		};
@@ -933,7 +932,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			var module = __webpack_module_cache__[moduleId] = {
 				exports: {}
 			};
-			__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+			__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
 			return module.exports;
 		}
 		(() => {
@@ -969,6 +968,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 		})();
 		var __webpack_exports__ = {};
 		(() => {
+			"use strict";
 			__webpack_require__.r(__webpack_exports__);
 			__webpack_require__.d(__webpack_exports__, {
 				default: () => QuickToggler
@@ -1021,7 +1021,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			const utils_namespaceObject = Modules["@discord/utils"];
 			var Result_React = __webpack_require__(113);
 			function _extends() {
-				_extends = Object.assign || function(target) {
+				_extends = Object.assign ? Object.assign.bind() : function(target) {
 					for (var i = 1; i < arguments.length; i++) {
 						var source = arguments[i];
 						for (var key in source)
@@ -1118,7 +1118,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					}))
 				});
 			}
-			var fuzzysort = __webpack_require__(486);
+			var fuzzysort = __webpack_require__(141);
 			var fuzzysort_default = __webpack_require__.n(fuzzysort);
 			var Results_React = __webpack_require__(113);
 			const biases = {
@@ -1150,7 +1150,6 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				const themes = BdApi.Themes.getAll();
 				let addonsByQuery;
 				const addons = [...plugins, ...themes];
-				addonsByQuery = sortByBestResults(addons, query);
 				if (query.includes("$plugin")) addonsByQuery = addonsByQuery.filter((addon => addon.filename.endsWith("js")));
 				if (query.includes("$theme")) addonsByQuery = addonsByQuery.filter((addon => addon.filename.endsWith("css")));
 				if (query.includes("$enabled")) addonsByQuery = addonsByQuery.filter((addon => {
@@ -1161,6 +1160,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					const addonStore = addon.filename.endsWith("js") ? BdApi.Plugins : BdApi.Themes;
 					return !addonStore.isEnabled(addon.id);
 				}));
+				addonsByQuery = sortByBestResults(addons, query);
 				return addonsByQuery.map((addon => Results_React.createElement(AddonResult, {
 					addon,
 					key: addon.id
@@ -1190,9 +1190,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					};
 				}
 				render() {
-					return QuickToggler_React.createElement(Modal.ModalRoot, {
-						transitionState: this.props.transitionState
-					}, QuickToggler_React.createElement("div", {
+					return QuickToggler_React.createElement("div", {
 						className: QuickToggler_classes.quickswitcher
 					}, QuickToggler_React.createElement("input", {
 						className: QuickToggler_classes.input,
@@ -1211,7 +1209,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						}),
 						onClick: () => {
 							QuickToggler_open("plugins");
-							external_PluginApi_DiscordModules_namespaceObject.ModalActions.closeAllModals();
+							ModalActions.closeAllModals();
 						}
 					}), QuickToggler_React.createElement(Result, {
 						name: "Themes",
@@ -1220,7 +1218,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						}),
 						onClick: () => {
 							QuickToggler_open("themes");
-							external_PluginApi_DiscordModules_namespaceObject.ModalActions.closeAllModals();
+							ModalActions.closeAllModals();
 						}
 					}), QuickToggler_React.createElement("div", {
 						style: {
@@ -1241,7 +1239,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						className: QuickToggler_classes.autocompleteQuerySymbol
 					}, "$plugin"), ", and ", QuickToggler_React.createElement("span", {
 						className: QuickToggler_classes.autocompleteQuerySymbol
-					}, "$theme"), " to filter results."))));
+					}, "$theme"), " to filter results.")));
 				}
 			}
 			const forms_namespaceObject = Modules["@discord/forms"];
@@ -1263,7 +1261,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					})
 				}));
 			}
-			var plugins_QuickToggler_React = __webpack_require__(113);
+			var QuickToggler_React_0 = __webpack_require__(113);
 			let keys = {};
 			let settings = {};
 			class QuickToggler extends(external_BasePlugin_default()) {
@@ -1282,7 +1280,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					]).map((e => 162 === e[1] ? 17 : 160 === e[1] ? 16 : 164 === e[1] ? 18 : e[1]));
 					if (keybinds.every((key => true === keys[key]))) {
 						keys = {};
-						external_PluginApi_DiscordModules_namespaceObject.ModalActions.openModal((props => plugins_QuickToggler_React.createElement(QuickToggler_QuickToggler, props)));
+						ModalActions.openModal((props => QuickToggler_React_0.createElement(QuickToggler_QuickToggler, props)));
 					} else setTimeout((() => keys = {}), 300);
 					keys[e.key] = false;
 				}
@@ -1303,7 +1301,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					settings = newSettings;
 				}
 				getSettingsPanel() {
-					return plugins_QuickToggler_React.createElement(Settings, {
+					return QuickToggler_React_0.createElement(Settings, {
 						settings: this.getSettings(),
 						saveSettings: this.saveSettings
 					});

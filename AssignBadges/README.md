@@ -1,6 +1,6 @@
-# GrammarCorrect
+# AssignBadges
 
-> Corrects your grammar mistakes just like Grammarly
+> Allows you to locally assign badges to users through the user context menu.
 <hr/>
 
 

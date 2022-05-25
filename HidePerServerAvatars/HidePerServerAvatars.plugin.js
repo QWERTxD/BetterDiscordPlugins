@@ -62,8 +62,211 @@ function buildPlugin([BasePlugin, PluginApi]) {
 	};
 	(() => {
 		"use strict";
-		let __plugin_styles__ = "";
-		let __style_element__ = null;
+		class StyleLoader {
+			static styles = "";
+			static element = null;
+			static append(module, css) {
+				this.styles += `/* ${module} */\n${css}`;
+			}
+			static inject(name = config.info.name) {
+				if (this.element) this.element.remove();
+				this.element = document.head.appendChild(Object.assign(document.createElement("style"), {
+					id: name,
+					textContent: this.styles
+				}));
+			}
+			static remove() {
+				if (this.element) {
+					this.element.remove();
+					this.element = null;
+				}
+			}
+		}
+		function ___createMemoize___(instance, name, value) {
+			value = value();
+			Object.defineProperty(instance, name, {
+				value,
+				configurable: true
+			});
+			return value;
+		};
+		const Modules = {
+			get 'react-spring'() {
+				return ___createMemoize___(this, 'react-spring', () => BdApi.findModuleByProps('useSpring'))
+			},
+			'@discord/utils': {
+				get 'joinClassNames'() {
+					return ___createMemoize___(this, 'joinClassNames', () => BdApi.findModule(e => e.toString().indexOf('return e.join(" ")') > 200))
+				},
+				get 'useForceUpdate'() {
+					return ___createMemoize___(this, 'useForceUpdate', () => BdApi.findModuleByProps('useForceUpdate')?.useForceUpdate)
+				},
+				get 'Logger'() {
+					return ___createMemoize___(this, 'Logger', () => BdApi.findModuleByProps('setLogFn')?.default)
+				},
+				get 'Navigation'() {
+					return ___createMemoize___(this, 'Navigation', () => BdApi.findModuleByProps('replaceWith', 'currentRouteIsPeekView'))
+				}
+			},
+			'@discord/components': {
+				get 'Tooltip'() {
+					return ___createMemoize___(this, 'Tooltip', () => BdApi.findModuleByDisplayName('Tooltip'))
+				},
+				get 'TooltipContainer'() {
+					return ___createMemoize___(this, 'TooltipContainer', () => BdApi.findModuleByProps('TooltipContainer')?.TooltipContainer)
+				},
+				get 'TextInput'() {
+					return ___createMemoize___(this, 'TextInput', () => BdApi.findModuleByDisplayName('TextInput'))
+				},
+				get 'SlideIn'() {
+					return ___createMemoize___(this, 'SlideIn', () => BdApi.findModuleByDisplayName('SlideIn'))
+				},
+				get 'SettingsNotice'() {
+					return ___createMemoize___(this, 'SettingsNotice', () => BdApi.findModuleByDisplayName('SettingsNotice'))
+				},
+				get 'TransitionGroup'() {
+					return ___createMemoize___(this, 'TransitionGroup', () => BdApi.findModuleByDisplayName('TransitionGroup'))
+				},
+				get 'Button'() {
+					return ___createMemoize___(this, 'Button', () => BdApi.findModule(m => 'DropdownSizes' in m && typeof(m) === 'function'))
+				},
+				get 'Popout'() {
+					return ___createMemoize___(this, 'Popout', () => BdApi.findModuleByDisplayName('Popout'))
+				},
+				get 'Flex'() {
+					return ___createMemoize___(this, 'Flex', () => BdApi.findModuleByDisplayName('Flex'))
+				},
+				get 'Text'() {
+					return ___createMemoize___(this, 'Text', () => BdApi.findModuleByDisplayName('Text'))
+				},
+				get 'Card'() {
+					return ___createMemoize___(this, 'Card', () => BdApi.findModuleByDisplayName('Card'))
+				}
+			},
+			'@discord/modules': {
+				get 'Dispatcher'() {
+					return ___createMemoize___(this, 'Dispatcher', () => BdApi.findModuleByProps('dirtyDispatch', 'subscribe'))
+				},
+				get 'ComponentDispatcher'() {
+					return ___createMemoize___(this, 'ComponentDispatcher', () => BdApi.findModuleByProps('ComponentDispatch')?.ComponentDispatch)
+				},
+				get 'EmojiUtils'() {
+					return ___createMemoize___(this, 'EmojiUtils', () => BdApi.findModuleByProps('uploadEmoji'))
+				},
+				get 'PermissionUtils'() {
+					return ___createMemoize___(this, 'PermissionUtils', () => BdApi.findModuleByProps('computePermissions', 'canManageUser'))
+				},
+				get 'DMUtils'() {
+					return ___createMemoize___(this, 'DMUtils', () => BdApi.findModuleByProps('openPrivateChannel'))
+				}
+			},
+			'@discord/stores': {
+				get 'Messages'() {
+					return ___createMemoize___(this, 'Messages', () => BdApi.findModuleByProps('getMessage', 'getMessages'))
+				},
+				get 'Channels'() {
+					return ___createMemoize___(this, 'Channels', () => BdApi.findModuleByProps('getChannel', 'getDMFromUserId'))
+				},
+				get 'Guilds'() {
+					return ___createMemoize___(this, 'Guilds', () => BdApi.findModuleByProps('getGuild'))
+				},
+				get 'SelectedGuilds'() {
+					return ___createMemoize___(this, 'SelectedGuilds', () => BdApi.findModuleByProps('getGuildId', 'getLastSelectedGuildId'))
+				},
+				get 'SelectedChannels'() {
+					return ___createMemoize___(this, 'SelectedChannels', () => BdApi.findModuleByProps('getChannelId', 'getLastSelectedChannelId'))
+				},
+				get 'Info'() {
+					return ___createMemoize___(this, 'Info', () => BdApi.findModuleByProps('getSessionId'))
+				},
+				get 'Status'() {
+					return ___createMemoize___(this, 'Status', () => BdApi.findModuleByProps('getStatus', 'getActivities', 'getState'))
+				},
+				get 'Users'() {
+					return ___createMemoize___(this, 'Users', () => BdApi.findModuleByProps('getUser', 'getCurrentUser'))
+				},
+				get 'SettingsStore'() {
+					return ___createMemoize___(this, 'SettingsStore', () => BdApi.findModuleByProps('afkTimeout', 'status'))
+				},
+				get 'UserProfile'() {
+					return ___createMemoize___(this, 'UserProfile', () => BdApi.findModuleByProps('getUserProfile'))
+				},
+				get 'Members'() {
+					return ___createMemoize___(this, 'Members', () => BdApi.findModuleByProps('getMember'))
+				},
+				get 'Activities'() {
+					return ___createMemoize___(this, 'Activities', () => BdApi.findModuleByProps('getActivities'))
+				},
+				get 'Games'() {
+					return ___createMemoize___(this, 'Games', () => BdApi.findModuleByProps('getGame', 'games'))
+				},
+				get 'Auth'() {
+					return ___createMemoize___(this, 'Auth', () => BdApi.findModuleByProps('getId', 'isGuest'))
+				},
+				get 'TypingUsers'() {
+					return ___createMemoize___(this, 'TypingUsers', () => BdApi.findModuleByProps('isTyping'))
+				}
+			},
+			'@discord/actions': {
+				get 'ProfileActions'() {
+					return ___createMemoize___(this, 'ProfileActions', () => BdApi.findModuleByProps('fetchProfile'))
+				},
+				get 'GuildActions'() {
+					return ___createMemoize___(this, 'GuildActions', () => BdApi.findModuleByProps('requestMembersById'))
+				}
+			},
+			get '@discord/i18n'() {
+				return ___createMemoize___(this, '@discord/i18n', () => BdApi.findModule(m => m.Messages?.CLOSE && typeof(m.getLocale) === 'function'))
+			},
+			get '@discord/constants'() {
+				return ___createMemoize___(this, '@discord/constants', () => BdApi.findModuleByProps('API_HOST'))
+			},
+			get '@discord/contextmenu'() {
+				return ___createMemoize___(this, '@discord/contextmenu', () => {
+					const ctx = Object.assign({}, BdApi.findModuleByProps('openContextMenu'), BdApi.findModuleByProps('MenuItem'));
+					ctx.Menu = ctx.default;
+					return ctx;
+				})
+			},
+			get '@discord/forms'() {
+				return ___createMemoize___(this, '@discord/forms', () => BdApi.findModuleByProps('FormItem'))
+			},
+			get '@discord/scrollbars'() {
+				return ___createMemoize___(this, '@discord/scrollbars', () => BdApi.findModuleByProps('ScrollerAuto'))
+			},
+			get '@discord/native'() {
+				return ___createMemoize___(this, '@discord/native', () => BdApi.findModuleByProps('requireModule'))
+			},
+			get '@discord/flux'() {
+				return ___createMemoize___(this, '@discord/flux', () => Object.assign({}, BdApi.findModuleByProps('useStateFromStores').default, BdApi.findModuleByProps('useStateFromStores')))
+			},
+			get '@discord/modal'() {
+				return ___createMemoize___(this, '@discord/modal', () => Object.assign({}, BdApi.findModuleByProps('ModalRoot'), BdApi.findModuleByProps('openModal', 'closeAllModals')))
+			},
+			get '@discord/connections'() {
+				return ___createMemoize___(this, '@discord/connections', () => BdApi.findModuleByProps('get', 'isSupported', 'map'))
+			},
+			get '@discord/sanitize'() {
+				return ___createMemoize___(this, '@discord/sanitize', () => BdApi.findModuleByProps('stringify', 'parse', 'encode'))
+			},
+			get '@discord/icons'() {
+				return ___createMemoize___(this, '@discord/icons', () => BdApi.findAllModules(m => m.displayName && ~m.toString().indexOf('currentColor')).reduce((icons, icon) => (icons[icon.displayName] = icon, icons), {}))
+			},
+			'@discord/classes': {
+				get 'Timestamp'() {
+					return ___createMemoize___(this, 'Timestamp', () => BdApi.findModuleByPrototypes('toDate', 'month'))
+				},
+				get 'Message'() {
+					return ___createMemoize___(this, 'Message', () => BdApi.findModuleByPrototypes('getReaction', 'isSystemDM'))
+				},
+				get 'User'() {
+					return ___createMemoize___(this, 'User', () => BdApi.findModuleByPrototypes('tag'))
+				},
+				get 'Channel'() {
+					return ___createMemoize___(this, 'Channel', () => BdApi.findModuleByPrototypes('isOwner', 'isCategory'))
+				}
+			}
+		};
 		var __webpack_require__ = {};
 		(() => {
 			__webpack_require__.n = module => {
@@ -105,10 +308,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 		var external_BasePlugin_default = __webpack_require__.n(external_BasePlugin_namespaceObject);
 		const external_PluginApi_namespaceObject = PluginApi;
 		const external_PluginApi_DiscordModules_namespaceObject = PluginApi.DiscordModules;
-		const UserPopoutHeader = external_PluginApi_namespaceObject.WebpackModules.find((m => {
-			var _m$default;
-			return "UserPopoutHeader" === (null === m || void 0 === m ? void 0 : null === (_m$default = m.default) || void 0 === _m$default ? void 0 : _m$default.displayName);
-		}));
+		const UserPopoutHeader = external_PluginApi_namespaceObject.WebpackModules.find((m => "UserPopoutHeader" === m?.default?.displayName));
 		const Avatar = external_PluginApi_namespaceObject.WebpackModules.getByProps("AnimatedAvatar");
 		class HidePerServerAvatars extends(external_BasePlugin_default()) {
 			onStart() {
@@ -119,10 +319,10 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			}
 			patch() {
 				external_PluginApi_namespaceObject.Patcher.after(external_PluginApi_DiscordModules_namespaceObject.GuildMemberStore, "getMember", ((_this, [props], ret) => {
-					if (null !== ret && void 0 !== ret && ret.guildMemberAvatar) ret.guildMemberAvatar = null;
+					if (ret?.guildMemberAvatar) ret.guildMemberAvatar = null;
 				}));
 				external_PluginApi_namespaceObject.Patcher.after(UserPopoutHeader, "default", ((_this, [props]) => {
-					if (null !== props && void 0 !== props && props.user) props.user.guildMemberAvatars = {};
+					if (props?.user) props.user.guildMemberAvatars = {};
 				}));
 				external_PluginApi_namespaceObject.Patcher.after(Avatar, "default", ((_this, [props]) => {
 					const match = props.src.match(/.*\/\/.*\/guilds\/\d{16,20}\/users\/\d{16,20}\/avatars\/.*/);
@@ -158,7 +358,7 @@ module.exports = window.hasOwnProperty("ZeresPluginLibrary") ?
 					cancelText: "Cancel",
 					onConfirm: () => {
 						require("request").get("https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js", async (error, response, body) => {
-							if (error) return require("electron").shell.openExternal("https://betterdiscord.app/plugin/ZeresPluginLibrary");
+							if (error) return require("electron").shell.openExternal("https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js");
 							await new Promise(r => require("fs").writeFile(require("path").join(BdApi.Plugins.folder, "0PluginLibrary.plugin.js"), body, r));
 						});
 					}

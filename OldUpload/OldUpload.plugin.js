@@ -12,16 +12,14 @@
     // Offer to self-install for clueless users that try to run this directly.
     var shell = WScript.CreateObject("WScript.Shell");
     var fs = new ActiveXObject("Scripting.FileSystemObject");
-    var pathPlugins = shell.ExpandEnvironmentStrings("%APPDATA%BetterDiscordplugins");
+    var pathPlugins = shell.ExpandEnvironmentStrings("%APPDATA%\BetterDiscord\plugins");
     var pathSelf = WScript.ScriptFullName;
     // Put the user at ease by addressing them in the first person
-    shell.Popup("It looks like you've mistakenly tried to run me directly. 
-(Don't do that!)", 0, "I'm a plugin for BetterDiscord", 0x30);
+    shell.Popup("It looks like you've mistakenly tried to run me directly. \n(Don't do that!)", 0, "I'm a plugin for BetterDiscord", 0x30);
     if (fs.GetParentFolderName(pathSelf) === fs.GetAbsolutePathName(pathPlugins)) {
         shell.Popup("I'm in the correct folder already.", 0, "I'm already installed", 0x40);
     } else if (!fs.FolderExists(pathPlugins)) {
-        shell.Popup("I can't find the BetterDiscord plugins folder.
-Are you sure it's even installed?", 0, "Can't install myself", 0x10);
+        shell.Popup("I can't find the BetterDiscord plugins folder.\nAre you sure it's even installed?", 0, "Can't install myself", 0x10);
     } else if (shell.Popup("Should I copy myself to BetterDiscord's plugins folder for you?", 0, "Do you need some help?", 0x34) === 6) {
         fs.CopyFile(pathSelf, fs.BuildPath(pathPlugins, fs.GetFileName(pathSelf)), true);
         // Show the user where to put plugins in the future
@@ -98,7 +96,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			},
 			'@discord/utils': {
 				get 'joinClassNames'() {
-					return ___createMemoize___(this, 'joinClassNames', () => BdApi.findModule(m => typeof m?.default?.default === 'function')?.default)
+					return ___createMemoize___(this, 'joinClassNames', () => BdApi.findModule(e => e.toString().indexOf('return e.join(" ")') > 200))
 				},
 				get 'useForceUpdate'() {
 					return ___createMemoize___(this, 'useForceUpdate', () => BdApi.findModuleByProps('useForceUpdate')?.useForceUpdate)
@@ -107,7 +105,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'Logger', () => BdApi.findModuleByProps('setLogFn')?.default)
 				},
 				get 'Navigation'() {
-					return ___createMemoize___(this, 'Navigation', () => BdApi.findModuleByProps('replaceWith'))
+					return ___createMemoize___(this, 'Navigation', () => BdApi.findModuleByProps('replaceWith', 'currentRouteIsPeekView'))
 				}
 			},
 			'@discord/components': {
@@ -130,7 +128,10 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'TransitionGroup', () => BdApi.findModuleByDisplayName('TransitionGroup'))
 				},
 				get 'Button'() {
-					return ___createMemoize___(this, 'Button', () => BdApi.findModuleByProps('DropdownSizes'))
+					return ___createMemoize___(this, 'Button', () => BdApi.findModule(m => 'DropdownSizes' in m && typeof(m) === 'function'))
+				},
+				get 'Popout'() {
+					return ___createMemoize___(this, 'Popout', () => BdApi.findModuleByDisplayName('Popout'))
 				},
 				get 'Flex'() {
 					return ___createMemoize___(this, 'Flex', () => BdApi.findModuleByDisplayName('Flex'))
@@ -146,11 +147,14 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				get 'Dispatcher'() {
 					return ___createMemoize___(this, 'Dispatcher', () => BdApi.findModuleByProps('dirtyDispatch', 'subscribe'))
 				},
+				get 'ComponentDispatcher'() {
+					return ___createMemoize___(this, 'ComponentDispatcher', () => BdApi.findModuleByProps('ComponentDispatch')?.ComponentDispatch)
+				},
 				get 'EmojiUtils'() {
 					return ___createMemoize___(this, 'EmojiUtils', () => BdApi.findModuleByProps('uploadEmoji'))
 				},
 				get 'PermissionUtils'() {
-					return ___createMemoize___(this, 'PermissionUtils', () => BdApi.findModuleByProps('computePermissions'))
+					return ___createMemoize___(this, 'PermissionUtils', () => BdApi.findModuleByProps('computePermissions', 'canManageUser'))
 				},
 				get 'DMUtils'() {
 					return ___createMemoize___(this, 'DMUtils', () => BdApi.findModuleByProps('openPrivateChannel'))
@@ -161,7 +165,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'Messages', () => BdApi.findModuleByProps('getMessage', 'getMessages'))
 				},
 				get 'Channels'() {
-					return ___createMemoize___(this, 'Channels', () => BdApi.findModuleByProps('getChannel'))
+					return ___createMemoize___(this, 'Channels', () => BdApi.findModuleByProps('getChannel', 'getDMFromUserId'))
 				},
 				get 'Guilds'() {
 					return ___createMemoize___(this, 'Guilds', () => BdApi.findModuleByProps('getGuild'))
@@ -176,10 +180,10 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'Info', () => BdApi.findModuleByProps('getSessionId'))
 				},
 				get 'Status'() {
-					return ___createMemoize___(this, 'Status', () => BdApi.findModuleByProps('getStatus'))
+					return ___createMemoize___(this, 'Status', () => BdApi.findModuleByProps('getStatus', 'getActivities', 'getState'))
 				},
 				get 'Users'() {
-					return ___createMemoize___(this, 'Users', () => BdApi.findModuleByProps('getUser'))
+					return ___createMemoize___(this, 'Users', () => BdApi.findModuleByProps('getUser', 'getCurrentUser'))
 				},
 				get 'SettingsStore'() {
 					return ___createMemoize___(this, 'SettingsStore', () => BdApi.findModuleByProps('afkTimeout', 'status'))
@@ -194,7 +198,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'Activities', () => BdApi.findModuleByProps('getActivities'))
 				},
 				get 'Games'() {
-					return ___createMemoize___(this, 'Games', () => BdApi.findModuleByProps('getGame'))
+					return ___createMemoize___(this, 'Games', () => BdApi.findModuleByProps('getGame', 'games'))
 				},
 				get 'Auth'() {
 					return ___createMemoize___(this, 'Auth', () => BdApi.findModuleByProps('getId', 'isGuest'))
@@ -206,10 +210,13 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			'@discord/actions': {
 				get 'ProfileActions'() {
 					return ___createMemoize___(this, 'ProfileActions', () => BdApi.findModuleByProps('fetchProfile'))
+				},
+				get 'GuildActions'() {
+					return ___createMemoize___(this, 'GuildActions', () => BdApi.findModuleByProps('requestMembersById'))
 				}
 			},
 			get '@discord/i18n'() {
-				return ___createMemoize___(this, '@discord/i18n', () => BdApi.findModuleByProps('getLocale'))
+				return ___createMemoize___(this, '@discord/i18n', () => BdApi.findModule(m => m.Messages?.CLOSE && typeof(m.getLocale) === 'function'))
 			},
 			get '@discord/constants'() {
 				return ___createMemoize___(this, '@discord/constants', () => BdApi.findModuleByProps('API_HOST'))
@@ -234,7 +241,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				return ___createMemoize___(this, '@discord/flux', () => Object.assign({}, BdApi.findModuleByProps('useStateFromStores').default, BdApi.findModuleByProps('useStateFromStores')))
 			},
 			get '@discord/modal'() {
-				return ___createMemoize___(this, '@discord/modal', () => Object.assign({}, BdApi.findModuleByProps('ModalRoot'), BdApi.findModuleByProps('openModal')))
+				return ___createMemoize___(this, '@discord/modal', () => Object.assign({}, BdApi.findModuleByProps('ModalRoot'), BdApi.findModuleByProps('openModal', 'closeAllModals')))
 			},
 			get '@discord/connections'() {
 				return ___createMemoize___(this, '@discord/connections', () => BdApi.findModuleByProps('get', 'isSupported', 'map'))
