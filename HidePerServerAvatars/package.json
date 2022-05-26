@@ -10,8 +10,8 @@
 				"github_username": "QWERTxD"
 			}
 		],
-		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/HidePerServerAvatars",
-		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/HidePerServerAvatars/HidePerServerAvatars.plugin.js"
+		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/HidePerServerAvatars",
+		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/HidePerServerAvatars/HidePerServerAvatars.plugin.js"
 	},
 	"build": {
 		"zlibrary": true,
