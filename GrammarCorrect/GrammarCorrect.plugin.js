@@ -3,8 +3,8 @@
  * @version 1.0.6
  * @description Corrects your grammar mistakes just like Grammarly
  * @author QWERT
- * @source https://github.com/QWERTxD/BetterDiscordPlugins/GrammarCorrect
- * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/GrammarCorrect/GrammarCorrect.plugin.js
+ * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/GrammarCorrect
+ * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/GrammarCorrect/GrammarCorrect.plugin.js
  */
 /*@cc_on
 @if (@_jscript)
@@ -39,8 +39,8 @@ const config = {
 			"discord_id": "678556376640913408",
 			"github_username": "QWERTxD"
 		}],
-		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/GrammarCorrect",
-		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/GrammarCorrect/GrammarCorrect.plugin.js"
+		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/GrammarCorrect",
+		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/GrammarCorrect/GrammarCorrect.plugin.js"
 	},
 	"changelog": [{
 		"type": "fixed",

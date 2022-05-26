@@ -3,8 +3,8 @@
  * @version 1.0.0
  * @description Shows the actual users avatars in chat instead of their per-server avatar.
  * @author QWERT
- * @source https://github.com/QWERTxD/BetterDiscordPlugins/HidePerServerAvatars
- * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/HidePerServerAvatars/HidePerServerAvatars.plugin.js
+ * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/HidePerServerAvatars
+ * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/HidePerServerAvatars/HidePerServerAvatars.plugin.js
  */
 /*@cc_on
 @if (@_jscript)
@@ -39,8 +39,8 @@ const config = {
 			"discord_id": "678556376640913408",
 			"github_username": "QWERTxD"
 		}],
-		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/HidePerServerAvatars",
-		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/master/HidePerServerAvatars/HidePerServerAvatars.plugin.js"
+		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/HidePerServerAvatars",
+		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/HidePerServerAvatars/HidePerServerAvatars.plugin.js"
 	},
 	"build": {
 		"zlibrary": true,

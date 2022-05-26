@@ -3,7 +3,7 @@
  * @version 1.1.2
  * @description Allows you to play Discord's Activity Games (Such as watching YouTube together and Chess) with friends in voice chats.
  * @author QWERT
- * @source https://github.com/QWERTxD/BetterDiscordPlugins/DiscordActivities
+ * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/DiscordActivities
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/DiscordActivities/DiscordActivities.plugin.js
  */
 /*@cc_on
@@ -39,7 +39,7 @@ const config = {
 			"discord_id": "678556376640913408",
 			"github_username": "QWERTxD"
 		}],
-		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/DiscordActivities",
+		"github": "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/DiscordActivities",
 		"github_raw": "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/DiscordActivities/DiscordActivities.plugin.js"
 	},
 	"build": {
