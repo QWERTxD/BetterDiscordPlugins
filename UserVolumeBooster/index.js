@@ -25,7 +25,7 @@ export default class Plugin {
 
 	patch() {
 		Patcher.after("slider", Slider.prototype, 'render', (_this, [props], ret) => {
-			if(_this?.props?.className !== "slider-2zxowp") return;
+			if(_this?.props?.className !== "slider-1NC-Gf") return;
 			_this.props.maxValue = 200 * this.getMultiplier();
 			_this.state.range = 200 * this.getMultiplier();
 			_this.state.max = 200 * this.getMultiplier();
