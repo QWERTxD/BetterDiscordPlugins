@@ -1,7 +1,7 @@
 /**
  * @name UserVolumeBooster
  * @description Allows you to set a user's volume above the normal 200%
- * @version 1.0.0
+ * @version 1.0.1
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/UserVolumeBooster
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/UserVolumeBooster/UserVolumeBooster.plugin.js
@@ -33,7 +33,7 @@ const config = {
 	"info": {
 		"name": "UserVolumeBooster",
 		"description": "Allows you to set a user's volume above the normal 200%",
-		"version": "1.0.0",
+		"version": "1.0.1",
 		"authors": [{
 			"name": "QWERT",
 			"discord_id": "678556376640913408",
@@ -318,7 +318,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			}
 			patch() {
 				Patcher.after("slider", Slider.prototype, "render", ((_this, [props]) => {
-					if ("slider-1NC-Gf" !== _this?.props?.className) return;
+					if ("slider-BEB8u7" !== _this?.props?.className) return;
 					_this.props.maxValue = 200 * this.getMultiplier();
 					_this.state.range = 200 * this.getMultiplier();
 					_this.state.max = 200 * this.getMultiplier();
