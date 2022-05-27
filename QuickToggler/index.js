@@ -1,5 +1,5 @@
 import { PluginUtilities } from '@zlibrary';
-import { ModalStack } from '@zlibrary/discord';
+import { ModalStack, ModalActions } from '@zlibrary/discord';
 import BasePlugin from '@zlibrary/plugin';
 import QuickTogglerComponent from './Components/QuickToggler/QuickToggler';
 import Settings from './Components/Settings';
