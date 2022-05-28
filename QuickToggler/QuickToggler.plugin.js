@@ -1065,9 +1065,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			var external_path_default = __webpack_require__.n(external_path_namespaceObject);
 			var AddonResult_React = __webpack_require__(113);
 			const OverflowTooltip = external_PluginApi_namespaceObject.WebpackModules.getByDisplayName("OverflowTooltip");
-			const {
-				Colors
-			} = external_PluginApi_namespaceObject.WebpackModules.getByProps("Colors");
+			const Colors = external_PluginApi_namespaceObject.WebpackModules.getByProps("STATUS_GREEN", "STATUS_RED");
 			const {
 				TooltipContainer: Tooltip
 			} = external_PluginApi_namespaceObject.WebpackModules.getByProps("TooltipContainer");
@@ -1076,7 +1074,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			}) {
 				const type = addon.filename.toLowerCase().endsWith("js") ? "Plugin" : "Theme";
 				const AddonActions = "Plugin" === type ? BdApi.Plugins : BdApi.Themes;
-				const isEnabled = AddonActions.isEnabled(addon.id);
+				const [isEnabled, setIsEnabled] = (0, external_BdApi_React_.useState)(AddonActions.isEnabled(addon.id));
 				const color = isEnabled ? Colors.STATUS_GREEN : Colors.STATUS_RED;
 				const ContextMenu = external_PluginApi_namespaceObject.DCM.buildMenu([{
 					label: "Reload",
@@ -1100,7 +1098,10 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					color: "colorDanger"
 				}]);
 				return AddonResult_React.createElement(Result, {
-					onClick: () => AddonActions.toggle(addon.id),
+					onClick: () => {
+						setIsEnabled(!isEnabled);
+						AddonActions.toggle(addon.id);
+					},
 					onContextMenu: e => external_PluginApi_namespaceObject.DCM.openContextMenu(e, ContextMenu),
 					name: addon.name,
 					info: `v${addon.version} by ${addon.author}`,
@@ -1190,7 +1191,9 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					};
 				}
 				render() {
-					return QuickToggler_React.createElement("div", {
+					return QuickToggler_React.createElement(Modal.ModalRoot, {
+						transitionState: this.props.transitionState
+					}, QuickToggler_React.createElement("div", {
 						className: QuickToggler_classes.quickswitcher
 					}, QuickToggler_React.createElement("input", {
 						className: QuickToggler_classes.input,
@@ -1209,7 +1212,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						}),
 						onClick: () => {
 							QuickToggler_open("plugins");
-							ModalActions.closeAllModals();
+							external_PluginApi_DiscordModules_namespaceObject.ModalActions.closeAllModals();
 						}
 					}), QuickToggler_React.createElement(Result, {
 						name: "Themes",
@@ -1218,7 +1221,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						}),
 						onClick: () => {
 							QuickToggler_open("themes");
-							ModalActions.closeAllModals();
+							external_PluginApi_DiscordModules_namespaceObject.ModalActions.closeAllModals();
 						}
 					}), QuickToggler_React.createElement("div", {
 						style: {
@@ -1239,7 +1242,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						className: QuickToggler_classes.autocompleteQuerySymbol
 					}, "$plugin"), ", and ", QuickToggler_React.createElement("span", {
 						className: QuickToggler_classes.autocompleteQuerySymbol
-					}, "$theme"), " to filter results.")));
+					}, "$theme"), " to filter results."))));
 				}
 			}
 			const forms_namespaceObject = Modules["@discord/forms"];
@@ -1280,7 +1283,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					]).map((e => 162 === e[1] ? 17 : 160 === e[1] ? 16 : 164 === e[1] ? 18 : e[1]));
 					if (keybinds.every((key => true === keys[key]))) {
 						keys = {};
-						ModalActions.openModal((props => QuickToggler_React_0.createElement(QuickToggler_QuickToggler, props)));
+						external_PluginApi_DiscordModules_namespaceObject.ModalActions.openModal((props => QuickToggler_React_0.createElement(QuickToggler_QuickToggler, props)));
 					} else setTimeout((() => keys = {}), 300);
 					keys[e.key] = false;
 				}
