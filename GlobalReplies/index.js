@@ -51,7 +51,7 @@ export default class GlobalReplies extends BasePlugin {
 						id={`${e.channel.name}-${e.comparator}`}
 						action={() => {
 							NavigationUtils.replaceWith(`/channels/${server.id}/${e.channel.id}`);
-							ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {plainText: Utilities.formatString(this.getTemplate(), {messageLink: `https://discord.com/channels/${server.id}/${channel.id}/${props.message.id}`, author: `<@${props.message.author.id}>`, authorTag: props.message.author.tag, message: props.message.content, channel: `<#${channel.id}>`, newLine: "\n"})})
+							ComponentDispatch.dispatchToLastSubscribed("INSERT_TEXT", {plainText: Utilities.formatString(this.getTemplate(), {messageLink: `https://discord.com/channels/${server.id}/${channel.id}/${props.message.id}`, author: `<@${props.message.author.id}>`, authorTag: props.message.author.tag, message: props.message.content, messageShort: (props.message.content.length > 50 ? `${props.message.content.slice(0,50)}\u{2026}` : props.message.content).replace(/[\r\n]/gm, ' '), channel: `<#${channel.id}>`, newLine: "\n"})})
 						}}
 						label={[
 						<ChannelText width="10" height="10"/>,
