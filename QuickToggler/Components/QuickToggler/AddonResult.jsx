@@ -1,18 +1,19 @@
 import fs from 'fs';
 import { DCM, Modals, Toasts, WebpackModules } from '@zlibrary';
+import { useState } from 'react'
 import PluginIcon from './PluginIcon';
 import ThemeIcon from './ThemeIcon';
 import Result from './Result';
 import path from 'path';
 
 const OverflowTooltip = WebpackModules.getByDisplayName('OverflowTooltip');
-const { Colors } = WebpackModules.getByProps('Colors');
+const Colors = WebpackModules.getByProps('STATUS_GREEN', 'STATUS_RED');
 const { TooltipContainer: Tooltip } = WebpackModules.getByProps('TooltipContainer');
 
 export default function AddonResult({addon}) {
     const type = addon.filename.toLowerCase().endsWith('js') ? 'Plugin' : 'Theme';
     const AddonActions = type === 'Plugin' ? BdApi.Plugins : BdApi.Themes;
-    const isEnabled = AddonActions.isEnabled(addon.id);
+    const [isEnabled, setIsEnabled] = useState(AddonActions.isEnabled(addon.id));
     const color = isEnabled ? Colors.STATUS_GREEN : Colors.STATUS_RED;
     const ContextMenu = DCM.buildMenu([
         {
@@ -41,7 +42,10 @@ export default function AddonResult({addon}) {
 
     return (
         <Result
-        onClick={() => AddonActions.toggle(addon.id)}
+        onClick={() => {
+            setIsEnabled(!isEnabled);
+            AddonActions.toggle(addon.id);
+        }}
         onContextMenu={e => DCM.openContextMenu(e, ContextMenu)}
         name={addon.name}
         info={`v${addon.version} by ${addon.author}`}
