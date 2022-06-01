@@ -82,9 +82,9 @@
                  
              }else if(games.length == 0){
                  const savedStatus = BdApi.getData("DndWhilePlaying", "status");
-                 BdApi.findModuleByProps('updateRemoteSettings').updateRemoteSettings({status: savedStatus});
+                 if (savedStatus) BdApi.findModuleByProps('updateRemoteSettings').updateRemoteSettings({status: savedStatus});
 
-                 await BdApi.saveData("DndWhilePlaying", "status", "");
+                 await BdApi.saveData("DndWhilePlaying", "status", false);
                  await BdApi.saveData("DndWhilePlaying", "inGame", false);
              }
          }
