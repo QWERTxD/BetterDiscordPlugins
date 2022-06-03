@@ -82,7 +82,13 @@
                     }
                     ret.props.onClick = _ => {
                         ElectronModule.copy(`${props.name}#${props.discriminator}`);
-                        Toasts.success(`Successfully copied username for <strong>${props.name}</strong>!`);
+                        const thingy = document.querySelector(ret.props.className.toString().split(' ').map(i => "." + i).join(""));
+                        var duration = 300
+                        thingy.style.transition = "opacity " + duration + "ms"
+                        thingy.style.opacity = 0.75
+                        setTimeout(function() {
+                            thingy.style.opacity = 1
+                        }, duration)
                     };
                 })
             }
