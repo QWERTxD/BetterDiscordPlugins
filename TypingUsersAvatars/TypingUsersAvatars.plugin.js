@@ -19,16 +19,16 @@ const config = {
                 name: 'QWERT'
             }
         ],
-        version: '1.0.4',
+        version: '1.0.5',
         description: 'Shows avatars of typing users.',
         github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/TypingUsersAvatars/TypingUsersAvatars.plugin.js",
     },
     changelog: [
         {
-            title: 'Fixed',
-            type: 'fixed',
+            title: 'What\'s new?',
+            type: 'added',
             items: [
-                'The Plugin works again'
+                'Added option to show guild avatars of typing users',
             ]
         }
     ],
@@ -37,6 +37,12 @@ const config = {
             type: 'switch',
             name: 'Show users status',
             id: 'showStatus',
+            value: true
+        },
+        {
+            type: 'switch',
+            name: 'Show guild avatars',
+            id: 'showGuildAvatar',
             value: true
         }
     ]
@@ -69,14 +75,16 @@ module.exports = !global.ZeresPluginLibrary ? class {
 } : (([Plugin, Library]) => {
     const { DiscordModules, WebpackModules, PluginUtilities, Patcher, ReactComponents, Popouts, Utilities, DiscordSelectors } = Library;
     const { React, UserStore, RelationshipStore, UserStatusStore, Strings } = DiscordModules;
+    const AssetUtils = WebpackModules.getByProps("getUserBannerURL");
     const Avatar = WebpackModules.getByProps('AnimatedAvatar');
     const VoiceUserSummary = WebpackModules.findByDisplayName("VoiceUserSummaryItem")
 
     class AvatarComponent extends React.Component {
         render() {
-            const { user, status } = this.props;
+            const { user, status, guildId } = this.props;
+            const guildAvatar = AssetUtils.getGuildMemberAvatarURL({ guildId: guildId, userId: user.id, avatar: user.guildMemberAvatars[guildId] });
             return React.createElement(Avatar.default, {
-                src: user.getAvatarURL(),
+                src: user?.guildMemberAvatars[guildId] ? guildAvatar : user.getAvatarURL(),
                 status: status,
                 size: Avatar.Sizes.SIZE_16,
                 onClick() {
@@ -139,18 +147,18 @@ module.exports = !global.ZeresPluginLibrary ? class {
             const TypingUsers = await ReactComponents.getComponentByName('TypingUsers', DiscordSelectors.Typing.typing);
             Patcher.after(TypingUsers.component.prototype, 'render', (thisObject, [props], ret) => {
                 const typingUsers = this.filter({ ...thisObject.props.typingUsers });
+                const guildId = thisObject.props?.guildId;
 
                 for (let u = 0; u < typingUsers.length; u++) {
                     const user = UserStore.getUser(typingUsers[u]);
                     const status = this.settings.showStatus ? UserStatusStore.getStatus(user.id) : null;
 
                     if (ret.props.children[0].props.children[1]?.props.children !== Strings.Messages.SEVERAL_USERS_TYPING) {
-
                         const usersComponent = ret.props.children[0].props.children[1].props.children.filter(user => user.props);
 
                         usersComponent[u].props.children.unshift(React.createElement("div", {
                             id: `typing-user-${user.id}`,
-                            children: React.createElement(AvatarComponent, { user, status })
+                            children: React.createElement(AvatarComponent, { user, status, guildId })
                         }));
                     } else {
                         ret.props.children[0].props.children = [
@@ -161,7 +169,6 @@ module.exports = !global.ZeresPluginLibrary ? class {
                             }),
                             ret.props.children[0].props.children
                         ]
-
                     }
                 }
 
