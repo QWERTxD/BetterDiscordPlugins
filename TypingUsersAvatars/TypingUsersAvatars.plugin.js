@@ -21,6 +21,7 @@ const config = {
         ],
         version: '1.0.4',
         description: 'Shows avatars of typing users.',
+        github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/TypingUsersAvatars/TypingUsersAvatars.plugin.js",
     },
     changelog: [
         {

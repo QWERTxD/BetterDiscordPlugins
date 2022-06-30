@@ -21,6 +21,7 @@ const config = {
         ],
         version: "0.0.3",
         description: "Shows how much time you are in a voice chat.",
+        github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CallTimeCounter/CallTimeCounter.plugin.js",
     },
     changelog: [
         {

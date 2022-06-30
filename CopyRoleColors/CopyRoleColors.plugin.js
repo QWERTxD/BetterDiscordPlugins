@@ -20,6 +20,7 @@ const config = {
     ],
     version: "0.0.4",
     description: "Adds option to copy role color in the role context menu.",
+    github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CopyRoleColors/CopyRoleColors.plugin.js",
   },
   changelog: [
     {

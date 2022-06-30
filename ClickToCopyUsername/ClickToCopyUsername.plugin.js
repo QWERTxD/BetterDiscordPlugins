@@ -20,6 +20,7 @@
             ],
             version: "0.0.2",
             description: "Allows you to copy someone's username by pressing their nametag, like on mobile.",
+            github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/ClickToCopyUsername/ClickToCopyUsername.plugin.js",
         },
         changelog: [
             {
