@@ -3,7 +3,7 @@
 * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/TypingUsersAvatars/TypingUsersAvatars.plugin.js
 * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/TypingUsersAvatars/TypingUsersAvatars.plugin.js
 * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/TypingUsersAvatars
-* @version 1.0.4
+* @version 1.0.5
 * @description Shows avatars of typing users.
 */
 
