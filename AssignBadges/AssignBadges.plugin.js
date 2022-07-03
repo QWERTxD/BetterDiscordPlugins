@@ -1,6 +1,6 @@
 /**
  * @name AssignBadges
- * @version 1.0.27
+ * @version 1.0.28
  * @description Allows you to locally assign badges to users through the user context menu.
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/AssignBadges
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "AssignBadges",
-		"version": "1.0.27",
+		"version": "1.0.28",
 		"description": "Allows you to locally assign badges to users through the user context menu.",
 		"authors": [{
 			"name": "QWERT",
@@ -59,7 +59,7 @@ const config = {
 		"type": "fixed",
 		"title": "Fixes",
 		"items": [
-			"Fixed bot tag crashing discord\nThanks to AGreenPig for debugging and fix"
+			"Fixed the ContextMenus"
 		]
 	}]
 };
@@ -426,7 +426,8 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			} = external_PluginApi_namespaceObject.WebpackModules.getByProps("MenuRadioItem");
 			const classes = {
 				...external_PluginApi_namespaceObject.WebpackModules.getByProps("executedCommand", "buttonContainer", "applicationName"),
-				...external_PluginApi_namespaceObject.WebpackModules.getByProps("container", "profileBadge18", "profileBadge22", "profileBadge22")
+				...external_PluginApi_namespaceObject.WebpackModules.getByProps("container", "profileBadge18", "profileBadge22", "profileBadge22"),
+				...external_PluginApi_namespaceObject.WebpackModules.getByProps("member", "lostPermission")
 			};
 			const memberlistClasses = external_PluginApi_namespaceObject.WebpackModules.getByProps("placeholder", "activity", "icon");
 			const getFlags = external_PluginApi_namespaceObject.WebpackModules.find((m => {
@@ -484,7 +485,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			const BotTag = external_PluginApi_namespaceObject.WebpackModules.getByProps("BotTagTypes").default;
 			const MessageAuthor = external_PluginApi_namespaceObject.WebpackModules.find((m => m.default.toString().indexOf("userOverride") > -1));
 			const NameTag = external_PluginApi_namespaceObject.WebpackModules.find((m => "DiscordTag" === m.default.displayName));
-			const MemberListItem = external_PluginApi_namespaceObject.WebpackModules.find((m => "MemberListItem" === m.default.displayName));
+			const flush = new Set;
 			class AssignBadges extends(external_BasePlugin_default()) {
 				constructor(...args) {
 					super(...args);
@@ -506,6 +507,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				}
 				onStop() {
 					external_PluginApi_namespaceObject.Patcher.unpatchAll();
+					flush.forEach((f => f()));
 				}
 				isUserVerifiedBot(user) {
 					const settings = this.getSettings();
@@ -558,14 +560,23 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						}
 					}));
 				}
-				patchMemberlistItem() {
-					external_PluginApi_namespaceObject.Patcher.after(MemberListItem.default.prototype, "renderBot", ((_this, [props]) => {
-						const user = _this.props.user;
-						if (this.isUserVerifiedBot(user)) return React.createElement(BotTag, {
-							verified: true,
-							className: memberlistClasses.botTag
-						});
+				async patchMemberlistItem() {
+					const MemberListItem = await external_PluginApi_namespaceObject.ReactComponents.getComponentByName("MemberListItem", `.${classes.member}`);
+					external_PluginApi_namespaceObject.Patcher.after(MemberListItem.component.prototype, "renderDecorators", (({
+						props
+					}, _, returnValue) => {
+						try {
+							const tree = returnValue?.props?.children;
+							if (!Array.isArray(tree)) return;
+							if (this.isUserVerifiedBot(props.user)) tree.unshift(React.createElement(BotTag, {
+								verified: true,
+								className: memberlistClasses.botTag
+							}));
+						} catch (error) {
+							console.error("Error while patching MemberListItem:", error);
+						}
 					}));
+					MemberListItem.forceUpdateAll();
 				}
 				async patchUserContextMenus() {
 					const getMenu = props => {
@@ -654,48 +665,93 @@ function buildPlugin([BasePlugin, PluginApi]) {
 							}))]
 						});
 					};
-					const patched = new Set;
-					const REGEX = /user.*contextmenu|useUserRolesItems/i;
-					const filter = function(name) {
-						const shouldInclude = ["page", "section", "objectType"];
-						const notInclude = ["use", "root"];
-						const isRegex = name instanceof RegExp;
-						return module => {
-							const string = module.toString({});
-							const getDisplayName = () => external_PluginApi_namespaceObject.Utilities.getNestedProp(module({}), "props.children.type.displayName");
-							return !~string.indexOf("return function") && shouldInclude.every((s => ~string.indexOf(s))) && !notInclude.every((s => ~string.indexOf(s))) && (isRegex ? name.test(getDisplayName()) : name === getDisplayName());
-						};
-					}(REGEX);
-					const search = async () => {
-						const Menu = await external_PluginApi_namespaceObject.DCM.getDiscordMenu((m => {
-							if (patched.has(m)) return false;
-							if (null != m.displayName) return REGEX.test(m.displayName);
-							return filter(m);
+					class Utils {
+						static combine(...filters) {
+							return (...args) => filters.every((filter => filter(...args)));
+						}
+					}
+					function findContextMenu(displayName, filter = (() => true)) {
+						const regex = new RegExp(displayName, "i");
+						const normalFilter = exports => exports && exports.default && regex.test(exports.default.displayName) && filter(exports.default);
+						const nestedFilter = module => regex.test(module.toString()); {
+							const normalCache = external_PluginApi_namespaceObject.WebpackModules.getModule(Utils.combine(normalFilter, (e => filter(e.default))));
+							if (normalCache) return {
+								type: "normal",
+								module: normalCache
+							};
+						} {
+							const webpackId = Object.keys(external_PluginApi_namespaceObject.WebpackModules.require.m).find((id => nestedFilter(external_PluginApi_namespaceObject.WebpackModules.require.m[id])));
+							const nestedCache = void 0 !== webpackId && external_PluginApi_namespaceObject.WebpackModules.getByIndex(webpackId);
+							if (nestedCache && filter(nestedCache?.default)) return {
+								type: "nested",
+								module: nestedCache
+							};
+						}
+						return new Promise((resolve => {
+							const cancel = () => external_PluginApi_namespaceObject.WebpackModules.removeListener(listener);
+							const listener = (exports, module) => {
+								const normal = normalFilter(exports);
+								const nested = nestedFilter(module);
+								if (!nested && !normal || !filter(exports?.default)) return;
+								resolve({
+									type: normal ? "normal" : "nested",
+									module: exports
+								});
+								external_PluginApi_namespaceObject.WebpackModules.removeListener(listener);
+								flush.delete(cancel);
+							};
+							external_PluginApi_namespaceObject.WebpackModules.addListener(listener);
+							flush.add(cancel);
 						}));
+					}
+					const patched = new Set;
+					const REGEX = /displayName="\S+?usercontextmenu./i;
+					const originalSymbol = Symbol("AssignBadges Original");
+					const search = async () => {
+						const Menu = await findContextMenu(REGEX, (m => !patched.has(m)));
 						if (this.promises.cancelled) return;
-						let original = null;
-						function wrapper(props) {
-							const rendered = original.call(this, props);
+						const patch = (rendered, props) => {
+							const children = external_PluginApi_namespaceObject.Utilities.findInReactTree(rendered, Array.isArray);
+							const user = props.user || external_PluginApi_DiscordModules_namespaceObject.UserStore.getUser(props.channel?.getRecipientId?.());
+							if (!children || !user || children.some((c => c && "assign-badge" === c.key))) return rendered;
+							children.splice(7, 0, getMenu(user.id));
+						};
+						function AnalyticsWrapper(props) {
+							const rendered = props[originalSymbol].call(this, props);
 							try {
-								const children = external_PluginApi_namespaceObject.Utilities.findInReactTree(rendered, Array.isArray);
-								const user = props.user || external_PluginApi_DiscordModules_namespaceObject.UserStore.getUser(props.channel?.getRecipientId?.());
-								if (!children || !user || children.some((c => c && "assign-badge" === c.key))) return rendered;
-								children.splice(7, 0, getMenu(user.id));
+								patch(rendered, props);
 							} catch (error) {
 								cancel();
-								console.error("Error in context menu patch:", error);
+								console.error("Error in AnalyticsWrapper:", error);
 							}
 							return rendered;
 						}
-						const cancel = external_PluginApi_namespaceObject.Patcher.after(Menu, "default", ((...args) => {
-							const [, , ret] = args;
+						let original = null;
+						function ContextMenuWrapper(props, _, rendered) {
+							rendered ??= original.call(this, props);
+							try {
+								if (rendered?.props?.children?.type?.displayName.indexOf("ContextMenu") > 0) {
+									const child = rendered.props.children;
+									child.props[originalSymbol] = child.type;
+									AnalyticsWrapper.displayName = child.type.displayName;
+									child.type = AnalyticsWrapper;
+									return rendered;
+								}
+								patch(rendered, props);
+							} catch (error) {
+								cancel();
+								console.error("Error in ContextMenuWrapper:", error);
+							}
+							return rendered;
+						}
+						const cancel = external_PluginApi_namespaceObject.Patcher.after(Menu.module, "default", ((_, [props], ret) => {
 							const contextMenu = external_PluginApi_namespaceObject.Utilities.getNestedProp(ret, "props.children");
 							if (!contextMenu || "function" !== typeof contextMenu.type) return;
 							original ??= contextMenu.type;
-							wrapper.displayName ??= original.displayName;
-							contextMenu.type = wrapper;
+							ContextMenuWrapper.displayName ??= original.displayName;
+							contextMenu.type = ContextMenuWrapper;
 						}));
-						patched.add(Menu.default);
+						patched.add(Menu.module.default);
 						search();
 					};
 					search();
