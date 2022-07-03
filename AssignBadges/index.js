@@ -1,4 +1,4 @@
-import { Patcher, PluginUtilities, Utilities, WebpackModules, Toasts, DCM} from "@zlibrary";
+import { Patcher, PluginUtilities, Utilities, WebpackModules, Toasts, ReactComponents} from "@zlibrary";
 import BasePlugin from "@zlibrary/plugin";
 import { MenuGroup, MenuItem } from "@discord/contextmenu";
 import { UserStore } from "@zlibrary/discord";
@@ -10,7 +10,8 @@ const day = 86400000;
 const { MenuCheckboxItem, MenuRadioItem } = WebpackModules.getByProps("MenuRadioItem");
 const classes = {
 	...WebpackModules.getByProps("executedCommand", "buttonContainer", "applicationName"),
-	...WebpackModules.getByProps("container", "profileBadge18", "profileBadge22", "profileBadge22")
+	...WebpackModules.getByProps("container", "profileBadge18", "profileBadge22", "profileBadge22"),
+	...WebpackModules.getByProps("member", "lostPermission")
 }
 
 const memberlistClasses = WebpackModules.getByProps("placeholder", "activity", "icon");
@@ -36,9 +37,8 @@ const boosts = [
 ]
 
 const BotTag = WebpackModules.getByProps("BotTagTypes").default;
-const MessageAuthor = WebpackModules.find(m => m.default.toString().indexOf("userOverride") > -1)
+const MessageAuthor = WebpackModules.find(m => m.default.toString().indexOf("userOverride") > -1);
 const NameTag = WebpackModules.find(m => m.default.displayName === "DiscordTag");
-const MemberListItem = WebpackModules.find(m => m.default.displayName === "MemberListItem");
 
 const flush = new Set;
 
@@ -128,18 +128,21 @@ export default class AssignBadges extends BasePlugin {
 		})
 	}
 
-	patchMemberlistItem() {
-		Patcher.after(MemberListItem.default.prototype, 'renderBot', (_this, [props], ret) => {
-			const user = _this.props.user;
-			if(this.isUserVerifiedBot(user)) {
-				return (
-					<BotTag
-					verified={true}
-					className={memberlistClasses.botTag}
-					/>
-				)
-			}
-		})
+	// Credits to Strencher for this (https://github.com/Strencher/BetterDiscordStuff/blob/master/PlatformIndicators/APlatformIndicators.plugin.js#L337-L359)
+	async patchMemberlistItem() {
+        const MemberListItem = await ReactComponents.getComponentByName("MemberListItem", `.${classes.member}`);
+        Patcher.after(MemberListItem.component.prototype, "renderDecorators", ({ props }, _, returnValue) => {
+            try {
+				const tree = returnValue?.props?.children;
+                if (!Array.isArray(tree)) return;
+				if (this.isUserVerifiedBot(props.user)) {
+					tree.unshift(<BotTag verified={true} className={memberlistClasses.botTag} />);
+				}
+            } catch (error) {
+				console.error("Error while patching MemberListItem:", error);
+            }
+        });
+        MemberListItem.forceUpdateAll();
 	}
 
 	async patchUserContextMenus() {
@@ -244,7 +247,7 @@ export default class AssignBadges extends BasePlugin {
 			/>)
 		}
 
-		//Credits to Strencher for this (https://github.com/Strencher/BetterDiscordStuff/blob/ad2e5c2d1fbbe2155fd9c6440e23e8da0b878bdf/Copier/Copier.plugin.js#L1173-L1249)
+		// Credits to Strencher for this (https://github.com/Strencher/BetterDiscordStuff/blob/ad2e5c2d1fbbe2155fd9c6440e23e8da0b878bdf/Copier/Copier.plugin.js#L1173-L1249)
 		class Utils {
 			static combine(...filters) {
 				return (...args) => filters.every(filter => filter(...args));
