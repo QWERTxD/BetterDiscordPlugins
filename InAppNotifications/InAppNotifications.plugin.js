@@ -942,9 +942,15 @@ module.exports = !global.ZeresPluginLibrary
           const disableOnDnd = this.settings.disableOnDnd;
           const isDnd =
             UserStatusStore.getStatus(UserStore.getCurrentUser().id) === "dnd";
+          const disableIfNoFocus = this.settings.disableIfNoFocus;
+          const hasFocus = document.hasFocus();
 
           if (disableOnDnd) {
             shouldNotify = !isDnd;
+          }
+
+          if (disableIfNoFocus) {
+            if (!hasFocus) shouldNotify = false;
           }
 
           if (ignoreDMs) {
