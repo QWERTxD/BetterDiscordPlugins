@@ -104,7 +104,7 @@ export default class AssignBadges extends BasePlugin {
 			if(!user) return;
 
 			if(this.isUserVerifiedBot(user)) {
-				const badgeIndex = props.compact ? 0 : 2;
+				const badgeIndex = props.compact ? 0 : 4;
 				const displayClass = props.compact ? classes.botTagCompact : classes.botTagCozy;
 				ret.props.children[badgeIndex] = (
 					<BotTag
@@ -136,7 +136,12 @@ export default class AssignBadges extends BasePlugin {
 				const tree = returnValue?.props?.children;
                 if (!Array.isArray(tree)) return;
 				if (this.isUserVerifiedBot(props.user)) {
-					tree.unshift(<BotTag verified={true} className={memberlistClasses.botTag} />);
+					tree[0] = (
+						<BotTag
+						verified={true}
+						className={memberlistClasses.botTag}
+						/>
+					)
 				}
             } catch (error) {
 				console.error("Error while patching MemberListItem:", error);
