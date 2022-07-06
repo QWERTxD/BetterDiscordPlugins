@@ -1,6 +1,6 @@
 /**
  * @name AssignBadges
- * @version 1.0.28
+ * @version 1.0.29
  * @description Allows you to locally assign badges to users through the user context menu.
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/AssignBadges
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "AssignBadges",
-		"version": "1.0.28",
+		"version": "1.0.29",
 		"description": "Allows you to locally assign badges to users through the user context menu.",
 		"authors": [{
 			"name": "QWERT",
@@ -59,7 +59,8 @@ const config = {
 		"type": "fixed",
 		"title": "Fixes",
 		"items": [
-			"Fixed the ContextMenus"
+			"Fixed the ContextMenus",
+			"Fixed some issues with the Bot Tag"
 		]
 	}]
 };
@@ -541,7 +542,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						const user = props.message.author;
 						if (!user) return;
 						if (this.isUserVerifiedBot(user)) {
-							const badgeIndex = props.compact ? 0 : 2;
+							const badgeIndex = props.compact ? 0 : 4;
 							const displayClass = props.compact ? classes.botTagCompact : classes.botTagCozy;
 							ret.props.children[badgeIndex] = React.createElement(BotTag, {
 								verified: true,
@@ -568,10 +569,10 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						try {
 							const tree = returnValue?.props?.children;
 							if (!Array.isArray(tree)) return;
-							if (this.isUserVerifiedBot(props.user)) tree.unshift(React.createElement(BotTag, {
+							if (this.isUserVerifiedBot(props.user)) tree[0] = React.createElement(BotTag, {
 								verified: true,
 								className: memberlistClasses.botTag
-							}));
+							});
 						} catch (error) {
 							console.error("Error while patching MemberListItem:", error);
 						}
