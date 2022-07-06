@@ -1,7 +1,7 @@
 {
 	"info": {
 		"name": "AssignBadges",
-		"version": "1.0.28",
+		"version": "1.0.29",
 		"description": "Allows you to locally assign badges to users through the user context menu.",
 		"authors": [
 			{
@@ -31,7 +31,7 @@
 			"type": "fixed",
 			"title": "Fixes",
 			"items": [
-				"Fixed the ContextMenus"
+				"Fixed the ContextMenus", "Fixed some issues with the Bot Tag"
 			]
 		}
 	]
