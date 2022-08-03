@@ -144,7 +144,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 						return ___createMemoize___(this, 'Flex', () => BdApi.findModuleByDisplayName('Flex'))
 					},
 					get 'Text'() {
-						return ___createMemoize___(this, 'Text', () => BdApi.findModuleByDisplayName('Text'))
+						return ___createMemoize___(this, 'Text', () => BdApi.findModuleByDisplayName('LegacyText'))
 					},
 					get 'Card'() {
 						return ___createMemoize___(this, 'Card', () => BdApi.findModuleByDisplayName('Card'))
@@ -152,7 +152,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				},
 				'@discord/modules': {
 					get 'Dispatcher'() {
-						return ___createMemoize___(this, 'Dispatcher', () => BdApi.findModuleByProps('dirtyDispatch', 'subscribe'))
+						return ___createMemoize___(this, 'Dispatcher', () => BdApi.findModuleByProps('dispatch', 'isDispatching'))
 					},
 					get 'ComponentDispatcher'() {
 						return ___createMemoize___(this, 'ComponentDispatcher', () => BdApi.findModuleByProps('ComponentDispatch')?.ComponentDispatch)
@@ -1020,17 +1020,6 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			}
 			const utils_namespaceObject = Modules["@discord/utils"];
 			var Result_React = __webpack_require__(113);
-			function _extends() {
-				_extends = Object.assign ? Object.assign.bind() : function(target) {
-					for (var i = 1; i < arguments.length; i++) {
-						var source = arguments[i];
-						for (var key in source)
-							if (Object.prototype.hasOwnProperty.call(source, key)) target[key] = source[key];
-					}
-					return target;
-				};
-				return _extends.apply(this, arguments);
-			}
 			const classes = {
 				...external_PluginApi_namespaceObject.WebpackModules.getByProps("quickswitcher", "miscContainer", "scroller"),
 				...external_PluginApi_namespaceObject.WebpackModules.getByProps("input", "container", "emptyStateCTA", "protip"),
@@ -1041,7 +1030,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			};
 			function Result(props) {
 				const [state, setState] = (0, external_BdApi_React_.useState)(classes.result);
-				return Result_React.createElement("div", _extends({
+				return Result_React.createElement("div", Object.assign({
 					className: (0, utils_namespaceObject.joinClassNames)(state),
 					onMouseOver: () => setState([classes.result, classes.resultFocused]),
 					onMouseLeave: () => setState(classes.result)
