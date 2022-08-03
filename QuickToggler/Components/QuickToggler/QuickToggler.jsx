@@ -1,5 +1,5 @@
 import ScrollerThin from '@discord/scrollbars';
-import { Modals, WebpackModules } from '@zlibrary';
+import { WebpackModules } from '@zlibrary';
 import { ModalActions } from '@zlibrary/discord';
 import { Component } from 'react';
 import Results from './Results';
