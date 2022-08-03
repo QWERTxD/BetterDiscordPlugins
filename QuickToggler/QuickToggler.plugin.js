@@ -1,6 +1,6 @@
 /**
  * @name QuickToggler
- * @version 1.0.5
+ * @version 1.0.6
  * @description Allows you to open a toggle-able addon search with a keybind (default keybind: CTRL+D)
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/QuickToggler
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "QuickToggler",
-		"version": "1.0.5",
+		"version": "1.0.6",
 		"description": "Allows you to open a toggle-able addon search with a keybind (default keybind: CTRL+D)",
 		"authors": [{
 			"name": "QWERT",
@@ -56,10 +56,10 @@ const config = {
 		}
 	},
 	"changelog": [{
-		"type": "added",
-		"title": "Added",
+		"type": "improvement",
+		"title": "Colors are back",
 		"items": [
-			"Added Fuzzy Search"
+			"Status colors working again"
 		]
 	}]
 };
