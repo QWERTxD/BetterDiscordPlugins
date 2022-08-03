@@ -61,9 +61,10 @@ module.exports = !global.ZeresPluginLibrary ? class {
     stop() { }
 } : (([Plugin, Library]) => {
     const { DiscordModules, WebpackModules, Patcher, PluginUtilities } = Library;
-    const { React, Dispatcher, SelectedChannelStore: {getVoiceChannelId} } = DiscordModules;
+    const { React, SelectedChannelStore: {getVoiceChannelId} } = DiscordModules;
     const PanelSubtext = WebpackModules.find(m => m?.default?.displayName === "PanelSubtext");
     let lastVoice, lastState;
+    const Dispatcher = WebpackModules.getByProps('dispatch', 'subscribe');
 
     class Timer extends React.Component {
         constructor(props) {
