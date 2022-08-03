@@ -6,10 +6,9 @@ const _fs = require("fs");
 
 const changedFilesIgnore = [
   "bdbuilder",
-  "scripts",
-  "UserBirthdays"
+  "scripts"
 ];
-const releaseExtensions = [".md", ".plugin.js", "assets"];
+const releaseExtensions = [".md", ".plugin.js"];
 
 const argv = process.argv.slice(2);
 
@@ -39,11 +38,12 @@ console.log("Will build the following plugins:", changedPlugins.join(", "));
 actuallyDoSomething();
 
 function actuallyDoSomething() {
-  if (!changedPlugins.length) throw new Error("Got nothing to build");
+  _cp.execSync("npm i", {
+    stdio: ["ignore", "inherit", "inherit"]
+  });
 
   for (const pluginName of changedPlugins) {
     buildPlugin(pluginName);
-    console.log("Finished building " + pluginName);
   }
 
   cleanup();
@@ -57,7 +57,7 @@ function buildPlugin(pluginName) {
     stdio: ["ignore", "inherit", "inherit"]
   });
 
-  _cp.execSync(`npm exec -- bdbuilder --plugin="${pluginName}" --build --config=bdbuilder.prod.config.json`, {
+  _cp.execSync(`npx bdbuilder --plugin="${pluginName}" --build --config=bdbuilder.prod.config.json`, {
     cwd: ".",
     stdio: ["ignore", "inherit", "inherit"]
   });
