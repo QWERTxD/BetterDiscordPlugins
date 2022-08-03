@@ -4,7 +4,7 @@
     * @description Shows how much time you are in a voice chat.
     * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CallTimeCounter/CallTimeCounter.plugin.js
     * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/CallTimeCounter
-    * @version 0.0.3
+    * @version 0.0.4
     */
 
 const request = require("request");
@@ -19,7 +19,7 @@ const config = {
                 name: "QWERT"
             }
         ],
-        version: "0.0.3",
+        version: "0.0.4",
         description: "Shows how much time you are in a voice chat.",
         github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CallTimeCounter/CallTimeCounter.plugin.js",
     },
@@ -28,7 +28,7 @@ const config = {
             title: "Fixes",
             type: "fixed",
             items: [
-                "Timer continues to count after rejoining the call."
+                "Fixed crashing in new Discord update."
             ]
         }
     ],
