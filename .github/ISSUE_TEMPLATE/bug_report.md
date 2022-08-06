@@ -1,7 +1,7 @@
 ---
 name: Bug report
 about: Create a report to help us improve | DO NOT OPEN ISSUES FOR SUPPORT, JOIN THE
-  SUPPORT SERVER https://discord.gg/zMnHFAKsu3
+  SUPPORT SERVER https://discord.gg/zJbXFXNAhJ
 title: "[BUG]"
 labels: bug
 assignees: QWERTxD

@@ -509,7 +509,7 @@ module.exports = !global.ZeresPluginLibrary
             );
             BdApi.alert(
               "InAppNotifications",
-              "There was an error while trying to start the plugin.\n Try checking the console for any erros from this plugin.\nFor any further support, join my support server (https://discord.gg/zMnHFAKsu3)"
+              "There was an error while trying to start the plugin.\n Try checking the console for any erros from this plugin.\nFor any further support, join my support server (https://discord.gg/zJbXFXNAhJ)"
             );
           }
 
@@ -547,7 +547,7 @@ module.exports = !global.ZeresPluginLibrary
               } catch {
                 BdApi.alert(
                   "InAppNotifications",
-                  "There was an error while trying to start the plugin.\n Try checking the console for any erros from this plugin.\nFor any further support, join my support server (https://discord.gg/zMnHFAKsu3)"
+                  "There was an error while trying to start the plugin.\n Try checking the console for any erros from this plugin.\nFor any further support, join my support server (https://discord.gg/zJbXFXNAhJ)"
                 );
               }
             }
@@ -585,7 +585,7 @@ module.exports = !global.ZeresPluginLibrary
               } catch {
                 BdApi.alert(
                   "InAppNotifications",
-                  "There was an error while trying to start the plugin.\n Try checking the console for any erros from this plugin.\nFor any further support, join my support server (https://discord.gg/zMnHFAKsu3)"
+                  "There was an error while trying to start the plugin.\n Try checking the console for any erros from this plugin.\nFor any further support, join my support server (https://discord.gg/zJbXFXNAhJ)"
                 );
               }
             }

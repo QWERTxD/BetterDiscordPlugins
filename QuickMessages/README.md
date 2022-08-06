@@ -6,7 +6,7 @@ Save messages to quickly send them later, when you need
 ## Changelog<sup>v1.2</sup>
 Added:
 * Added categories 🥳 Hover the "Save as Quick Message" button to use the categories.
-I still need ideas and suggestions, so if you have some, feel free to send them to me in the support server https://discord.gg/zMnHFAKsu3
+I still need ideas and suggestions, so if you have some, feel free to send them to me in the support server https://discord.gg/zJbXFXNAhJ
 
 [icon]: https://img.shields.io/badge/Download-QuickMessages-brightgreen.svg
 [link]: https://betterdiscord.net/ghdl?id=3557
