@@ -44,7 +44,9 @@ export default function Results({query}) {
         ...plugins,
         ...themes
     ]; 
-
+    
+    addonsByQuery = sortByBestResults(addons, query);
+    
     if(query.includes('$plugin')) {
         addonsByQuery = addonsByQuery.filter(addon => addon.filename.endsWith('js'));
     }
@@ -66,8 +68,7 @@ export default function Results({query}) {
             return !addonStore.isEnabled(addon.id);
         })
     }
-
-    addonsByQuery = sortByBestResults(addons, query);
+    
     return (
         addonsByQuery.map(addon => {
             return (
