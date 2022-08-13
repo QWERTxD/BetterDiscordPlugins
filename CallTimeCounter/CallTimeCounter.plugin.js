@@ -115,7 +115,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
 
         render() {
             var hrs=parseInt(this.state.delta/86400)*24;
-            return React.createElement("div", { className: "voiceTimer" }, `Time elapsed: ${(new Date(this.state.delta%86400*1000)).toUTCString().replace(/.*(\d{2}):(\d{2}):(\d{2}).*/, function replacer(match, p1, p2, p3, offset, string, d=hrs){ var hour = +p1+d.toString(); while (hour.length < 2) hour = "0" + hour; return [hour, p2, p3].join(':');})}`);
+            return React.createElement("div", { className: "voiceTimer" }, `Time elapsed: ${(new Date(this.state.delta%86400*1000)).toUTCString().replace(/.*(\d{2}):(\d{2}):(\d{2}).*/, function replacer(match, p1, p2, p3, offset, string, d=hrs){return [+p1+d, p2, p3].join(':');})}`);
         }
     };
 
