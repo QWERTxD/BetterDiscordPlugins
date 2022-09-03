@@ -902,6 +902,7 @@ module.exports = !global.ZeresPluginLibrary
 
         supposedToNotify(message, channel) {
           if (message.author.id === UserStore.getCurrentUser().id) return false;
+	        if (channel.type === ChannelTypes["PUBLIC_THREAD"] && !channel.member) return false;
           const isSuppressEveryone = MuteStore.isSuppressEveryoneEnabled(
             message.guild_id || "@me"
           );
