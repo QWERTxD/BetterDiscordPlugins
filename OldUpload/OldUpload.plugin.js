@@ -1,6 +1,6 @@
 /**
  * @name OldUpload
- * @version 1.0.0
+ * @version 1.0.1
  * @description Reverts Discord upload button to work as it worked before the update (Quick Upload by default and not when Double-Clicking only)
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/OldUpload
@@ -32,7 +32,7 @@
 const config = {
 	"info": {
 		"name": "OldUpload",
-		"version": "1.0.0",
+		"version": "1.0.1",
 		"description": "Reverts Discord upload button to work as it worked before the update (Quick Upload by default and not when Double-Clicking only)",
 		"authors": [{
 			"name": "QWERT",
@@ -137,7 +137,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'Flex', () => BdApi.findModuleByDisplayName('Flex'))
 				},
 				get 'Text'() {
-					return ___createMemoize___(this, 'Text', () => BdApi.findModuleByDisplayName('Text'))
+					return ___createMemoize___(this, 'Text', () => BdApi.findModuleByDisplayName('LegacyText'))
 				},
 				get 'Card'() {
 					return ___createMemoize___(this, 'Card', () => BdApi.findModuleByDisplayName('Card'))
@@ -145,7 +145,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			},
 			'@discord/modules': {
 				get 'Dispatcher'() {
-					return ___createMemoize___(this, 'Dispatcher', () => BdApi.findModuleByProps('dirtyDispatch', 'subscribe'))
+					return ___createMemoize___(this, 'Dispatcher', () => BdApi.findModuleByProps('dispatch', 'isDispatching'))
 				},
 				get 'ComponentDispatcher'() {
 					return ___createMemoize___(this, 'ComponentDispatcher', () => BdApi.findModuleByProps('ComponentDispatch')?.ComponentDispatch)
@@ -320,7 +320,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					const options = props.options;
 					const uploadOption = ret.props.children.find((e => "upload-file" === e.key));
 					delete uploadOption.props.subtext;
-					if (!options || options.length > 1 || "UPLOAD_A_FILE" !== options[0]?.type) return;
+					if (!options || "UPLOAD_A_FILE" !== options[0]?.type) return;
 					props.onClose();
 					props.onFileUpload();
 				}));
