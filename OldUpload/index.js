@@ -18,7 +18,7 @@ export default class OldUpload extends BasePlugin {
 			const uploadOption = ret.props.children.find(e => e.key === "upload-file");
 			delete uploadOption.props.subtext;
 
-			if(!options || options.length > 1 || options[0]?.type !== "UPLOAD_A_FILE") return;
+			if(!options || options[0]?.type !== "UPLOAD_A_FILE") return;
 			props.onClose();
 			props.onFileUpload();
 		})	

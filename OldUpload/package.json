@@ -1,7 +1,7 @@
 {
 	"info": {
 		"name": "OldUpload",
-		"version": "1.0.0",
+		"version": "1.0.1",
 		"description": "Reverts Discord upload button to work as it worked before the update (Quick Upload by default and not when Double-Clicking only)",
 		"authors": [
 			{
