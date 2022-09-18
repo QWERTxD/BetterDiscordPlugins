@@ -355,7 +355,7 @@ module.exports = window.hasOwnProperty("ZeresPluginLibrary") ?
 			return config.info.name;
 		}
 		getAuthor() {
-			return config.info.authors.map(a => a.name).join(", ");
+			return config.info.author.map(a => a.name).join(", ");
 		}
 		getDescription() {
 			return `${config.info.description}. __**ZeresPluginLibrary was not found! This plugin will not work!**__`;
