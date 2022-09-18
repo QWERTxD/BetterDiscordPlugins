@@ -1,7 +1,7 @@
 /**
  * @name UserVolumeBooster
  * @description Allows you to set a user's volume above the normal 200%
- * @version 1.0.1
+ * @version 1.0.2
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/UserVolumeBooster
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/UserVolumeBooster/UserVolumeBooster.plugin.js
@@ -33,7 +33,7 @@ const config = {
 	"info": {
 		"name": "UserVolumeBooster",
 		"description": "Allows you to set a user's volume above the normal 200%",
-		"version": "1.0.1",
+		"version": "1.0.2",
 		"authors": [{
 			"name": "QWERT",
 			"discord_id": "678556376640913408",
@@ -137,7 +137,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					return ___createMemoize___(this, 'Flex', () => BdApi.findModuleByDisplayName('Flex'))
 				},
 				get 'Text'() {
-					return ___createMemoize___(this, 'Text', () => BdApi.findModuleByDisplayName('Text'))
+					return ___createMemoize___(this, 'Text', () => BdApi.findModuleByDisplayName('LegacyText'))
 				},
 				get 'Card'() {
 					return ___createMemoize___(this, 'Card', () => BdApi.findModuleByDisplayName('Card'))
@@ -145,7 +145,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			},
 			'@discord/modules': {
 				get 'Dispatcher'() {
-					return ___createMemoize___(this, 'Dispatcher', () => BdApi.findModuleByProps('dirtyDispatch', 'subscribe'))
+					return ___createMemoize___(this, 'Dispatcher', () => BdApi.findModuleByProps('dispatch', 'isDispatching'))
 				},
 				get 'ComponentDispatcher'() {
 					return ___createMemoize___(this, 'ComponentDispatcher', () => BdApi.findModuleByProps('ComponentDispatch')?.ComponentDispatch)
