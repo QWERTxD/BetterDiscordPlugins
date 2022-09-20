@@ -48,6 +48,7 @@ export default function Settings() {
             <Variable title="{{messageLink}}" desc="Being replaced with the replied message link"/>,
             <Variable title="{{channel}}" desc="Being replaced with the channel of the replied message"/>,
             <Variable title="{{message}}" desc="Will be replaced with the user message"/>,
+            <Variable title="{{messageShort}}" desc="Will be replaced with the first 50 characters of user message"/>,
             <Variable title="{{newLine}}" desc="Switching to a new line"/>
         ]}>
 
