@@ -62,7 +62,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
 } : (([Plugin, Library]) => {
     const { DiscordModules, WebpackModules, Patcher, PluginUtilities } = Library;
     const { React, SelectedChannelStore: {getVoiceChannelId} } = DiscordModules;
-    const panelSubtext = WebpackModules.findAll(m => m?.$$typeof?.toString() === "Symbol(react.forward_ref)");
+    const PanelSubtext = WebpackModules.findAll(m => m?.$$typeof?.toString() === "Symbol(react.forward_ref)");
     let lastVoice, lastState;
     const Dispatcher = WebpackModules.getByProps('dispatch', 'register');
 
@@ -142,9 +142,9 @@ module.exports = !global.ZeresPluginLibrary ? class {
         }
 
         patch() {
-            panelSubtext.forEach(element => {
+            PanelSubtext.forEach(element => {
                 Patcher.before(element, "render", (_, [props], ret) => {
-                    if ( !props?.children?.props?.className.includes("channel")) return;
+                    if (!props?.children?.props?.className.includes("channel")) return;
                     props.children = [
                         props.children,
                         React.createElement(Timer, { className: "voiceTimer" }), 
