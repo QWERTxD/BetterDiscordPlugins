@@ -132,7 +132,6 @@ module.exports = !global.ZeresPluginLibrary ? class {
            .voiceTimer {
              text-decoration: none !important;
              margin-top: 8px;
-             color: var(--header-primary);
            }
            `)
         }
@@ -145,8 +144,8 @@ module.exports = !global.ZeresPluginLibrary ? class {
         patch() {
             Patcher.before(PanelSubtext, "render", (_, [props], ret) => {
                 if (!props?.children?.props?.className?.includes("channel")) return;
-                props.children = [
-                    props.children,
+                props.children.props.children = [
+                    props.children.props.children,
                     React.createElement(Timer, { className: "voiceTimer" })
                 ]
             });
