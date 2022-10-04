@@ -21,15 +21,17 @@ const config = {
         ],
     github_raw:
       "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js",
-    version: "1.0.7",
+    version: "1.0.8",
     description:
       "Displays notifications such as new messages, friends added in Discord.",
 	},
   changelog: [
     {
-      title: "Fixed notificaitons from threads",
-      type: "fixed",
-      items: ["Stopped notifications from threads you haven't joined from showing."],
+      "title": "Fixed",
+      "type": "fixed",
+      "items": [
+        "Fixed many issues related to Discord update.",
+      ]
     }
   ],
   defaultConfig: [
