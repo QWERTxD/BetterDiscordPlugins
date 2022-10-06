@@ -4,7 +4,7 @@
     * @description Shows how much time you are in a voice chat.
     * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CallTimeCounter/CallTimeCounter.plugin.js
     * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/CallTimeCounter
-    * @version 0.0.4
+    * @version 0.0.5
     */
 
 const request = require("request");
@@ -19,7 +19,7 @@ const config = {
                 name: "QWERT"
             }
         ],
-        version: "0.0.4",
+        version: "0.0.5",
         description: "Shows how much time you are in a voice chat.",
         github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CallTimeCounter/CallTimeCounter.plugin.js",
     },
@@ -28,7 +28,7 @@ const config = {
             title: "Fixes",
             type: "fixed",
             items: [
-                "Fixed crashing in new Discord update."
+                "Updated for new Discord update."
             ]
         }
     ],
@@ -62,9 +62,10 @@ module.exports = !global.ZeresPluginLibrary ? class {
 } : (([Plugin, Library]) => {
     const { DiscordModules, WebpackModules, Patcher, PluginUtilities } = Library;
     const { React, SelectedChannelStore: {getVoiceChannelId} } = DiscordModules;
-    const PanelSubtext = WebpackModules.find(m => m?.default?.displayName === "PanelSubtext");
+    const PanelSubtext = WebpackModules.find(m => m?.$$typeof?.toString() === "Symbol(react.forward_ref)"
+        && m.render?.toString().includes("createHref"));
     let lastVoice, lastState;
-    const Dispatcher = WebpackModules.getByProps('dispatch', 'subscribe');
+    const Dispatcher = WebpackModules.getByProps('dispatch', 'register');
 
     class Timer extends React.Component {
         constructor(props) {
@@ -141,13 +142,13 @@ module.exports = !global.ZeresPluginLibrary ? class {
         }
 
         patch() {
-            Patcher.after(PanelSubtext, "default", (_, [props], ret) => {
-                if (!props.className || !props.className.includes('channel')) return;
-                ret.props.children = [
-                    props.children,
+            Patcher.before(PanelSubtext, "render", (_, [props], ret) => {
+                if (!props?.children?.props?.className?.includes("channel")) return;
+                props.children.props.children = [
+                    props.children.props.children,
                     React.createElement(Timer, { className: "voiceTimer" })
                 ]
-            })
+            });
         }
 
     }
