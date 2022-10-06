@@ -3,7 +3,7 @@
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
- * @version 1.0.7
+ * @version 1.0.8
 */
 const request = require("request");
 const fs = require("fs");
