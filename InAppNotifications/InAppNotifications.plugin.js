@@ -3,7 +3,7 @@
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
- * @version 1.0.8
+ * @version 1.0.9
 */
 const request = require("request");
 const fs = require("fs");
@@ -21,7 +21,7 @@ const config = {
         ],
     github_raw:
       "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js",
-    version: "1.0.8",
+    version: "1.0.9",
     description:
       "Displays notifications such as new messages, friends added in Discord.",
 	},
@@ -31,6 +31,7 @@ const config = {
       "type": "fixed",
       "items": [
         "Fixed many issues related to Discord update.",
+        "Fixed clicking on notifications.",
       ]
     }
   ],
@@ -192,7 +193,7 @@ module.exports = !global.ZeresPluginLibrary
       } = Library;
 
       function getByString(string) {
-        return WebpackModules.getModule(m => m.toString().includes(string));
+        return WebpackModules.getModule(m => typeof m === "function" && m.toString().includes(string));
       }
 
       const {
@@ -202,13 +203,14 @@ module.exports = !global.ZeresPluginLibrary
         UserStore,
         ChannelStore,
         // GuildStore,
-        NavigationUtils,
+        // NavigationUtils,
         UserStatusStore,
         SelectedChannelStore,
         GuildMemberStore,
         UserProfileModals,
         InviteActions,
       } = DiscordModules;
+      const NavigationUtils = { replaceWith: WebpackModules.getModule(m => m.toString().includes(`"Replacing route with "`)) }
       const Dispatcher = WebpackModules.getModule(m => m._subscriptions);
       const GuildStore = WebpackModules.getByProps("getGuildCount");
       const ChannelTypes = WebpackModules.getByProps("GUILD_TEXT");
