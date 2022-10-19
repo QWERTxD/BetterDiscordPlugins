@@ -3,7 +3,7 @@
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
- * @version 1.1.1
+ * @version 1.1.2
 */
 const request = require("request");
 const fs = require("fs");
@@ -21,7 +21,7 @@ const config = {
         ],
     github_raw:
       "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js",
-    version: "1.1.1",
+    version: "1.1.2",
     description:
       "Displays notifications such as new messages, friends added in Discord.",
 	},
@@ -30,8 +30,7 @@ const config = {
       "title": "Fixed",
       "type": "fixed",
       "items": [
-        "Fixed failure Notification spam.",
-        "\"Mark message as read when closing\" fixed.",
+        "Fixed mentions not working.",
       ]
     }
   ],
@@ -210,7 +209,7 @@ module.exports = !global.ZeresPluginLibrary
 
       const ChannelTypes = Webpack.getModule(Webpack.Filters.byProps("GUILD_TEXT"), { searchExports: true });
       const MuteStore = WebpackModules.getByProps("isSuppressEveryoneEnabled");
-      const isMentioned = { isRawMessageMentioned: WebpackModules.getByString("suppressEveryone") };
+      const isMentioned = { isRawMessageMentioned: WebpackModules.getModule(Webpack.Filters.byStrings("rawMessage", "suppressEveryone"), {searchExports: true}) };
       const Markdown = WebpackModules.getByProps("parse", "parseTopic");
       const AckUtils = { ack: Webpack.getModule(Webpack.Filters.byStrings("CHANNEL_ACK"), { searchExports: true }) };
       const CallJoin = WebpackModules.getByString("M11 5V3C16.515 3 21 7.486 21 13H19C19 8.589 15.411 5 11 5ZM17 13H15C15 10.795 13.206 9 11 9V7C14.309 7 17 9.691 17 13ZM11 11V13H13C13 11.896 12.105 11 11 11ZM14 16H18C18.553 16 19 16.447 19 17V21C19 21.553 18.553 22 18 22H13C6.925 22 2 17.075 2 11V6C2 5.447 2.448 5 3 5H7C7.553 5 8 5.447 8 6V10C8 10.553 7.553 11 7 11H6C6.063 14.938 9 18 13 18V17C13 16.447 13.447 16 14 16Z");
@@ -923,7 +922,7 @@ module.exports = !global.ZeresPluginLibrary
           if (MuteStore.allowAllMessages(channel)) return true;
           return isMentioned.isRawMessageMentioned(
             {
-              message,
+              rawMessage: message,
               userId: UserStore.getCurrentUser().id,
               suppressEveryone,
               suppressRoles
