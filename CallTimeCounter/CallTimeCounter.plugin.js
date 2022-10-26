@@ -4,7 +4,7 @@
     * @description Shows how much time you are in a voice chat.
     * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CallTimeCounter/CallTimeCounter.plugin.js
     * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/CallTimeCounter
-    * @version 0.0.5
+    * @version 0.0.6
     */
 
 const request = require("request");
@@ -19,7 +19,7 @@ const config = {
                 name: "QWERT"
             }
         ],
-        version: "0.0.5",
+        version: "0.0.6",
         description: "Shows how much time you are in a voice chat.",
         github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CallTimeCounter/CallTimeCounter.plugin.js",
     },
@@ -28,7 +28,7 @@ const config = {
             title: "Fixes",
             type: "fixed",
             items: [
-                "Updated for new Discord update."
+                "Fixed for BetterDiscord 1.8 update."
             ]
         }
     ],
@@ -63,7 +63,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
     const { DiscordModules, WebpackModules, Patcher, PluginUtilities } = Library;
     const { React, SelectedChannelStore: {getVoiceChannelId} } = DiscordModules;
     const PanelSubtext = WebpackModules.find(m => m?.$$typeof?.toString() === "Symbol(react.forward_ref)"
-        && m.render?.toString().includes("createHref"));
+        && m.render?.toString().includes("createHref"), {searchExports: true});
     let lastVoice, lastState;
     const Dispatcher = WebpackModules.getByProps('dispatch', 'register');
 
