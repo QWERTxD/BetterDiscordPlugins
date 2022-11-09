@@ -3,7 +3,7 @@
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
- * @version 1.0.9
+ * @version 1.1.2
 */
 const request = require("request");
 const fs = require("fs");
@@ -21,7 +21,7 @@ const config = {
         ],
     github_raw:
       "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js",
-    version: "1.0.9",
+    version: "1.1.2",
     description:
       "Displays notifications such as new messages, friends added in Discord.",
 	},
@@ -30,8 +30,7 @@ const config = {
       "title": "Fixed",
       "type": "fixed",
       "items": [
-        "Fixed many issues related to Discord update.",
-        "Fixed clicking on notifications.",
+        "Fixed mentions not working.",
       ]
     }
   ],
@@ -192,50 +191,39 @@ module.exports = !global.ZeresPluginLibrary
         Patcher,
       } = Library;
 
-      function getByString(string) {
-        return WebpackModules.getModule(m => typeof m === "function" && m.toString().includes(string));
-      }
-
       const {
         React,
         ReactDOM,
-        // Dispatcher,
+        Dispatcher,
         UserStore,
         ChannelStore,
-        // GuildStore,
-        // NavigationUtils,
+        GuildStore,
+        NavigationUtils,
         UserStatusStore,
         SelectedChannelStore,
         GuildMemberStore,
-        UserProfileModals,
+        // UserProfileModals,
         InviteActions,
       } = DiscordModules;
-      const NavigationUtils = { replaceWith: WebpackModules.getModule(m => m.toString().includes(`"Replacing route with "`)) }
-      const Dispatcher = WebpackModules.getModule(m => m._subscriptions);
-      const GuildStore = WebpackModules.getByProps("getGuildCount");
-      const ChannelTypes = WebpackModules.getByProps("GUILD_TEXT");
+      const { Webpack } = BdApi;
+
+      const ChannelTypes = Webpack.getModule(Webpack.Filters.byProps("GUILD_TEXT"), { searchExports: true });
       const MuteStore = WebpackModules.getByProps("isSuppressEveryoneEnabled");
-      const isMentioned = { isRawMessageMentioned: getByString("suppressEveryone") };
+      const isMentioned = { isRawMessageMentioned: WebpackModules.getModule(Webpack.Filters.byStrings("rawMessage", "suppressEveryone"), {searchExports: true}) };
       const Markdown = WebpackModules.getByProps("parse", "parseTopic");
-      const AckUtils = WebpackModules.getByProps("bulkAck", "ack");
-      const CallJoin = getByString("M11 5V3C16.515 3 21 7.486 21 13H19C19 8.589 15.411 5 11 5ZM17 13H15C15 10.795 13.206 9 11 9V7C14.309 7 17 9.691 17 13ZM11 11V13H13C13 11.896 12.105 11 11 11ZM14 16H18C18.553 16 19 16.447 19 17V21C19 21.553 18.553 22 18 22H13C6.925 22 2 17.075 2 11V6C2 5.447 2.448 5 3 5H7C7.553 5 8 5.447 8 6V10C8 10.553 7.553 11 7 11H6C6.063 14.938 9 18 13 18V17C13 16.447 13.447 16 14 16Z");
-      const ImagePlaceholder = getByString("M6 2C3.79086 2 2 3.79086 2 6V18C2 20.2091 3.79086 22 6 22H18C20.2091 22 22 20.2091 22 18V6C22 3.79086 20.2091 2 18 2H6ZM10 8C10 6.8952 9.1032 6 8 6C6.8944 6 6 6.8952 6 8C6 9.1056 6.8944 10 8 10C9.1032 10 10 9.1056 10 8ZM9 14L6 18H18L15 11L11 16L9 14Z")
-      const PersonAdd = getByString("M21 3H24V5H21V8H19V5H16V3H19V0H21V3ZM10 12C12.205 12 14 10.205 14 8C14 5.795 12.205 4 10 4C7.795 4 6 5.795 6 8C6 10.205 7.795 12 10 12ZM10 13C5.289 13 2 15.467 2 19V20H18V19C18 15.467 14.711 13 10 13Z")
-			const CloseIcon = getByString("M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z");
-      const StickerIcon = getByString("M12.0002 0.662583V5.40204C12.0002 6.83974 13.1605 7.99981 14.5986 7.99981H19.3393C19.9245 7.99981 20.222 7.29584 19.8055 6.8794L13.1209 0.196569C12.7043 -0.219868 12.0002 0.0676718 12.0002 0.662583ZM14.5759 10.0282C12.0336 10.0282 9.96986 7.96441 9.96986 5.42209V0.0583083H1.99397C0.897287 0.0583083 0 0.955595 0 2.05228V18.0041C0 19.1007 0.897287 19.998 1.99397 19.998H17.9457C19.0424 19.998 19.9397 19.1007 19.9397 18.0041V10.0282H14.5759ZM11.9998 12.2201C11.9998 13.3245 11.1046 14.2198 10.0002 14.2198C8.8958 14.2198 8.00052 13.3245 8.00052 12.2201H6.66742C6.66742 14.0607 8.15955 15.5529 10.0002 15.5529C11.8408 15.5529 13.3329 14.0607 13.3329 12.2201H11.9998ZM4.44559 13.331C4.44559 13.9446 3.94821 14.442 3.33467 14.442C2.72112 14.442 2.22375 13.9446 2.22375 13.331C2.22375 12.7175 2.72112 12.2201 3.33467 12.2201C3.94821 12.2201 4.44559 12.7175 4.44559 13.331ZM16.6657 14.442C17.2793 14.442 17.7766 13.9446 17.7766 13.331C17.7766 12.7175 17.2793 12.2201 16.6657 12.2201C16.0522 12.2201 15.5548 12.7175 15.5548 13.331C15.5548 13.9446 16.0522 14.442 16.6657 14.442Z")
-      const Avatar = { default: WebpackModules.getModule(m => m.type?.toString().includes("fromIsMobile")), Sizes: WebpackModules.getByProps("SIZE_32") };
+      const AckUtils = { ack: Webpack.getModule(Webpack.Filters.byStrings("CHANNEL_ACK"), { searchExports: true }) };
+      const CallJoin = WebpackModules.getByString("M11 5V3C16.515 3 21 7.486 21 13H19C19 8.589 15.411 5 11 5ZM17 13H15C15 10.795 13.206 9 11 9V7C14.309 7 17 9.691 17 13ZM11 11V13H13C13 11.896 12.105 11 11 11ZM14 16H18C18.553 16 19 16.447 19 17V21C19 21.553 18.553 22 18 22H13C6.925 22 2 17.075 2 11V6C2 5.447 2.448 5 3 5H7C7.553 5 8 5.447 8 6V10C8 10.553 7.553 11 7 11H6C6.063 14.938 9 18 13 18V17C13 16.447 13.447 16 14 16Z");
+      const ImagePlaceholder = WebpackModules.getByString("M6 2C3.79086 2 2 3.79086 2 6V18C2 20.2091 3.79086 22 6 22H18C20.2091 22 22 20.2091 22 18V6C22 3.79086 20.2091 2 18 2H6ZM10 8C10 6.8952 9.1032 6 8 6C6.8944 6 6 6.8952 6 8C6 9.1056 6.8944 10 8 10C9.1032 10 10 9.1056 10 8ZM9 14L6 18H18L15 11L11 16L9 14Z")
+      const PersonAdd = WebpackModules.getByString("M21 3H24V5H21V8H19V5H16V3H19V0H21V3ZM10 12C12.205 12 14 10.205 14 8C14 5.795 12.205 4 10 4C7.795 4 6 5.795 6 8C6 10.205 7.795 12 10 12ZM10 13C5.289 13 2 15.467 2 19V20H18V19C18 15.467 14.711 13 10 13Z")
+			const CloseIcon = WebpackModules.getByString("M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z");
+      const StickerIcon = WebpackModules.getByString("M12.0002 0.662583V5.40204C12.0002 6.83974 13.1605 7.99981 14.5986 7.99981H19.3393C19.9245 7.99981 20.222 7.29584 19.8055 6.8794L13.1209 0.196569C12.7043 -0.219868 12.0002 0.0676718 12.0002 0.662583ZM14.5759 10.0282C12.0336 10.0282 9.96986 7.96441 9.96986 5.42209V0.0583083H1.99397C0.897287 0.0583083 0 0.955595 0 2.05228V18.0041C0 19.1007 0.897287 19.998 1.99397 19.998H17.9457C19.0424 19.998 19.9397 19.1007 19.9397 18.0041V10.0282H14.5759ZM11.9998 12.2201C11.9998 13.3245 11.1046 14.2198 10.0002 14.2198C8.8958 14.2198 8.00052 13.3245 8.00052 12.2201H6.66742C6.66742 14.0607 8.15955 15.5529 10.0002 15.5529C11.8408 15.5529 13.3329 14.0607 13.3329 12.2201H11.9998ZM4.44559 13.331C4.44559 13.9446 3.94821 14.442 3.33467 14.442C2.72112 14.442 2.22375 13.9446 2.22375 13.331C2.22375 12.7175 2.72112 12.2201 3.33467 12.2201C3.94821 12.2201 4.44559 12.7175 4.44559 13.331ZM16.6657 14.442C17.2793 14.442 17.7766 13.9446 17.7766 13.331C17.7766 12.7175 17.2793 12.2201 16.6657 12.2201C16.0522 12.2201 15.5548 12.7175 15.5548 13.331C15.5548 13.9446 16.0522 14.442 16.6657 14.442Z")
 
-      function getExports(f) {
-        let match;
-        WebpackModules.getModule((_, { exports }) => {
-          if (f(exports)) {
-            match = exports;
-            return true;
-          }
-        });
-
-        return match;
-      }
+      const openProfileModal = Webpack.getModule(Webpack.Filters.byStrings("friendToken"), { searchExports: true });
+      const UserProfileModals = {
+        open: (id) => {
+          openProfileModal({ userId: id });
+        }
+      };
 
       const colors = {
         online: "#43b581",
@@ -250,7 +238,7 @@ module.exports = !global.ZeresPluginLibrary
         ...WebpackModules.getByProps("avatar", "alt"),
       };
       /* Created by Strencher */
-      const Spring = getExports(e => e.useSpring);
+      const Spring = WebpackModules.getModule(e => e.useSpring);
       const { useSpring, animated } = Spring;
 
       const createStore = (state) => {
@@ -706,8 +694,8 @@ module.exports = !global.ZeresPluginLibrary
                 left: 0;
                }
                .qwert-toast-avatar {
-                height: 22px;
-                height: 22px;
+                height: 32px;
+                height: 32px;
                 border-radius: 50%;
                }
                .qwert-toast-avatar-container {
@@ -874,11 +862,12 @@ module.exports = !global.ZeresPluginLibrary
             : Markdown.parse(message.content, "div", { channelId: channel.id });
           const time = isNaN(notiTime * 1000) ? 3000 : notiTime * 1000;
           QWERTLib.Toasts.create(children, {
-            icon: React.createElement(Avatar.default, {
-              src: author.getAvatarURL(),
-              status: UserStatusStore.getStatus(author.id),
-              size: Avatar.Sizes.SIZE_32,
-              isMobile: UserStatusStore.isMobileOnline(author.id),
+            icon: React.createElement("div", {
+              className: "qwert-toast-avatar-container",
+              children: React.createElement("img", {
+                src: author.getAvatarURL(),
+                className: "qwert-toast-avatar",
+              }),
             }),
             author: authorString,
             time,
@@ -890,7 +879,7 @@ module.exports = !global.ZeresPluginLibrary
               );
             },
             onManualClose: () => {
-              if (!this.settings.markAsRead) return;
+              if (!this.settings.markAsRead || AckUtils == null) return;
               AckUtils.ack(message.channel_id);
             },
           });
@@ -933,7 +922,7 @@ module.exports = !global.ZeresPluginLibrary
           if (MuteStore.allowAllMessages(channel)) return true;
           return isMentioned.isRawMessageMentioned(
             {
-              message,
+              rawMessage: message,
               userId: UserStore.getCurrentUser().id,
               suppressEveryone,
               suppressRoles
