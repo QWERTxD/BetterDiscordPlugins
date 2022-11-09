@@ -89,7 +89,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 Dispatcher.subscribe('RTC_CONNECTION_STATE', this.connected);
                 this.setState(lastState);
                 this.interval = setInterval(() => {
-                    this.setState((prev) => (prev.delta = Math.round((Date.now() - prev.startTime) / 1000) * 1000));
+                    this.setState((prev) => (prev.delta = Math.round((Date.now() - prev.startTime) / 1000)));
                     this.setState((prev) => prev.lastVoice = getVoiceChannelId());
                 }, 1000);
             }else{
@@ -97,7 +97,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                     prev.startTime = Date.now()));
                 Dispatcher.subscribe('RTC_CONNECTION_STATE', this.connected);
                 this.interval = setInterval(() => {
-                    this.setState((prev) => (prev.delta = Math.round((Date.now() - prev.startTime) / 1000) * 1000));
+                    this.setState((prev) => (prev.delta = Math.round((Date.now() - prev.startTime) / 1000)));
                     this.setState((prev) => prev.lastVoice = getVoiceChannelId());
                 }, 1000);
             }
@@ -115,7 +115,8 @@ module.exports = !global.ZeresPluginLibrary ? class {
         }
 
         render() {
-            return React.createElement("div", { className: "voiceTimer" }, `Time elapsed: ${new Date(this.state.delta).toISOString().substr(11, 8)}`);
+            var hrs=parseInt(this.state.delta/86400)*24;
+            return React.createElement("div", { className: "voiceTimer" }, `Time elapsed: ${(new Date(this.state.delta%86400*1000)).toUTCString().replace(/.*(\d{2}):(\d{2}):(\d{2}).*/, function replacer(match, p1, p2, p3, offset, string, d=hrs){return [+p1+d, p2, p3].join(':');})}`);
         }
     };
 
