@@ -15,11 +15,11 @@
             name: "ClickToCopyUsername",
             authors: [
                 {
-                    name: "QWERT"
+                    name: "QWERT / Traduit par Felzow47"
                 }
             ],
             version: "0.0.2",
-            description: "Allows you to copy someone's username by pressing their nametag, like on mobile.",
+            description: "Vous permet de copier le nom d'utilisateur de quelqu'un en appuyant sur son pseudo, comme sur mobile.",
             github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/ClickToCopyUsername/ClickToCopyUsername.plugin.js",
         },
         changelog: [
@@ -41,9 +41,9 @@
     
         load() {
             BdApi.showConfirmationModal("Library plugin is needed",
-                `The library plugin needed for AQWERT'sPluginBuilder is missing. Please click Download Now to install it.`, {
-                    confirmText: "Download",
-                    cancelText: "Cancel",
+                `La librairie nécessaire pour le fonctionnement de AQWERT'sPluginBuilder est manquante. Cliquer Télécharger Maintenant pour l'installer.`, {
+                    confirmText: "Télécharger",
+                    cancelText: "Annuler",
                     onConfirm: () => {
                         request.get("https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js", (error, response, body) => {
                             if (error)
