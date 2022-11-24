@@ -13,14 +13,14 @@ const path = require("path");
 
 const config = {
     info: {
-        name: "CallTimeCounter",
+        name: "Temps_d'appel",
         authors: [
             {
-                name: "QWERT"
+                name: "QWERT / Traduit par Felzow47"
             }
         ],
         version: "0.0.6",
-        description: "Shows how much time you are in a voice chat.",
+        description: "Montre la durée de l'appel",
         github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CallTimeCounter/CallTimeCounter.plugin.js",
     },
     changelog: [
@@ -42,9 +42,9 @@ module.exports = !global.ZeresPluginLibrary ? class {
 
     load() {
         BdApi.showConfirmationModal("Library plugin is needed",
-            `The library plugin needed for AQWERT'sPluginBuilder is missing. Please click Download Now to install it.`, {
-            confirmText: "Download",
-            cancelText: "Cancel",
+            `La librairie nécessaire pour le fonctionnement de AQWERT'sPluginBuilder est manquante. Cliquer Télécharger Maintenant pour l'installer`, {
+            confirmText: "Télécharger",
+            cancelText: "Annuler",
             onConfirm: () => {
                 request.get("https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js", (error, response, body) => {
                     if (error)
@@ -115,7 +115,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
         }
 
         render() {
-            return React.createElement("div", { className: "voiceTimer" }, `Time elapsed: ${new Date(this.state.delta).toISOString().substr(11, 8)}`);
+            return React.createElement("div", { className: "voiceTimer" }, `Temps écoulé: ${new Date(this.state.delta).toISOString().substr(11, 8)}`);
         }
     };
 
