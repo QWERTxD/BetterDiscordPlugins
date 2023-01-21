@@ -3,7 +3,7 @@
 * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/TypingUsersAvatars/TypingUsersAvatars.plugin.js
 * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/TypingUsersAvatars/TypingUsersAvatars.plugin.js
 * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/TypingUsersAvatars
-* @version 1.0.5
+* @version 1.0.6
 * @description Shows avatars of typing users.
 */
 
@@ -19,16 +19,15 @@ const config = {
                 name: 'QWERT'
             }
         ],
-        version: '1.0.5',
+        version: '1.0.6',
         description: 'Shows avatars of typing users.',
-        github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/TypingUsersAvatars/TypingUsersAvatars.plugin.js",
     },
     changelog: [
         {
-            title: 'What\'s new?',
-            type: 'added',
+            title: 'Fixed',
+            type: 'fixed',
             items: [
-                'Added option to show guild avatars of typing users',
+                'The Plugin works again'
             ]
         }
     ],
@@ -37,12 +36,6 @@ const config = {
             type: 'switch',
             name: 'Show users status',
             id: 'showStatus',
-            value: true
-        },
-        {
-            type: 'switch',
-            name: 'Show guild avatars',
-            id: 'showGuildAvatar',
             value: true
         }
     ]
@@ -73,18 +66,16 @@ module.exports = !global.ZeresPluginLibrary ? class {
 
     stop() { }
 } : (([Plugin, Library]) => {
-    const { DiscordModules, WebpackModules, PluginUtilities, Patcher, ReactComponents, Popouts, Utilities, DiscordSelectors } = Library;
-    const { React, UserStore, RelationshipStore, UserStatusStore, Strings } = DiscordModules;
-    const AssetUtils = WebpackModules.getByProps("getUserBannerURL");
+    const { DiscordModules, WebpackModules, PluginUtilities, Patcher, Popouts, Utilities, DiscordSelectors } = Library;
+    const { React, UserStore, RelationshipStore, UserStatusStore, UserTypingStore, SelectedChannelStore } = DiscordModules;
     const Avatar = WebpackModules.getByProps('AnimatedAvatar');
-    const VoiceUserSummary = WebpackModules.findByDisplayName("VoiceUserSummaryItem")
+    // const VoiceUserSummary = WebpackModules.findByDisplayName("VoiceUserSummaryItem")
 
     class AvatarComponent extends React.Component {
         render() {
-            const { user, status, guildId } = this.props;
-            const guildAvatar = AssetUtils.getGuildMemberAvatarURL({ guildId: guildId, userId: user.id, avatar: user.guildMemberAvatars[guildId] });
+            const { user, status } = this.props;
             return React.createElement(Avatar.default, {
-                src: user?.guildMemberAvatars[guildId] ? guildAvatar : user.getAvatarURL(),
+                src: user.getAvatarURL(),
                 status: status,
                 size: Avatar.Sizes.SIZE_16,
                 onClick() {
@@ -97,13 +88,14 @@ module.exports = !global.ZeresPluginLibrary ? class {
     class plugin extends Plugin {
         constructor() {
             super();
+            this.element = null;
             this.getSettingsPanel = () => {
                 return this.buildSettingsPanel().getElement();
             };
         }
 
         onStart() {
-            Utilities.suppressErrors(this.patch.bind(this))();
+            // Utilities.suppressErrors(this.patch.bind(this))();
 
             PluginUtilities.addStyle('TypingUsersAvatars', `
                 .typing-2J1mQU .text-3S7XCz {
@@ -128,66 +120,75 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 .several-users .avatarSize-1KpZ5E {
                     margin: 0;
                 }
+
+                .typing-user {
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 50%;
+                    background-size: contain;
+                    pointer-events: auto !important;
+                }
+
+                .typing-user:hover {
+                    cursor: pointer;
+                }
             `)
+
+            UserTypingStore.addChangeListener(this.inject.bind(this));
         }
 
         onStop() {
-            Patcher.unpatchAll();
             PluginUtilities.removeStyle('TypingUsersAvatars');
+            UserTypingStore._changeCallbacks.listeners.clear()
         }
 
-        filter(users) {
-            return Object.keys(users).filter((user) => {
-                return user != UserStore.getCurrentUser().id && !RelationshipStore.isBlocked(user);
-            })
-        }
+        inject() {
+            if (!this.element) return;
 
-        /* code highly inspired by https://github.com/rauenzi/BetterDiscordAddons/blob/master/Plugins/BetterRoleColors/BetterRoleColors.plugin.js */
-        async patch() {
-            const TypingUsers = await ReactComponents.getComponentByName('TypingUsers', DiscordSelectors.Typing.typing);
-            Patcher.after(TypingUsers.component.prototype, 'render', (thisObject, [props], ret) => {
-                const typingUsers = this.filter({ ...thisObject.props.typingUsers });
-                const guildId = thisObject.props?.guildId;
+            this.element.querySelector('#typing-users-avatars')?.remove();
+            let avatars = document.createElement('div');
+            avatars.className = 'wrapper-1VLyxH avatarStack-3vfSFa';
+            avatars.id = 'typing-users-avatars';
 
-                for (let u = 0; u < typingUsers.length; u++) {
-                    const user = UserStore.getUser(typingUsers[u]);
+            Object.keys(UserTypingStore.getTypingUsers(SelectedChannelStore.getChannelId()))
+                .filter(user => user != UserStore.getCurrentUser().id && !RelationshipStore.isBlocked(user))
+                .map((user) => UserStore.getUser(user))
+                .forEach((user) => {
                     const status = this.settings.showStatus ? UserStatusStore.getStatus(user.id) : null;
+                    const avatarURL = user.getAvatarURL();
+                    
+                    const avatar = document.createElement('div');
+                    
+                    avatar.id = `typing-user-${user.id}`;
+                    avatar.className = 'typing-user mask-1FEkla';
+                    avatar.style.backgroundImage = `url(${avatarURL})`;
 
-                    if (ret.props.children[0].props.children[1]?.props.children !== Strings.Messages.SEVERAL_USERS_TYPING) {
-                        const usersComponent = ret.props.children[0].props.children[1].props.children.filter(user => user.props);
+                    //avatar.onclick = () => Popouts.showUserPopout(document.getElementById(`typing-user-${user.id}`), user);
+                    avatar.addEventListener('click', () => Popouts.showUserPopout(document.getElementById(`typing-user-${user.id}`), user));
+                    //avatar.addEventListener('click', (e) => console.log('click'));
 
-                        usersComponent[u].props.children.unshift(React.createElement("div", {
-                            id: `typing-user-${user.id}`,
-                            children: React.createElement(AvatarComponent, { user, status, guildId })
-                        }));
-                    } else {
-                        ret.props.children[0].props.children = [
-                            React.createElement(VoiceUserSummary, {
-                                className: "several-users",
-                                users: typingUsers.map(UserStore.getUser),
-                                max: 3
-                            }),
-                            ret.props.children[0].props.children
-                        ]
-                    }
-                }
+                    avatars.appendChild(avatar);
+                });
 
-                if (!ret) return;
-                const tree = ret.props.children;
-                if (!tree) return;
-
-                tree.map((child) => {
-                    const children = child?.props?.children;
-                    if (!children || typeof children !== 'object') return;
-
-                    child.props.style = {
-                        display: 'flex',
-                        alignItems: 'center'
-                    };
-                })
-            })
+            this.element.children[1].prepend(avatars);
         }
 
+        observer({addedNodes, removedNodes}) {
+            for(const node of addedNodes) {
+                if (Node.TEXT_NODE == node.nodeType) continue;
+                Array.from(node.getElementsByClassName('typingDots-1Y8dki')).forEach((element) => {
+                    this.element = element;
+                    this.inject();
+                });
+            }
+
+            for(const node of removedNodes) {
+                if (Node.TEXT_NODE == node.nodeType) continue;
+                Array.from(node.getElementsByClassName('typingDots-1Y8dki')).forEach((element) => {
+                    this.element = null;
+                });
+            }
+        }
     }
 
     return plugin;
