@@ -27,7 +27,7 @@ const config = {
             title: 'Fixed',
             type: 'fixed',
             items: [
-                'The Plugin works again'
+                'The Plugin works again.'
             ]
         }
     ],
@@ -66,24 +66,10 @@ module.exports = !global.ZeresPluginLibrary ? class {
 
     stop() { }
 } : (([Plugin, Library]) => {
-    const { DiscordModules, WebpackModules, PluginUtilities, Patcher, Popouts, Utilities, DiscordSelectors } = Library;
-    const { React, UserStore, RelationshipStore, UserStatusStore, UserTypingStore, SelectedChannelStore } = DiscordModules;
-    const Avatar = WebpackModules.getByProps('AnimatedAvatar');
-    // const VoiceUserSummary = WebpackModules.findByDisplayName("VoiceUserSummaryItem")
-
-    class AvatarComponent extends React.Component {
-        render() {
-            const { user, status } = this.props;
-            return React.createElement(Avatar.default, {
-                src: user.getAvatarURL(),
-                status: status,
-                size: Avatar.Sizes.SIZE_16,
-                onClick() {
-                    Popouts.showUserPopout(document.getElementById(`typing-user-${user.id}`), user)
-                }
-            })
-        }
-    }
+    const { DiscordModules, PluginUtilities, Popouts } = Library;
+    const { UserStore, RelationshipStore, UserStatusStore, UserTypingStore, SelectedChannelStore } = DiscordModules;
+    // const Avatar = WebpackModules.getByProps('AnimatedAvatar');
+    const avatarSize = 20; // Avatar.Sizes.SIZE_16
 
     class plugin extends Plugin {
         constructor() {
@@ -94,9 +80,8 @@ module.exports = !global.ZeresPluginLibrary ? class {
             };
         }
 
-        onStart() {
-            // Utilities.suppressErrors(this.patch.bind(this))();
 
+        onStart() {
             PluginUtilities.addStyle('TypingUsersAvatars', `
                 .typing-2J1mQU .text-3S7XCz {
                     margin: 0;
@@ -121,9 +106,22 @@ module.exports = !global.ZeresPluginLibrary ? class {
                     margin: 0;
                 }
 
+                .user-overflow-count {
+                    height: ${avatarSize}px;
+                    border-radius: ${avatarSize/2}px;
+                    font-size: 12px;
+                    background-color: var(--channeltextarea-background);
+                    padding: 0 7px 0 7px;
+                    display: flex;
+                }
+
+                .user-overflow-count > strong {
+                    margin-top: -1px;                    
+                }
+
                 .typing-user {
-                    width: 20px;
-                    height: 20px;
+                    width: ${avatarSize}px;
+                    height: ${avatarSize}px;
                     border-radius: 50%;
                     background-size: contain;
                     pointer-events: auto !important;
@@ -142,6 +140,44 @@ module.exports = !global.ZeresPluginLibrary ? class {
             UserTypingStore._changeCallbacks.listeners.clear()
         }
 
+        statusToColor(status) {
+            switch (status) {
+                case 'online':
+                    return '#3ba55c';
+                case 'idle':
+                    return '#faa61a';
+                case 'dnd':
+                    return '#ed4245';
+                case 'offline':
+                    return '#747f8d';
+                default:
+                    return '#00000000';
+            }
+        }
+
+        avatarElement(user, masked) {
+            const status = this.settings.showStatus ? UserStatusStore.getStatus(user.id) : null;
+            const statusColor = this.statusToColor(status);
+
+            const avatarURL = user.getAvatarURL();
+            const avatar = document.createElement('div');
+            avatar.id = `typing-user-${user.id}`;
+            avatar.className = 'typing-user mask-1FEkla';
+            avatar.addEventListener('click', () => Popouts.showUserPopout(document.getElementById(`typing-user-${user.id}`), user));
+
+            avatar.innerHTML = `<svg width="${avatarSize}" height="${avatarSize}" class="avatarContainerMasked-13fYnN" viewBox="0 0 ${avatarSize} ${avatarSize}">
+                <foreignObject x="0" y="0" width="${avatarSize}" height="${avatarSize}" overflow="visible" ${
+                    masked ? `mask="url(#svg-mask-voice-user-summary-item)` : ''
+                }">
+                    <img src="${avatarURL}" class="avatar-3TrM7c">
+                </foreignObject>
+                <rect width="7" height="7" x="12" y="12" fill="${statusColor}" mask="url(#svg-mask-status-online)"
+                class="pointerEvents-9SZWKj"></rect>
+            </svg>`;
+
+            return avatar;
+        }
+
         inject() {
             if (!this.element) return;
 
@@ -150,33 +186,34 @@ module.exports = !global.ZeresPluginLibrary ? class {
             avatars.className = 'wrapper-1VLyxH avatarStack-3vfSFa';
             avatars.id = 'typing-users-avatars';
 
-            Object.keys(UserTypingStore.getTypingUsers(SelectedChannelStore.getChannelId()))
+            const users = Object.keys(UserTypingStore.getTypingUsers(SelectedChannelStore.getChannelId()))
                 .filter(user => user != UserStore.getCurrentUser().id && !RelationshipStore.isBlocked(user))
-                .map((user) => UserStore.getUser(user))
-                .forEach((user) => {
-                    const status = this.settings.showStatus ? UserStatusStore.getStatus(user.id) : null;
-                    const avatarURL = user.getAvatarURL();
-                    
-                    const avatar = document.createElement('div');
-                    
-                    avatar.id = `typing-user-${user.id}`;
-                    avatar.className = 'typing-user mask-1FEkla';
-                    avatar.style.backgroundImage = `url(${avatarURL})`;
+                .map((user) => UserStore.getUser(user));
 
-                    //avatar.onclick = () => Popouts.showUserPopout(document.getElementById(`typing-user-${user.id}`), user);
-                    avatar.addEventListener('click', () => Popouts.showUserPopout(document.getElementById(`typing-user-${user.id}`), user));
-                    //avatar.addEventListener('click', (e) => console.log('click'));
+            if (users.length == 0) return;
 
-                    avatars.appendChild(avatar);
-                });
+            const severalThreshold = 2;
+            const severalUsers = users.length > severalThreshold;
+            for (let i = 0; i < (severalUsers ? severalThreshold : users.length - 1); i++) {
+                avatars.appendChild(this.avatarElement(users[i], true));
+            }
+            if (severalUsers) {
+                const severalUsersElement = document.createElement('div');
+                severalUsersElement.className = 'user-overflow-count';
+                severalUsersElement.innerHTML = `<strong>+${users.length - severalThreshold}</strong>`;
+                avatars.appendChild(severalUsersElement);
+            } else {
+                avatars.appendChild(this.avatarElement(users[users.length - 1], false));
+            }
 
-            this.element.children[1].prepend(avatars);
+            this.element.children[0]?.children[1]?.prepend(avatars);
         }
 
         observer({addedNodes, removedNodes}) {
+            const dotsClass = 'typing-2J1mQU';
             for(const node of addedNodes) {
                 if (Node.TEXT_NODE == node.nodeType) continue;
-                Array.from(node.getElementsByClassName('typingDots-1Y8dki')).forEach((element) => {
+                Array.from(node.getElementsByClassName(dotsClass)).forEach((element) => {
                     this.element = element;
                     this.inject();
                 });
@@ -184,7 +221,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
 
             for(const node of removedNodes) {
                 if (Node.TEXT_NODE == node.nodeType) continue;
-                Array.from(node.getElementsByClassName('typingDots-1Y8dki')).forEach((element) => {
+                Array.from(node.getElementsByClassName(dotsClass)).forEach((element) => {
                     this.element = null;
                 });
             }
