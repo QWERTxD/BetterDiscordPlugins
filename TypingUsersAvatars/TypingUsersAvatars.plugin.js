@@ -215,7 +215,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 avatars.appendChild(this.avatarElement(users[users.length - 1], false, guildId));
             }
 
-            this.element.insertBefore(avatars, this.element.children[1]);
+            this.element.insertBefore(avatars, this.element.querySelector("span"));
         }
 
         observer({addedNodes, removedNodes}) {
