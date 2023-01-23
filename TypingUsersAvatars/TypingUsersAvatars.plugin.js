@@ -67,9 +67,9 @@ module.exports = !global.ZeresPluginLibrary ? class {
     stop() { }
 } : (([Plugin, Library]) => {
     const { DiscordModules, PluginUtilities, Popouts } = Library;
-    const { UserStore, RelationshipStore, UserStatusStore, UserTypingStore, SelectedChannelStore } = DiscordModules;
-    // const Avatar = WebpackModules.getByProps('AnimatedAvatar');
-    const avatarSize = 20; // Avatar.Sizes.SIZE_16
+    const { UserStore, RelationshipStore, UserStatusStore, UserTypingStore, SelectedChannelStore, ChannelStore } = DiscordModules;
+    
+    const avatarSize = 20;
 
     class plugin extends Plugin {
         constructor() {
@@ -79,7 +79,6 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 return this.buildSettingsPanel().getElement();
             };
         }
-
 
         onStart() {
             PluginUtilities.addStyle('TypingUsersAvatars', `
@@ -155,15 +154,17 @@ module.exports = !global.ZeresPluginLibrary ? class {
             }
         }
 
-        avatarElement(user, masked) {
+        avatarElement(user, masked, guildId) {
             const status = this.settings.showStatus ? UserStatusStore.getStatus(user.id) : null;
             const statusColor = this.statusToColor(status);
 
-            const avatarURL = user.getAvatarURL();
+            const avatarURL = user.hasAvatarForGuild(guildId) ? user.getAvatarURL(guildId) : user.getAvatarURL();
             const avatar = document.createElement('div');
             avatar.id = `typing-user-${user.id}`;
             avatar.className = 'typing-user mask-1FEkla';
-            avatar.addEventListener('click', () => Popouts.showUserPopout(document.getElementById(`typing-user-${user.id}`), user));
+            
+            // `showUserPopout` is broken right now.
+            // avatar.addEventListener('click', () => Popouts.showUserPopout(document.getElementById(`typing-user-${user.id}`), user), {align: "top"});
 
             avatar.innerHTML = `<svg width="${avatarSize}" height="${avatarSize}" class="avatarContainerMasked-13fYnN" viewBox="0 0 ${avatarSize} ${avatarSize}">
                 <foreignObject x="0" y="0" width="${avatarSize}" height="${avatarSize}" overflow="visible" ${
@@ -181,6 +182,8 @@ module.exports = !global.ZeresPluginLibrary ? class {
         inject() {
             if (!this.element) return;
 
+            const guildId = ChannelStore.getChannel(SelectedChannelStore.getChannelId()).guild_id;
+
             this.element.querySelector('#typing-users-avatars')?.remove();
             let avatars = document.createElement('div');
             avatars.className = 'wrapper-1VLyxH avatarStack-3vfSFa';
@@ -195,7 +198,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             const severalThreshold = 2;
             const severalUsers = users.length > severalThreshold;
             for (let i = 0; i < (severalUsers ? severalThreshold : users.length - 1); i++) {
-                avatars.appendChild(this.avatarElement(users[i], true));
+                avatars.appendChild(this.avatarElement(users[i], true, guildId));
             }
             if (severalUsers) {
                 const severalUsersElement = document.createElement('div');
@@ -203,14 +206,14 @@ module.exports = !global.ZeresPluginLibrary ? class {
                 severalUsersElement.innerHTML = `<strong>+${users.length - severalThreshold}</strong>`;
                 avatars.appendChild(severalUsersElement);
             } else {
-                avatars.appendChild(this.avatarElement(users[users.length - 1], false));
+                avatars.appendChild(this.avatarElement(users[users.length - 1], false, guildId));
             }
 
-            this.element.children[0]?.children[1]?.prepend(avatars);
+            this.element.insertBefore(avatars, this.element.children[1]);
         }
 
         observer({addedNodes, removedNodes}) {
-            const dotsClass = 'typing-2J1mQU';
+            const dotsClass = 'typingDots-1Y8dki';
             for(const node of addedNodes) {
                 if (Node.TEXT_NODE == node.nodeType) continue;
                 Array.from(node.getElementsByClassName(dotsClass)).forEach((element) => {
