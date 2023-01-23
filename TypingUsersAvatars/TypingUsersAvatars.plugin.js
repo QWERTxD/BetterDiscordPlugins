@@ -37,6 +37,12 @@ const config = {
             name: 'Show users status',
             id: 'showStatus',
             value: true
+        },
+        {
+            type: 'switch',
+            name: 'Show guild avatars',
+            id: 'showGuildAvatar',
+            value: true
         }
     ]
 };
@@ -158,7 +164,7 @@ module.exports = !global.ZeresPluginLibrary ? class {
             const status = this.settings.showStatus ? UserStatusStore.getStatus(user.id) : null;
             const statusColor = this.statusToColor(status);
 
-            const avatarURL = user.hasAvatarForGuild(guildId) ? user.getAvatarURL(guildId) : user.getAvatarURL();
+            const avatarURL = this.settings.showGuildAvatar ? user.getAvatarURL(guildId) : user.getAvatarURL();
             const avatar = document.createElement('div');
             avatar.id = `typing-user-${user.id}`;
             avatar.className = 'typing-user mask-1FEkla';
