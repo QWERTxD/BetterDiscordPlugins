@@ -4,7 +4,7 @@
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/DndWhilePlaying/DndWhilePlaying.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/DndWhilePlaying
  * @invite zMnHFAKsu3
- * @version 0.0.3
+ * @version 0.0.4
  */
 
  const request = require("request");
@@ -20,7 +20,7 @@
                  discord_id: "678556376640913408",
              }
          ],
-         version: "0.0.3",
+         version: "0.0.4",
          description: "Automatically updates your status to Do Not Disturb when playing games and resets it back when stopped playing.",
          github: "https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/DndWhilePlaying",
          github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/DndWhilePlaying/DndWhilePlaying.plugin.js",
@@ -29,7 +29,7 @@
          {
              "title": "Bug Fix",
              "type": "fixed",
-             "items": ["version fix"]
+             "items": ["fixed: plugin can now change status to dnd and back"]
          }
      ]
  };
@@ -60,6 +60,21 @@
      stop() { }
  } : (([Plugin, Library]) => {
      const Dispatcher = BdApi.findModuleByProps("dispatch", "subscribe");
+    const UserSettingsProtoStore = BdApi.Webpack.getModule(
+      (m) =>
+        m &&
+        typeof m.getName == "function" &&
+        m.getName() == "UserSettingsProtoStore" &&
+        m,
+      { first: true, searchExports: true }
+    );
+
+    const UserSettingsProtoUtils = BdApi.Webpack.getModule(
+      (m) =>
+        m.ProtoClass &&
+        m.ProtoClass.typeName.endsWith(".PreloadedUserSettings"),
+      { first: true, searchExports: true }
+    );
      class DndWhilePlaying extends Plugin {
          constructor() {
              super();
@@ -67,10 +82,9 @@
  
          async runningGamesChange(event) {
              const { games } = event;
-          
-             const StatusStore = BdApi.findModuleByProps('getStatus', 'getState');
-             const currentUser = BdApi.findModuleByProps('getCurrentUser').getCurrentUser();
-             const status = StatusStore.getStatus(currentUser.id);
+
+             const status = UserSettingsProtoStore.settings.status.status.value;
+
              if(status === 'invisible') return;
 
              if(games.length > 0) {
@@ -78,11 +92,27 @@
                      await BdApi.saveData("DndWhilePlaying", "status", status);
                      await BdApi.saveData("DndWhilePlaying", "inGame", true);
                  }
-                 if(status !== "dnd") BdApi.findModuleByProps("updateRemoteSettings").updateRemoteSettings({ status: "dnd" });
+                 if (status !== "dnd") {
+                     UserSettingsProtoUtils.updateAsync(
+                         "status",
+                         (statusSetting) => {
+                             statusSetting.status.value = "dnd";
+                         },
+                         0
+                     );
+                 }
                  
-             }else if(games.length == 0){
+             } else if (games.length == 0) {
                  const savedStatus = BdApi.getData("DndWhilePlaying", "status");
-                 if (savedStatus) BdApi.findModuleByProps('updateRemoteSettings').updateRemoteSettings({status: savedStatus});
+                 if (savedStatus) {
+                     UserSettingsProtoUtils.updateAsync(
+                         "status",
+                         (statusSetting) => {
+                             statusSetting.status.value = savedStatus;
+                         },
+                         0
+                     );
+                 }
 
                  await BdApi.saveData("DndWhilePlaying", "status", false);
                  await BdApi.saveData("DndWhilePlaying", "inGame", false);
