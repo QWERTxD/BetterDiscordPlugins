@@ -21,7 +21,7 @@ const config = {
         ],
     github_raw:
       "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js",
-    version: "1.1.2",
+    version: "1.1.3",
     description:
       "Displays notifications such as new messages, friends added in Discord.",
 	},
@@ -30,7 +30,7 @@ const config = {
       "title": "Fixed",
       "type": "fixed",
       "items": [
-        "Fixed mentions not working.",
+        "Fixed usernames displaying empty discriminators",
       ]
     }
   ],
