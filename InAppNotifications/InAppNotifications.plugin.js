@@ -21,7 +21,7 @@ const config = {
         ],
     github_raw:
       "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js",
-    version: "1.1.2",
+    version: "1.1.3",
     description:
       "Displays notifications such as new messages, friends added in Discord.",
 	},
@@ -30,7 +30,7 @@ const config = {
       "title": "Fixed",
       "type": "fixed",
       "items": [
-        "Fixed mentions not working.",
+        "Fixed usernames displaying empty discriminators",
       ]
     }
   ],
@@ -739,6 +739,7 @@ module.exports = !global.ZeresPluginLibrary
           const keywordFound = this.checkKeywords(message);
           if (!this.supposedToNotify(message, channel) && !keywordFound) return;
           let authorString = "";
+	  let authorName = author.globalName ?? author.tag;  
           if (channel.guild_id) {
             const guild = GuildStore.getGuild(channel.guild_id);
             const colorString = GuildMemberStore.getMember(
@@ -755,22 +756,22 @@ module.exports = !global.ZeresPluginLibrary
                       display: "inline",
                     },
                   },
-                  author.tag
+                  authorName
                 ),
                 ` (${guild.name}, #${channel.name})`,
               ];
             } else {
-              authorString = `${author.tag} (${guild.name}, #${channel.name})`;
+              authorString = `${authorName} (${guild.name}, #${channel.name})`;
             }
           }
           if (channel.type === ChannelTypes["GROUP_DM"]) {
-            authorString = `${author.tag} (${channel.name})`;
+            authorString = `${authorName} (${channel.name})`;
 			if (!channel.name || channel.name === " " || channel.name === "") {
-              authorString = `${author.tag} (${channel.rawRecipients.map((e) => e.username).join(", ")})`;
+              authorString = `${authorName} (${channel.rawRecipients.map((e) => e.username).join(", ")})`;
             }
           }
           if (channel.type === ChannelTypes["DM"]) {
-            authorString = `${author.tag}`;
+            authorString = `${authorName}`;
           }
 
           if (message.call) {
