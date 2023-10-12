@@ -1,7 +1,7 @@
 /**
  * @name UserVolumeBooster
  * @description Allows you to set a user's volume above the normal 200%
- * @version 1.0.2
+ * @version 1.0.3
  * @author QWERT
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/UserVolumeBooster
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/UserVolumeBooster/UserVolumeBooster.plugin.js
@@ -297,16 +297,12 @@ function buildPlugin([BasePlugin, PluginApi]) {
 		});
 		const {
 			React,
-			ReactDOM,
+			Data,
+			Webpack,
 			Patcher,
-			findModule: get,
-			findModuleByProps: getByProps,
-			findModuleByDisplayName: getByName,
-			getData,
-			setData
 		} = BdApi;
-		const Slider = getByName("Slider");
-		const FormItem = getByName("FormItem");
+		const Slider = Webpack.getModule(x=>x.Slider).Slider;
+		const FormItem = BdApi.Webpack.getModule(x=>x.FormItem).FormItem
 		class Plugin {
 			start() {
 				console.log("%cUser Volume Booster", "background: #61DBFB; color: black; padding: 2px; border-radius: 4px; font-weight: bold;", "Successfully started.");
@@ -318,7 +314,8 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			}
 			patch() {
 				Patcher.after("slider", Slider.prototype, "render", ((_this, [props]) => {
-					if ("slider-BEB8u7" !== _this?.props?.className) return;
+					console.log(_this)
+					if (!_this.props["aria-label"] === "User Volume") return
 					_this.props.maxValue = 200 * this.getMultiplier();
 					_this.state.range = 200 * this.getMultiplier();
 					_this.state.max = 200 * this.getMultiplier();
@@ -326,7 +323,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 				}));
 			}
 			getMultiplier() {
-				return getData("UserVolumeBooster", "multiplier") ?? 2;
+				return Data.load("UserVolumeBooster", "multiplier") ?? 2;
 			}
 			getSettingsPanel() {
 				return React.createElement(FormItem, {
@@ -338,7 +335,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 					markers: [1, 2, 3, 4, 5],
 					stickToMarkers: true,
 					onValueChange: value => {
-						setData("UserVolumeBooster", "multiplier", value);
+						Data.save("UserVolumeBooster", "multiplier", value);
 					}
 				}));
 			}
