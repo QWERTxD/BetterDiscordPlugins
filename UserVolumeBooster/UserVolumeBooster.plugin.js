@@ -302,7 +302,7 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			Patcher,
 		} = BdApi;
 		const Slider = Webpack.getModule(x=>x.Slider).Slider;
-		const FormItem = BdApi.Webpack.getModule(x=>x.FormItem).FormItem
+		const FormItem = Webpack.getModule(x=>x.FormItem).FormItem
 		class Plugin {
 			start() {
 				console.log("%cUser Volume Booster", "background: #61DBFB; color: black; padding: 2px; border-radius: 4px; font-weight: bold;", "Successfully started.");
@@ -314,7 +314,6 @@ function buildPlugin([BasePlugin, PluginApi]) {
 			}
 			patch() {
 				Patcher.after("slider", Slider.prototype, "render", ((_this, [props]) => {
-					console.log(_this)
 					if (!_this.props["aria-label"] === "User Volume") return
 					_this.props.maxValue = 200 * this.getMultiplier();
 					_this.state.range = 200 * this.getMultiplier();
