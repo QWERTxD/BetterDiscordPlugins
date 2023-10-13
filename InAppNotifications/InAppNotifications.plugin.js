@@ -809,10 +809,8 @@ module.exports = !global.ZeresPluginLibrary
           if (!this.supposedToNotify(message, channel) && !keywordFound) return;
           let authorString = "";
           let authorName = `${author.globalName} (${author.discriminator === "0" ? author.username : author.tag})`;
-          if (author.globalName === null) {
+          if (author.globalName === null || author.globalName.toLowerCase() === author.username.toLowerCase()) {
             authorName = author.discriminator === "0" ? author.username : author.tag;
-          } else if (author.globalName.toLowerCase() === author.username.toLowerCase()) {
-            authorName = author.globalName;
           }
           if (channel.guild_id) {
             const guild = GuildStore.getGuild(channel.guild_id);
@@ -1060,7 +1058,7 @@ module.exports = !global.ZeresPluginLibrary
               "Accepted your friend request.",
             ],
             {
-              author: user.discriminator === "0" ? user.tag.split("#")[0] : user.tag,
+              author: user.discriminator === "0" ? user.username : user.tag,
               avatar: user.getAvatarURL(),
               onClick: () => {
                 UserProfileModals.open(user.id);
