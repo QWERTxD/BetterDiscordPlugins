@@ -197,7 +197,6 @@ const config = {
         Dispatcher,
         UserStore,
         ChannelStore,
-        GuildStore,
         NavigationUtils,
         UserStatusStore,
         SelectedChannelStore,
@@ -211,6 +210,7 @@ const config = {
       const MuteStore = WebpackModules.getByProps("isSuppressEveryoneEnabled");
       const isMentioned = BdApi.Webpack.getModule(x=>x.isRawMessageMentioned)
       const Markdown = WebpackModules.getByProps("parse", "parseTopic");
+      const GuildStore = Webpack.getStore("GuildStore")
       const AckUtils = { ack: Webpack.getModule(Webpack.Filters.byStrings("CHANNEL_ACK"), { searchExports: true }) };
       const CallJoin = React.createElement(
         "svg",
@@ -809,7 +809,7 @@ const config = {
           if (!this.supposedToNotify(message, channel) && !keywordFound) return;
           let authorString = "";
           if (channel.guild_id) {
-            const guild = BdApi.Webpack.getStore("GuildStore").getGuild(channel.guild_id);
+            const guild = GuildStore.getGuild(channel.guild_id);
             const colorString = GuildMemberStore.getMember(
               channel.guild_id,
               author.id
