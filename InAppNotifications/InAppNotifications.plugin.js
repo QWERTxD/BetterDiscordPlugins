@@ -145,7 +145,7 @@ const config = {
   ]
   };
 
-module.exports = !global.ZeresPluginLibrary
+  module.exports = !global.ZeresPluginLibrary
   ? class {
       constructor() {
         this._config = config;
@@ -209,7 +209,7 @@ module.exports = !global.ZeresPluginLibrary
 
       const ChannelTypes = Webpack.getModule(Webpack.Filters.byProps("GUILD_TEXT"), { searchExports: true });
       const MuteStore = WebpackModules.getByProps("isSuppressEveryoneEnabled");
-      const isMentioned = { isRawMessageMentioned: WebpackModules.getModule(Webpack.Filters.byStrings("rawMessage", "suppressEveryone"), {searchExports: true}) };
+      const isMentioned = BdApi.Webpack.getModule(x=>x.isRawMessageMentioned)
       const Markdown = WebpackModules.getByProps("parse", "parseTopic");
       const AckUtils = { ack: Webpack.getModule(Webpack.Filters.byStrings("CHANNEL_ACK"), { searchExports: true }) };
       const CallJoin = React.createElement(
@@ -794,7 +794,7 @@ module.exports = !global.ZeresPluginLibrary
 
         onMessage({ message }) {
           const author = UserStore.getUser(message.author.id);
-		  const channel = ChannelStore.getChannel(message.channel_id);
+		      const channel = ChannelStore.getChannel(message.channel_id);
           const images = message.attachments.filter(
             (e) =>
               typeof e?.content_type === "string" &&
@@ -809,7 +809,7 @@ module.exports = !global.ZeresPluginLibrary
           if (!this.supposedToNotify(message, channel) && !keywordFound) return;
           let authorString = "";
           if (channel.guild_id) {
-            const guild = GuildStore.getGuild(channel.guild_id);
+            const guild = BdApi.Webpack.getStore("GuildStore").getGuild(channel.guild_id);
             const colorString = GuildMemberStore.getMember(
               channel.guild_id,
               author.id
@@ -989,7 +989,7 @@ module.exports = !global.ZeresPluginLibrary
             message.guild_id || "@me"
           );
           if (MuteStore.allowAllMessages(channel)) return true;
-          return isMentioned.isRawMessageMentioned(
+          const SomethingHereShrug = isMentioned.isRawMessageMentioned(
             {
               rawMessage: message,
               userId: UserStore.getCurrentUser().id,
@@ -997,6 +997,7 @@ module.exports = !global.ZeresPluginLibrary
               suppressRoles
             }
           );
+          return SomethingHereShrug
         }
 
         checkSettings(message, channel) {
