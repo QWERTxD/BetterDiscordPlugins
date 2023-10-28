@@ -208,7 +208,7 @@ const config = {
 
       const ChannelTypes = Webpack.getModule(Webpack.Filters.byProps("GUILD_TEXT"), { searchExports: true });
       const MuteStore = WebpackModules.getByProps("isSuppressEveryoneEnabled");
-      const isMentioned = BdApi.Webpack.getModule(x=>x.isRawMessageMentioned)
+      const isMentioned = Webpack.getModule(x=>x.isRawMessageMentioned)
       const Markdown = WebpackModules.getByProps("parse", "parseTopic");
       const GuildStore = Webpack.getStore("GuildStore")
       const AckUtils = { ack: Webpack.getModule(Webpack.Filters.byStrings("CHANNEL_ACK"), { searchExports: true }) };
