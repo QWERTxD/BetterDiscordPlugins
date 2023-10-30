@@ -307,7 +307,7 @@ const config = {
         ...WebpackModules.getByProps("avatar", "alt"),
       };
       /* Created by Strencher */
-      const Spring = WebpackModules.getModule(e => e.useSpring);
+      const Spring = WebpackModules.getModule(e => e.useSpring && e.animated);
       const { useSpring, animated } = Spring;
 
       const createStore = (state) => {
