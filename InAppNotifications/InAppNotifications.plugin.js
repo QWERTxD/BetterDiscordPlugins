@@ -21,7 +21,7 @@ const config = {
         ],
     github_raw:
       "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js",
-    version: "1.1.3",
+    version: "1.1.4",
     description:
       "Displays notifications such as new messages, friends added in Discord.",
 	},
@@ -307,7 +307,7 @@ const config = {
         ...WebpackModules.getByProps("avatar", "alt"),
       };
       /* Created by Strencher */
-      const Spring = WebpackModules.getModule(e => e.useSpring);
+      const Spring = WebpackModules.getModule(e => e.useSpring && e.animated);
       const { useSpring, animated } = Spring;
 
       const createStore = (state) => {
