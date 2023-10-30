@@ -3,7 +3,7 @@
  * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/InAppNotifications/InAppNotifications.plugin.js
  * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js
  * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/InAppNotifications
- * @version 1.1.3
+ * @version 1.1.4
  */
 const request = require("request");
 const fs = require("fs");
@@ -27,10 +27,10 @@ const config = {
 	},
   changelog: [
     {
-      "title": "Fixed",
-      "type": "fixed",
+      "title": "Discriminators",
+      "type": "added",
       "items": [
-        "Fixed the plugin. thanks to davilarek",
+        "Modified how usernames and display names are displayed in notifications.",
       ]
     }
   ],
@@ -808,6 +808,10 @@ const config = {
           const keywordFound = this.checkKeywords(message);
           if (!this.supposedToNotify(message, channel) && !keywordFound) return;
           let authorString = "";
+          let authorName = `${author.globalName} (${author.discriminator === "0" ? author.username : author.tag})`;
+          if (author.globalName === null || author.globalName.toLowerCase() === author.username.toLowerCase()) {
+            authorName = author.discriminator === "0" ? author.username : author.tag;
+          }
           if (channel.guild_id) {
             const guild = GuildStore.getGuild(channel.guild_id);
             const colorString = GuildMemberStore.getMember(
@@ -824,22 +828,22 @@ const config = {
                       display: "inline",
                     },
                   },
-                  author.tag
+                  authorName
                 ),
                 ` (${guild.name}, #${channel.name})`,
               ];
             } else {
-              authorString = `${author.tag} (${guild.name}, #${channel.name})`;
+              authorString = `${authorName} (${guild.name}, #${channel.name})`;
             }
           }
           if (channel.type === ChannelTypes["GROUP_DM"]) {
-            authorString = `${author.tag} (${channel.name})`;
+            authorString = `${authorName} (${channel.name})`;
 			if (!channel.name || channel.name === " " || channel.name === "") {
-              authorString = `${author.tag} (${channel.rawRecipients.map((e) => e.username).join(", ")})`;
+              authorString = `${authorName} (${channel.rawRecipients.map((e) => e.username).join(", ")})`;
             }
           }
           if (channel.type === ChannelTypes["DM"]) {
-            authorString = `${author.tag}`;
+            authorString = `${authorName}`;
           }
 
           if (message.call) {
@@ -1055,7 +1059,7 @@ const config = {
               "Accepted your friend request.",
             ],
             {
-              author: user.tag,
+              author: user.discriminator === "0" ? user.username : user.tag,
               avatar: user.getAvatarURL(),
               onClick: () => {
                 UserProfileModals.open(user.id);
