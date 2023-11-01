@@ -21,7 +21,7 @@ const config = {
         ],
     github_raw:
       "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/InAppNotifications/InAppNotifications.plugin.js",
-    version: "1.1.4",
+    version: "1.1.5",
     description:
       "Displays notifications such as new messages, friends added in Discord.",
 	},
@@ -574,7 +574,7 @@ const config = {
             //     }),
             //     time: 6000,
             //     onClick: () => {
-            //         InviteActions.acceptInviteAndTransitionToInviteChannel("zMnHFAKsu3");
+            //         InviteActions.acceptInviteAndTransitionToInviteChannel("zJbXFXNAhJ");
             //     }
             // })
           } catch (e) {
@@ -617,7 +617,7 @@ const config = {
                     time: 7000,
                     onClick: () => {
                       InviteActions.acceptInviteAndTransitionToInviteChannel(
-                        "zMnHFAKsu3"
+                        "zJbXFXNAhJ"
                       );
                     },
                   }
@@ -655,7 +655,7 @@ const config = {
                     time: 7000,
                     onClick: () => {
                       InviteActions.acceptInviteAndTransitionToInviteChannel(
-                        "zMnHFAKsu3"
+                        "zJbXFXNAhJ"
                       );
                     },
                   }
