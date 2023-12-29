@@ -482,7 +482,7 @@ const config = {
                     height: "16",
                     viewBox: "0 0 24 24",
                     onClick: function () {
-                      onManualClose ? onManualClose() : () => {};
+                      () => {};
                       setReadyToClose(true);
                     },
                   },
