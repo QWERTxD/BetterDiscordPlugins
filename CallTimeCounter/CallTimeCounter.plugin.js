@@ -46,9 +46,9 @@ module.exports = !global.ZeresPluginLibrary ? class {
             confirmText: "Download",
             cancelText: "Cancel",
             onConfirm: () => {
-                request.get("https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js", (error, response, body) => {
+                request.get("https://zerebos.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js", (error, response, body) => {
                     if (error)
-                        return electron.shell.openExternal("https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js");
+                        return electron.shell.openExternal("https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/zerebos/BDPluginLibrary/master/release/0PluginLibrary.plugin.js");
 
                     fs.writeFileSync(path.join(BdApi.Plugins.folder, "0PluginLibrary.plugin.js"), body);
                 });
