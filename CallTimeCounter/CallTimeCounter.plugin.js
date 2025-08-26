@@ -1,157 +1,294 @@
 /**
-    * @name CallTimeCounter
-    * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/CallTimeCounter/CallTimeCounter.plugin.js
-    * @description Shows how much time you are in a voice chat.
-    * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CallTimeCounter/CallTimeCounter.plugin.js
-    * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/CallTimeCounter
-    * @version 0.0.6
-    */
+ * @name CallTimeCounter
+ * @author tigertaev
+ * @authorLink https://discord.com/users/1333264984817401944
+ * @version 1.0.1
+ * @description Call duration timer replacing the voice channel & server name in Discord’s voice panel.
+ * @donate BTC: 1Kyf8uLgGrco8FdVuYpqi5CqVaVNxvnfDJ
+ * @patreon USDT TRC20: TV5jZrPGJJcxrdS7wWpmNJZzqihZ6HBqQZ
+ * @website If you want to support me, please feel free to DM me on Discord: tigertaev
+ * @updateUrl https://raw.githubusercontent.com/TigerTaeV/BetterDiscordPlugins/refs/heads/main/CallTimer/CallTimeCounter.plugin.js
+ */
+"use strict";
 
-const request = require("request");
-const fs = require("fs");
-const path = require("path");
+const { Webpack, UI, Data } = BdApi;
 
-const config = {
-    info: {
-        name: "CallTimeCounter",
-        authors: [
-            {
-                name: "QWERT"
-            }
-        ],
-        version: "0.0.6",
-        description: "Shows how much time you are in a voice chat.",
-        github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CallTimeCounter/CallTimeCounter.plugin.js",
-    },
-    changelog: [
-        {
-            title: "Fixes",
-            type: "fixed",
-            items: [
-                "Fixed for BetterDiscord 1.8 update."
-            ]
-        }
-    ],
-    defaultConfig: []
-};
-
-module.exports = !global.ZeresPluginLibrary ? class {
-    constructor() {
-        this._config = config;
-    }
-
-    load() {
-        BdApi.showConfirmationModal("Library plugin is needed",
-            `The library plugin needed for AQWERT'sPluginBuilder is missing. Please click Download Now to install it.`, {
-            confirmText: "Download",
-            cancelText: "Cancel",
-            onConfirm: () => {
-                request.get("https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js", (error, response, body) => {
-                    if (error)
-                        return electron.shell.openExternal("https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js");
-
-                    fs.writeFileSync(path.join(BdApi.Plugins.folder, "0PluginLibrary.plugin.js"), body);
-                });
-            }
-        });
-    }
-
-    start() { }
-
-    stop() { }
-} : (([Plugin, Library]) => {
-    const { DiscordModules, WebpackModules, Patcher, PluginUtilities } = Library;
-    const { React, SelectedChannelStore: {getVoiceChannelId} } = DiscordModules;
-    const PanelSubtext = WebpackModules.find(m => m?.$$typeof?.toString() === "Symbol(react.forward_ref)"
-        && m.render?.toString().includes("createHref"), {searchExports: true});
-    let lastVoice, lastState;
-    const Dispatcher = WebpackModules.getByProps('dispatch', 'register');
-
-    class Timer extends React.Component {
-        constructor(props) {
-            super(props);
-            this.connected = this.connected.bind(this);
-            this.state = {
-                startTime: 0,
-                delta: 0
-            };
-        }
-
-        connected(e) {
-            if (e.state && e.state === 'RTC_DISCONNECTED' && !e.hasOwnProperty('streamKey')) {
-                this.setState((prev) => (
-                    prev.startTime = Date.now()));
-            }
-        }
-
-        componentDidMount() {
-            if(lastVoice === getVoiceChannelId()) {
-                Dispatcher.subscribe('RTC_CONNECTION_STATE', this.connected);
-                this.setState(lastState);
-                this.interval = setInterval(() => {
-                    this.setState((prev) => (prev.delta = Math.round((Date.now() - prev.startTime) / 1000) * 1000));
-                    this.setState((prev) => prev.lastVoice = getVoiceChannelId());
-                }, 1000);
-            }else{
-                this.setState((prev) => (
-                    prev.startTime = Date.now()));
-                Dispatcher.subscribe('RTC_CONNECTION_STATE', this.connected);
-                this.interval = setInterval(() => {
-                    this.setState((prev) => (prev.delta = Math.round((Date.now() - prev.startTime) / 1000) * 1000));
-                    this.setState((prev) => prev.lastVoice = getVoiceChannelId());
-                }, 1000);
-            }
-        }
-
-        componentWillUnmount() {
-            Dispatcher.unsubscribe('RTC_CONNECTION_STATE', this.connected);
-            lastVoice = this.state.lastVoice;
-            lastState = this.state;
-            setTimeout(() => {
-                lastVoice = null;
-                lastState = {};
-            }, 1000)
-            clearInterval(this.interval);
-        }
-
-        render() {
-            return React.createElement("div", { className: "voiceTimer" }, `Time elapsed: ${new Date(this.state.delta).toISOString().substr(11, 8)}`);
-        }
+module.exports = class CallTimeCounter {
+  constructor() {
+    this.meta = {
+      name: "CallTimeCounter",
+      version: "1.0.1",
+      author: "tigertaev",
+      authorLink: "https://discord.com/users/1333264984817401944",
+      description: "Call duration timer replacing the voice channel & server name in Discord’s voice panel."
     };
+    this._timerId = null;
+    this._observer = null;
+    this._startTime = null;
+    this._lastConnected = false;
+    this._originalText = null;
+    this._voiceDetailsNode = null;
+    this._UserStore = null;
+    this._RTCConnectionStore = null;
+    this._VoiceStateStore = null;
+  }
 
-    class plugin extends Plugin {
-        constructor() {
-            super();
-        }
-
-
-        onStart() {
-            this.patch();
-
-            PluginUtilities.addStyle("voicetimer", `
-           .voiceTimer {
-             text-decoration: none !important;
-             margin-top: 8px;
-           }
-           `)
-        }
-
-        onStop() {
-            Patcher.unpatchAll();
-            PluginUtilities.removeStyle("voicetimer");
-        }
-
-        patch() {
-            Patcher.before(PanelSubtext, "render", (_, [props], ret) => {
-                if (!props?.children?.props?.className?.includes("channel")) return;
-                props.children.props.children = [
-                    props.children.props.children,
-                    React.createElement(Timer, { className: "voiceTimer" })
-                ]
-            });
-        }
-
+  start() {
+    this._initModules();
+    // Guard for missing modules
+    if (!this._UserStore || !this._RTCConnectionStore || !this._VoiceStateStore) {
+      BdApi.showToast("CallTimeCounter: Required modules not found. Plugin may be broken after a Discord update.", { type: "error" });
+      return;
     }
+    this._showWelcome();
+    this._beginLoops();
+  }
 
-    return plugin;
-})(global.ZeresPluginLibrary.buildPlugin(config));
+  stop() {
+    this._teardownLoops();
+    this._restoreOriginal();
+  }
+
+  _initModules() {
+    const byProps = (...props) => Webpack.getModule(m => props.every(p => m?.[p] !== undefined));
+    this._UserStore = byProps("getCurrentUser");
+    this._RTCConnectionStore = Webpack.getModule(m => typeof m?.isConnected === "function" && typeof m?.getChannelId === "function");
+    this._VoiceStateStore = Webpack.getModule(m => typeof m?.getAllVoiceStates === "function" || typeof m?.getVoiceState === "function" || typeof m?.getVoiceStatesForChannel === "function");
+  }
+
+  _findVoiceDetailsNode() {
+    if (this._voiceDetailsNode && document.contains(this._voiceDetailsNode)) {
+      return this._voiceDetailsNode;
+    }
+    const parent = document.querySelector('[class*="rtcConnectionStatus"], [class*="voiceUserInfo"]');
+    if (!parent) return null;
+    this._voiceDetailsNode = parent.querySelector('[class*="subtext"]') || parent.querySelector('[class*="channelName"]') || parent;
+    return this._voiceDetailsNode;
+  }
+
+  _beginLoops() {
+    let lastFrameTime = performance.now();
+    const loop = (time) => {
+      const delta = time - lastFrameTime;
+      if (delta >= 1000) {
+        lastFrameTime = time - (delta % 1000);
+        this._tick();
+      }
+      this._timerId = requestAnimationFrame(loop);
+    };
+    this._timerId = requestAnimationFrame(loop);
+    const panel = document.querySelector('[class*="rtcConnectionStatus"], [class*="voiceUserInfo"]');
+    if (panel) {
+      this._observer = new MutationObserver(() => {
+        this._voiceDetailsNode = null; // Invalidate cache when DOM mutates
+        this._render();
+      });
+      this._observer.observe(panel, { childList: true, subtree: true });
+    }
+    this._tick();
+  }
+
+  _teardownLoops() {
+    if (this._timerId) cancelAnimationFrame(this._timerId);
+    if (this._observer) this._observer.disconnect();
+    this._timerId = null;
+    this._observer = null;
+    this._startTime = null;
+    this._lastConnected = false;
+    this._voiceDetailsNode = null;
+  }
+
+  _getSelfId() {
+    return this._UserStore?.getCurrentUser?.()?.id ?? null;
+  }
+
+  _getConnectedChannelId() {
+    if (this._RTCConnectionStore?.isConnected?.()) {
+      return this._RTCConnectionStore.getChannelId?.() ?? null;
+    }
+    const uid = this._getSelfId();
+    if (!uid || !this._VoiceStateStore) return null;
+    if (typeof this._VoiceStateStore.getAllVoiceStates === "function") {
+      const all = this._VoiceStateStore.getAllVoiceStates();
+      for (const [, users] of Object.entries(all)) {
+        const vs = users instanceof Map ? users.get(uid) : users[uid];
+        if (vs?.channelId) return vs.channelId;
+      }
+    }
+    if (typeof this._VoiceStateStore.getVoiceState === "function") {
+      return this._VoiceStateStore.getVoiceState(uid)?.channelId ?? null;
+    }
+    return null;
+  }
+
+  _tick() {
+    const connected = Boolean(this._getConnectedChannelId());
+    if (connected && !this._lastConnected) {
+      this._startTime = Date.now();
+      if (this._originalText === null) {
+        const node = this._findVoiceDetailsNode();
+        if (node) this._originalText = node.textContent;
+      }
+    }
+    if (!connected && this._lastConnected) {
+      this._restoreOriginal();
+      this._startTime = null;
+    }
+    this._lastConnected = connected;
+    this._render();
+  }
+
+  _format(ms) {
+    const secTotal = Math.floor(ms / 1000);
+    const hours = Math.floor(secTotal / 3600);
+    const mins = Math.floor((secTotal % 3600) / 60);
+    const secs = secTotal % 60;
+    const pad = n => String(n).padStart(2, "0");
+    return `${pad(hours)}:${pad(mins)}:${pad(secs)}`;
+  }
+
+  _render() {
+    const node = this._findVoiceDetailsNode();
+    if (!node) return;
+    if (this._lastConnected) {
+      if (!this._startTime) this._startTime = Date.now();
+      node.textContent = this._format(Date.now() - this._startTime);
+      Object.assign(node.style, {
+        fontVariantNumeric: "tabular-nums",
+        letterSpacing: "0.3px",
+        fontWeight: "600"
+      });
+    } else {
+      this._restoreOriginal();
+    }
+  }
+
+  _restoreOriginal() {
+    const node = this._findVoiceDetailsNode();
+    if (node && this._originalText !== null && node.textContent !== this._originalText) {
+      node.textContent = this._originalText;
+      Object.assign(node.style, {
+        fontVariantNumeric: "",
+        letterSpacing: "",
+        fontWeight: ""
+      });
+    }
+    this._originalText = null;
+  }
+
+  _showWelcome() {
+    const savedVersion = Data.load("CallTimeCounter", "version");
+    if (savedVersion === this.meta.version) return; // Skip if version hasn't changed
+
+    UI.showConfirmationModal(
+      "🎉 Welcome to CallTimeCounter!",
+      BdApi.React.createElement("div", {
+        style: {
+          lineHeight: "1.6",
+          color: "#ffffff",
+          fontSize: "16px",
+          padding: "10px",
+          backgroundColor: "#2f3136",
+          borderRadius: "8px"
+        }
+      }, [
+        BdApi.React.createElement("h2", {
+          style: {
+            margin: "0 0 12px 0",
+            fontSize: "24px",
+            fontWeight: "600",
+            color: "#4CAF50"
+          }
+        }, "CallTimeCounter v" + this.meta.version),
+        BdApi.React.createElement("p", {
+          style: { marginBottom: "12px" }
+        }, "Thank you for installing CallTimeCounter! This plugin displays a live HH:MM:SS timer in the Discord voice panel, replacing the voice channel and server name during calls."),
+        BdApi.React.createElement("h4", {
+          style: {
+            margin: "16px 0 8px 0",
+            fontSize: "18px",
+            color: "#ffffff"
+          }
+        }, "What's New"),
+        BdApi.React.createElement("ul", {
+          style: {
+            paddingLeft: "20px",
+            listStyle: "disc",
+            marginBottom: "16px"
+          }
+        }, [
+          BdApi.React.createElement("li", {
+            style: { color: "#4CAF50", fontWeight: "500" }
+          }, "Added: Real-time call duration display with improved accuracy"),
+          BdApi.React.createElement("li", {
+            style: { color: "#FF9800", fontWeight: "500" }
+          }, "Fixed: Restored original UI after call disconnect"),
+          BdApi.React.createElement("li", {
+            style: { color: "#4CAF50", fontWeight: "500" }
+          }, "Improved: Welcome message now only shows on first install or update")
+        ]),
+        BdApi.React.createElement("h4", {
+          style: {
+            margin: "16px 0 8px 0",
+            fontSize: "18px",
+            color: "#ffffff"
+          }
+        }, "Support the Developer"),
+        BdApi.React.createElement("p", {
+          style: {
+            fontSize: "14px",
+            opacity: "0.9",
+            lineHeight: "1.4"
+          }
+        }, [
+          "If you enjoy this plugin, consider supporting me via ",
+          BdApi.React.createElement("a", {
+            href: "https://discord.com/users/1333264984817401944",
+            style: { color: "#5865F2", textDecoration: "none", fontWeight: "500" },
+            onClick: () => BdApi.openLink("https://discord.com/users/1333264984817401944")
+          }, "Discord DM"),
+          " or through donations:"
+        ]),
+        BdApi.React.createElement("p", {
+          style: {
+            fontSize: "14px",
+            opacity: "0.9",
+            marginTop: "8px",
+            fontFamily: "monospace"
+          }
+        }, [
+          "BTC: 1Kyf8uLgGrco8FdVuYpqi5CqVaVNxvnfDJ",
+          BdApi.React.createElement("br"),
+          "USDT (TRC20): TV5jZrPGJJcxrdS7wWpmNJZzqihZ6HBqQZ"
+        ])
+      ]),
+      {
+        confirmText: "Got it!",
+        cancelText: "Close",
+        onConfirm: () => {
+          Data.save("CallTimeCounter", "version", this.meta.version);
+        }
+      }
+    );
+  }
+
+  getName() {
+    return this.meta.name;
+  }
+
+  getDescription() {
+    return this.meta.description;
+  }
+
+  getVersion() {
+    return this.meta.version;
+  }
+
+  getAuthor() {
+    return this.meta.author;
+  }
+
+  getAuthorLink() {
+    return this.meta.authorLink;
+  }
+};
