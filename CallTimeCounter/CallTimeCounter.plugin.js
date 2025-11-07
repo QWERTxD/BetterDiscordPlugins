@@ -1,157 +1,178 @@
 /**
-    * @name CallTimeCounter
-    * @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/CallTimeCounter/CallTimeCounter.plugin.js
-    * @description Shows how much time you are in a voice chat.
-    * @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CallTimeCounter/CallTimeCounter.plugin.js
-    * @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/CallTimeCounter
-    * @version 0.0.6
-    */
-
-const request = require("request");
-const fs = require("fs");
-const path = require("path");
+* @name CallTimeCounter
+* @description Shows how much time you are in a voice chat.
+* @version 1.0.0
+* @author QWERT
+* @source https://github.com/QWERTxD/BetterDiscordPlugins/blob/main/CallTimeCounter/CallTimeCounter.plugin.js
+* @updateUrl https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CallTimeCounter/CallTimeCounter.plugin.js
+* @website https://github.com/QWERTxD/BetterDiscordPlugins/tree/main/CallTimeCounter
+*/
 
 const config = {
-    info: {
-        name: "CallTimeCounter",
-        authors: [
-            {
-                name: "QWERT"
-            }
-        ],
-        version: "0.0.6",
-        description: "Shows how much time you are in a voice chat.",
-        github_raw: "https://raw.githubusercontent.com/QWERTxD/BetterDiscordPlugins/main/CallTimeCounter/CallTimeCounter.plugin.js",
-    },
-    changelog: [
-        {
-            title: "Fixes",
-            type: "fixed",
-            items: [
-                "Fixed for BetterDiscord 1.8 update."
-            ]
-        }
-    ],
-    defaultConfig: []
+    changelog: [],
+    settings: [
+        { type: "switch", id: "logSessionToFile", name: "Log session to file", note: "Logs the session time to a file in the plugin folder.", value: false },
+    ]
 };
 
-module.exports = !global.ZeresPluginLibrary ? class {
-    constructor() {
-        this._config = config;
+const { Webpack, Patcher, React, Data, UI, DOM } = BdApi;
+const DiscordModules = Webpack.getModule(m => m.dispatch && m.subscribe);
+const ChannelStore = Webpack.getStore("ChannelStore");
+const GuildStore = Webpack.getStore("GuildStore");
+const SelectedChannelStore = Webpack.getStore("SelectedChannelStore");
+
+const rtcClasses = Webpack.getByKeys('rtcConnectionStatus', 'ping');
+const panelContainerClasses = Webpack.getByKeys('connection', 'inner');
+const textXsNormal = Webpack.getModule(m => m["text-xs/normal"] && !m["avatar"] && !m["defaultColor"])["text-xs/normal"];
+const subtext = Webpack.getModules(m => m.subtext && Object.keys(m).length === 1)[0]["subtext"];
+
+const PanelSubtext = Webpack.getModule(m => m?.$$typeof?.toString() === "Symbol(react.forward_ref)"
+    && m.render?.toString().includes("createHref"), { searchExports: true });
+
+let lastVoice, lastState;
+
+module.exports = class CallTimeCounter {
+    constructor(meta) {
+        this.meta = meta;
     }
 
-    load() {
-        BdApi.showConfirmationModal("Library plugin is needed",
-            `The library plugin needed for AQWERT'sPluginBuilder is missing. Please click Download Now to install it.`, {
-            confirmText: "Download",
-            cancelText: "Cancel",
-            onConfirm: () => {
-                request.get("https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js", (error, response, body) => {
-                    if (error)
-                        return electron.shell.openExternal("https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js");
+    initSettings() {
+        config.settings[0].value = Data.load(this.meta.name, "logSessionToFile") ?? false;
+    }
 
-                    fs.writeFileSync(path.join(BdApi.Plugins.folder, "0PluginLibrary.plugin.js"), body);
-                });
+    getSettingsPanel() {
+        return UI.buildSettingsPanel({
+            settings: config.settings,
+            onChange: (category, id, value) => {
+                if(id === "logSessionToFile") {
+                    config.settings[0].value = value;
+                }
+                Data.save(this.meta.name, id, value);
             }
         });
     }
 
-    start() { }
-
-    stop() { }
-} : (([Plugin, Library]) => {
-    const { DiscordModules, WebpackModules, Patcher, PluginUtilities } = Library;
-    const { React, SelectedChannelStore: {getVoiceChannelId} } = DiscordModules;
-    const PanelSubtext = WebpackModules.find(m => m?.$$typeof?.toString() === "Symbol(react.forward_ref)"
-        && m.render?.toString().includes("createHref"), {searchExports: true});
-    let lastVoice, lastState;
-    const Dispatcher = WebpackModules.getByProps('dispatch', 'register');
-
-    class Timer extends React.Component {
-        constructor(props) {
-            super(props);
-            this.connected = this.connected.bind(this);
-            this.state = {
-                startTime: 0,
-                delta: 0
-            };
-        }
-
-        connected(e) {
-            if (e.state && e.state === 'RTC_DISCONNECTED' && !e.hasOwnProperty('streamKey')) {
-                this.setState((prev) => (
-                    prev.startTime = Date.now()));
+    start() {
+        this.initSettings();
+        this.patch();
+        DOM.addStyle(this.meta.name, `
+            .${rtcClasses.rtcConnectionStatus}, .${panelContainerClasses.inner}, .${panelContainerClasses.connection} {
+                height: fit-content;
             }
-        }
-
-        componentDidMount() {
-            if(lastVoice === getVoiceChannelId()) {
-                Dispatcher.subscribe('RTC_CONNECTION_STATE', this.connected);
-                this.setState(lastState);
-                this.interval = setInterval(() => {
-                    this.setState((prev) => (prev.delta = Math.round((Date.now() - prev.startTime) / 1000) * 1000));
-                    this.setState((prev) => prev.lastVoice = getVoiceChannelId());
-                }, 1000);
-            }else{
-                this.setState((prev) => (
-                    prev.startTime = Date.now()));
-                Dispatcher.subscribe('RTC_CONNECTION_STATE', this.connected);
-                this.interval = setInterval(() => {
-                    this.setState((prev) => (prev.delta = Math.round((Date.now() - prev.startTime) / 1000) * 1000));
-                    this.setState((prev) => prev.lastVoice = getVoiceChannelId());
-                }, 1000);
+            .${panelContainerClasses.channel}:hover > div {
+                text-decoration: underline !important;
             }
-        }
-
-        componentWillUnmount() {
-            Dispatcher.unsubscribe('RTC_CONNECTION_STATE', this.connected);
-            lastVoice = this.state.lastVoice;
-            lastState = this.state;
-            setTimeout(() => {
-                lastVoice = null;
-                lastState = {};
-            }, 1000)
-            clearInterval(this.interval);
-        }
-
-        render() {
-            return React.createElement("div", { className: "voiceTimer" }, `Time elapsed: ${new Date(this.state.delta).toISOString().substr(11, 8)}`);
-        }
-    };
-
-    class plugin extends Plugin {
-        constructor() {
-            super();
-        }
-
-
-        onStart() {
-            this.patch();
-
-            PluginUtilities.addStyle("voicetimer", `
-           .voiceTimer {
-             text-decoration: none !important;
-             margin-top: 8px;
-           }
-           `)
-        }
-
-        onStop() {
-            Patcher.unpatchAll();
-            PluginUtilities.removeStyle("voicetimer");
-        }
-
-        patch() {
-            Patcher.before(PanelSubtext, "render", (_, [props], ret) => {
-                if (!props?.children?.props?.className?.includes("channel")) return;
-                props.children.props.children = [
-                    props.children.props.children,
-                    React.createElement(Timer, { className: "voiceTimer" })
-                ]
-            });
-        }
-
+            .voiceTimer {
+                font-size: 12px;
+            }
+        `);
     }
 
-    return plugin;
-})(global.ZeresPluginLibrary.buildPlugin(config));
+    stop() {
+        Patcher.unpatchAll(this.meta.name);
+        DOM.removeStyle(this.meta.name);
+    }
+
+    patch() {
+        Patcher.before(this.meta.name, PanelSubtext, "render", (_, [props], ret) => {
+            if (!props?.children?.props?.className?.includes("channel")) return;
+            if(!props?.children?.props?.children) return;
+            props.children.props.children = [
+                props.children.props.children,
+                React.createElement(Timer)
+            ];
+        });
+    }
+};
+
+const fs = require("fs");
+const path = require("path");
+var lastSavedTime = 0;
+
+function timeToString(time) {
+    let date = new Date(time);
+    let ss = date.getUTCSeconds();
+    let mm = date.getUTCMinutes();
+    let hh = date.getUTCHours();
+    let DD = date.getUTCDate() - 1;
+    let MM = date.getUTCMonth();
+    let YY = date.getUTCFullYear() - 1970;
+  
+    let timeString = "";
+    if (YY > 0) timeString += `${YY}y `;
+    if (MM > 0) timeString += `${MM}m `;
+    if (DD > 0) timeString += `${DD}d `;
+    if (hh > 0) timeString += `${hh}h `;
+    if (mm > 0) timeString += `${mm}m `;
+    timeString += `${ss}s`;
+
+    return timeString;
+}
+
+class Timer extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            startTime: 0,
+            delta: 0
+        };
+        this.handleConnected = this.connected.bind(this);
+    }
+
+    connected(e) {
+        if (e.state && e.state === 'RTC_DISCONNECTED' && !e.hasOwnProperty('streamKey')) {
+            this.logToFile();
+            this.setState((prev) => (prev.startTime = Date.now()));
+        }
+    }
+
+    componentDidMount() {
+        if (lastVoice === SelectedChannelStore.getVoiceChannelId()) {
+            DiscordModules.subscribe('RTC_CONNECTION_STATE', this.handleConnected);
+            this.setState(lastState);
+            this.interval = setInterval(() => {
+                this.setState((prev) => (prev.delta = Math.round((Date.now() - prev.startTime) / 1000) * 1000));
+                this.setState((prev) => prev.lastVoice = SelectedChannelStore.getVoiceChannelId());
+            }, 1000);
+        } else {
+            this.setState((prev) => (   
+                prev.startTime = Date.now()));
+            DiscordModules.subscribe('RTC_CONNECTION_STATE', this.handleConnected);
+            this.interval = setInterval(() => {
+                this.setState((prev) => (prev.delta = Math.round((Date.now() - prev.startTime) / 1000) * 1000));
+                this.setState((prev) => prev.lastVoice = SelectedChannelStore.getVoiceChannelId());
+            }, 1000);
+        }
+    }
+
+    componentWillUnmount() {
+        DiscordModules.unsubscribe('RTC_CONNECTION_STATE', this.handleConnected);
+        lastVoice = this.state.lastVoice;
+        lastState = this.state;
+        setTimeout(() => {
+            lastVoice = null;
+            lastState = {};
+        }, 1000);
+        clearInterval(this.interval);
+    }
+
+    render() {
+        return React.createElement("div", { className: `${textXsNormal} ${subtext}` }, `Time elapsed: ${timeToString(this.state.delta)}`);
+    }
+
+    logToFile() {
+        if(!config.settings[0].value) return;   
+        let now = Date.now();
+        if(now - lastSavedTime < 1000) return;
+        lastSavedTime = now;
+        let channelId = this.state.lastVoice;
+        if(channelId) {
+            let channel = ChannelStore.getChannel(channelId);
+            let guild = GuildStore.getGuild(channel.guild_id);
+            let filePath = path.join(__dirname, "CallTimeCounter.log");
+            let start = new Date(this.state.startTime).toISOString();
+            let delta = timeToString(this.state.delta);
+            fs.writeFileSync(filePath, `${start}, ${guild?.name}, ${channel?.name}, ${delta}\n`, { flag: "a" });
+        }
+    }    
+};
